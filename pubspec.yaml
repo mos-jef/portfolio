@@ -1,0 +1,174 @@
+name: portfolio_website
+description: A personal portfolio website with a Nintendo theme toggle.
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.18.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.2
+  provider: ^6.0.5
+  google_fonts: ^4.0.3
+  url_launcher: ^6.1.10
+  responsive_framework: ^0.2.0
+  nes_ui: ^0.24.0
+  shared_preferences: ^2.1.0
+  flutter_svg: ^2.0.5
+  webview_flutter: ^4.0.0
+  easy_stepper: ^0.8.5+1
+  carousel_slider: ^5.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+flutter:
+  uses-material-design: true
+  
+  assets:
+    - assets/
+    
+    #images:
+      
+    - assets/background_dark.png
+    - assets/background_light.png
+    - assets/background_light2.png
+    - assets/background_dark2.png
+    - assets/menu.png
+    - assets/menublank.png
+    - assets/tvmodal.png
+    - assets/Calendar.png
+    - assets/Photos.png
+    - assets/Schedule.png
+    - assets/Timer.png
+    - assets/Mat.png
+    - assets/Feed.png
+    - assets/tapin_logo.png
+    - assets/tapin_header.png
+    - assets/empathy_mapping.png
+    - assets/redesign_images.png
+    - assets/style_guide_ninja_light.png
+    - assets/style_guide_ninja_dark.png
+    - assets/style_guide_athelete_dark.png
+    - assets/style_guide1.png
+    - assets/mood_board.png
+    - assets/wire_frame4.png
+    - assets/wire_frame3.png
+    - assets/wire_frame2.png
+    - assets/wire_frame1.png
+    - assets/user_flows.png
+    - assets/site_map.png
+    - assets/ideation_sketches.png
+    - assets/persona_michelle.png
+    - assets/persona_eric.png
+    - assets/media_content_members.png
+    - assets/social_content_gym_members.png
+    - assets/nes_land_day.png
+    - assets/nes_land_night.png
+    - assets/portfolio_selection.png
+    - assets/project_header.png
+    - assets/switch_modal.png
+    - assets/backgroundheader.png
+
+    
+    
+    # MOMENTS:
+      
+    - assets/moments/hero.png
+      
+    - assets/moments/devices/1.png
+    - assets/moments/devices/2.png
+    - assets/moments/devices/3.png
+    - assets/moments/devices/4.png
+    - assets/moments/devices/5.png
+    - assets/moments/devices/6.png
+    - assets/moments/devices/7.png
+    - assets/moments/devices/8.png
+    - assets/moments/devices/9.png
+    - assets/moments/devices/10.png
+    - assets/moments/devices/11.png
+    - assets/moments/devices/hero.png
+    
+    - assets/moments/dev_handoff/1.png
+    - assets/moments/dev_handoff/2.png
+    - assets/moments/dev_handoff/3.png
+    - assets/moments/dev_handoff/4.png
+    - assets/moments/dev_handoff/5.png
+    - assets/moments/dev_handoff/6.png
+    - assets/moments/dev_handoff/7.png
+    - assets/moments/dev_handoff/8.png
+    - assets/moments/dev_handoff/9.png
+    - assets/moments/dev_handoff/10.png
+    - assets/moments/dev_handoff/11.png
+    - assets/moments/dev_handoff/12.png
+    - assets/moments/dev_handoff/13.png
+    
+    # CORE Ai:
+      
+    - assets/coreai/device1.png
+    - assets/coreai/device2.png
+    - assets/coreai/device3.png
+    - assets/coreai/device4.png
+    - assets/coreai/device5.png
+    
+    - assets/coreai/1.png
+    - assets/coreai/2.png
+    - assets/coreai/3.png
+    - assets/coreai/4.png
+    - assets/coreai/5.png
+    - assets/coreai/6.png
+    - assets/coreai/7.png
+    - assets/coreai/8.png
+    
+    - assets/coreai/color_and_logos.png
+    - assets/coreai/color_exploration.png
+    - assets/coreai/dev_handoff1.png
+    - assets/coreai/dev_handoff2.png
+    - assets/coreai/dev_handoff3.png
+    - assets/coreai/dev_handoff4.png
+    - assets/coreai/flow1.png
+    - assets/coreai/flow2.png
+    - assets/coreai/hifi1.png
+    - assets/coreai/hifi2.png
+    - assets/coreai/hifi3.png
+    - assets/coreai/hifi4.png
+    - assets/coreai/hifi5.png
+    - assets/coreai/hueristic_analysis.png 
+    - assets/coreai/mood_board.png
+    - assets/coreai/hueristic1.png
+    - assets/coreai/hueristic2.png
+    
+    # PLANNIE:
+      
+    - assets/plannie/device1.png
+    - assets/plannie/device2.png
+    - assets/plannie/device3.png
+    - assets/plannie/device4.png
+    - assets/plannie/Billing.png
+    - assets/plannie/Events.png
+    - assets/plannie/planner.png
+    - assets/plannie/Portfolio.png
+    
+  
+    
+    
+    
+  fonts:
+  - family: Ghibli
+    fonts:
+      - asset: assets/fonts/Eyad Al-Samman - Ghibli.otf
+      - asset: assets/fonts/Eyad Al-Samman - Ghibli-Bold.otf
+        weight: 700
+  - family: Montserrat
+    fonts:
+      - asset: assets/fonts/Montserrat-Bold.ttf
+      - asset: assets/fonts/Montserrat-Regular.ttf
+  - family: NES
+    fonts:
+      - asset: assets/fonts/PressStart2P-Regular.ttf
+  - family: SuperMario256
+    fonts:
+      - asset: assets/fonts/SuperMario256.ttf 
