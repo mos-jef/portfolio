@@ -159,7 +159,7 @@ class _HomeScreenState extends State<HomeScreen>
     // Handle special actions for specific categories
     if (category == 'Resume') {
       _launchURL(
-          'https://storage.googleapis.com/uxfolio/643d6d8beaacf70002256d70/Jeff_Resume_PhJ.webp');
+          'https://storage.googleapis.com/uxfolio/643d6d8beaacf70002256d70/Resume_avP.pdf');
     }
     // No special handling for 'Projects' - it will just update selectedCategory
   }
