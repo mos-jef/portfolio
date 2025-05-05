@@ -5,7 +5,6 @@ import 'package:portfolio_website/components/project_viewer.dart';
 import 'package:portfolio_website/components/projects_registry.dart';
 import 'package:portfolio_website/widgets/circle_text_widget.dart';
 import 'package:portfolio_website/widgets/circle_theme_toggle.dart';
-import 'package:portfolio_website/widgets/light_mode_toggle.dart';
 import 'package:portfolio_website/widgets/pixel_widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -38,7 +37,8 @@ class _HomeScreenState extends State<HomeScreen>
   // Menu configuration - all in absolute pixel values
   final double _menuWidth = 1180; // Width in pixels
   final double _menuHeight = 800; // Height in pixels
-  final double _menuRestPosition = -380; // How far the menu comes in from the right (0 = full, negative = further in)
+  final double _menuRestPosition =
+      -380; // How far the menu comes in from the right (0 = full, negative = further in)
   final Duration _menuAnimationDuration = const Duration(milliseconds: 300);
   final Curve _menuAnimationCurve =
       Curves.easeOutQuart; // More dramatic ease-in
@@ -46,7 +46,8 @@ class _HomeScreenState extends State<HomeScreen>
   // Menu text configuration
   final double _menuTextSize = 23.0;
   final double _menuTextSpacing = 25.0;
-  final double _menuTextTopOffset = 170.0; // Vertical position of first menu item
+  final double _menuTextTopOffset =
+      170.0; // Vertical position of first menu item
   final double _menuTextLeftOffset = 500.0; // Horizontal position of menu items
   final Color _menuTextColor = const Color(0xFF567185);
   final Color _menuTextHoverColor = const Color(0xFFCC510F);
@@ -63,7 +64,7 @@ class _HomeScreenState extends State<HomeScreen>
   final double _tvTextBodySize = 16.0;
   final double _tvTextSpacing = 20.0;
   final Map<String, double> _sectionHeights = {
-    'About': 50.0,          // Affects top margin/padding/height of about section
+    'About': 50.0, // Affects top margin/padding/height of about section
     'Contact': 300.0,
     // Add other sections as needed
   };
@@ -78,7 +79,7 @@ class _HomeScreenState extends State<HomeScreen>
   final double _bookTextTopOffset = 74.0; // Vertical position adjustment
   final double _bookTextLeftOffset = 318.0; // Horizontal position of first book
   final Color _bookTextColor = const Color(0xFFF1E6C5);
-  final Color _bookTextHoverColor = const Color(0xFFFF9500);   
+  final Color _bookTextHoverColor = const Color(0xFFFF9500);
   final double _bookTextStrokeWidth = 3.5;
   final Color _bookTextStrokeColor = const Color(0xFF193857);
 
@@ -159,7 +160,7 @@ class _HomeScreenState extends State<HomeScreen>
     // Handle special actions for specific categories
     if (category == 'Resume') {
       _launchURL(
-          'https://storage.googleapis.com/uxfolio/643d6d8beaacf70002256d70/Jeff_Resume_PhJ.webp');
+          'https://storage.googleapis.com/uxfolio/643d6d8beaacf70002256d70/Resume_avP.pdf');
     }
     // No special handling for 'Projects' - it will just update selectedCategory
   }
@@ -220,7 +221,6 @@ class _HomeScreenState extends State<HomeScreen>
             },
           );
         } else {
-
           // Show the project TV modal for other projects
 
           _showProjectsModal(context, projectId: projectId);
@@ -248,8 +248,6 @@ class _HomeScreenState extends State<HomeScreen>
       ),
     );
   }
-
-  
 
   // Implementation of the TV modal for projects
   void _showProjectsModal(BuildContext context, {String projectId = 'tap-in'}) {
@@ -301,12 +299,13 @@ class _HomeScreenState extends State<HomeScreen>
                 ),
               ),
 
-              // Close button for switch modal 
+              // Close button for switch modal
               Positioned(
                 top: 10,
                 right: 10,
                 child: IconButton(
-                  icon: const Icon(Icons.close, color: const Color(0xFF51FF00), size: 40),
+                  icon: const Icon(Icons.close,
+                      color: const Color(0xFF51FF00), size: 40),
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
@@ -439,7 +438,8 @@ class _HomeScreenState extends State<HomeScreen>
                           size: 73.0,
                           borderColor: isDarkMode
                               ? Colors.white.withAlpha(0)
-                              : const Color.fromARGB(255, 58, 44, 2).withAlpha(0),
+                              : const Color.fromARGB(255, 58, 44, 2)
+                                  .withAlpha(0),
                           borderWidth: 1.5,
                         ),
                       ),
@@ -464,43 +464,40 @@ class _HomeScreenState extends State<HomeScreen>
                         ),
                       ),
 
-                        // NES system clickable area with very visible settings for testing
+                      // NES system clickable area with very visible settings for testing
                       Positioned(
-                      // Adjust these values based on where the NES system appears in your background
-                      left: 650, // Estimate - you'll need to adjust
-                      top: 570,  // Estimate - you'll need to adjust
-                      child: MouseRegion(
-                        onEnter: (_) => setState(() => hoveredNes = true),
-                        onExit: (_) => setState(() => hoveredNes = false),
-                        cursor: SystemMouseCursors.click,
-                        child: GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              selectedCategory = 'Menu';
-                            });
-                          },
-                          child: Container(
-                            width: 300,
-                            height: 100,
-                            decoration: BoxDecoration(
-                              color: hoveredNes ? Colors.white.withAlpha(20) : Colors.transparent,
-                              border: Border.all(
-                                color: hoveredNes 
-                                  ? Colors.white.withAlpha(0) 
-                                  : Colors.white.withAlpha(0),
-                                width: 1.0,
+                        // Adjust these values based on where the NES system appears in your background
+                        left: 650, // Estimate - you'll need to adjust
+                        top: 570, // Estimate - you'll need to adjust
+                        child: MouseRegion(
+                          onEnter: (_) => setState(() => hoveredNes = true),
+                          onExit: (_) => setState(() => hoveredNes = false),
+                          cursor: SystemMouseCursors.click,
+                          child: GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                selectedCategory = 'Menu';
+                              });
+                            },
+                            child: Container(
+                              width: 300,
+                              height: 100,
+                              decoration: BoxDecoration(
+                                color: hoveredNes
+                                    ? Colors.white.withAlpha(20)
+                                    : Colors.transparent,
+                                border: Border.all(
+                                  color: hoveredNes
+                                      ? Colors.white.withAlpha(0)
+                                      : Colors.white.withAlpha(0),
+                                  width: 1.0,
+                                ),
                               ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-
-
                     ] else ...[
-
-                    
-
                       // NES Theme UI Components
 
                       // White rectangle menu area
@@ -655,7 +652,6 @@ class _HomeScreenState extends State<HomeScreen>
                         child: Stack(
                           alignment: Alignment.center,
                           children: [
-
                             // Circular rotating text
                             CircularText(
                               text: "unem rof ereh paT ... ",
@@ -806,52 +802,52 @@ class _HomeScreenState extends State<HomeScreen>
         alignment: Alignment.centerLeft,
         child: Padding(
           padding: EdgeInsets.only(left: _textIndent), // Apply indent
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start, // Left align children
-          children: [
-            _buildStrokedText(
-              "Hi! I'm Jeff!",
-              color: Color.fromARGB(255, 228, 133, 69),
-              size: _tvTextTitleSize,
-              fontWeight: FontWeight.bold,
-              textAlign: TextAlign.left,
-            ),
-            SizedBox(height: _tvTextSpacing),
-            _buildStrokedText(
-              "I love to create...",
-              color: const Color(0xFFFFB74D),  // FFB74D
-              size: _tvTextTitleSize,
-              fontStyle: FontStyle.italic,
-              textAlign: TextAlign.left,
-            ),
-            SizedBox(height: _tvTextSpacing + 10),
-            _buildStrokedText(
-              "Click the hamburger icon in the right corner for a menu,\nor select a book below for an interactive experience",
-              color: const Color(0xFFF5E7C8),
-              size: _tvTextBodySize,
-              textAlign: TextAlign.left,
-            ),
-            SizedBox(height: _tvTextSpacing + 10),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start, // Left align children
+            children: [
               _buildStrokedText(
-              "...tap the clock to change the time of day",
+                "Hi! I'm Jeff!",
+                color: Color.fromARGB(255, 228, 133, 69),
+                size: _tvTextTitleSize,
+                fontWeight: FontWeight.bold,
+                textAlign: TextAlign.left,
+              ),
+              SizedBox(height: _tvTextSpacing),
+              _buildStrokedText(
+                "I love to create...",
+                color: const Color(0xFFFFB74D), // FFB74D
+                size: _tvTextTitleSize,
+                fontStyle: FontStyle.italic,
+                textAlign: TextAlign.left,
+              ),
+              SizedBox(height: _tvTextSpacing + 10),
+              _buildStrokedText(
+                "Click the hamburger icon in the right corner for a menu,\nor select a book below for an interactive experience",
+                color: const Color(0xFFF5E7C8),
+                size: _tvTextBodySize,
+                textAlign: TextAlign.left,
+              ),
+              SizedBox(height: _tvTextSpacing + 10),
+              _buildStrokedText(
+                "...tap the clock to change the time of day",
                 color: const Color(0xFFB2D348),
                 size: _tvTextBodySize,
                 textAlign: TextAlign.left,
               ),
-          ],
-        ),
+            ],
+          ),
         ),
       );
 
       // About Content
-
     } else if (selectedCategory == 'About') {
       return Container(
         alignment: Alignment.topLeft, // Align to top-left corner
         margin: EdgeInsets.only(
             left: _textIndent,
-            top: _sectionHeights['About'] ?? 200.0 // Use the height as top margin instead
+            top: _sectionHeights['About'] ??
+                200.0 // Use the height as top margin instead
             ),
         child: SingleChildScrollView(
           child: _buildStrokedText(
@@ -906,7 +902,7 @@ class _HomeScreenState extends State<HomeScreen>
                   style: TextStyle(
                     fontFamily: 'Ghibli',
                     fontSize: _tvTextBodySize,
-                    color: const Color(0xFFFFB74D), 
+                    color: const Color(0xFFFFB74D),
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -940,6 +936,7 @@ class _HomeScreenState extends State<HomeScreen>
             SizedBox(height: _tvTextSpacing * 0.5),
 
             // Location with custom color
+
             Row(
               children: [
                 _buildStrokedText(
@@ -952,12 +949,39 @@ class _HomeScreenState extends State<HomeScreen>
                   style: TextStyle(
                     fontFamily: 'Ghibli',
                     fontSize: _tvTextBodySize,
-                    color: const Color( 0xFFFFB74D), // Custom orange color for location
+                    color: const Color(
+                        0xFFFFB74D), // Custom orange color for location
                     fontWeight: FontWeight.normal,
                   ),
                 ),
               ],
             ),
+
+            // LinkedIn Icon
+
+            SizedBox(height: _tvTextSpacing * 2.0),
+            Row(
+              children: [
+                // You can adjust the left padding here if needed
+                SizedBox(width: _textIndent), // Same indent as other content
+                GestureDetector(
+                  onTap: () async {
+                    final Uri uri = Uri.parse(
+                        "https://www.linkedin.com/in/jeffrey-anderson-pdx/");
+                    if (await canLaunchUrl(uri)) {
+                      await launchUrl(uri,
+                          mode: LaunchMode.externalApplication);
+                    }
+                  },
+                  child: Image.asset(
+                    'assets/linked_in_main.png',
+                    width: 40, // Adjust size here
+                    height: 40, // Adjust size here
+                  ),
+                ),
+              ],
+            ),
+
           ],
         ),
       );
@@ -986,7 +1010,8 @@ class _HomeScreenState extends State<HomeScreen>
           // Theme selection buttons
           Center(
             child: Padding(
-              padding: const EdgeInsets.only(top: 70.0), // Move CTA Theme buttons 
+              padding:
+                  const EdgeInsets.only(top: 70.0), // Move CTA Theme buttons
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -1073,37 +1098,32 @@ class _HomeScreenState extends State<HomeScreen>
                                 return AlertDialog(
                                   title: const Text("This site right here!",
                                       style: TextStyle(
-                                        fontSize: 18,
-                                        color: const Color(0xFFFF9A62),
-                                        fontFamily: 'Ghibli'
-                                        )),
+                                          fontSize: 18,
+                                          color: const Color(0xFFFF9A62),
+                                          fontFamily: 'Ghibli')),
                                   content: const Text(
                                     "I designed and coded the entirety of this portfolio site!",
                                     style: TextStyle(
-                                      fontSize: 18,
-                                      color: const Color(0xFFFFB74D),
-                                      fontFamily: 'Ghibli'
-                                      ),
-                                      
+                                        fontSize: 18,
+                                        color: const Color(0xFFFFB74D),
+                                        fontFamily: 'Ghibli'),
                                   ),
                                   actions: [
                                     TextButton(
                                       onPressed: () =>
                                           Navigator.of(context).pop(),
                                       child: const Text("Close",
-                                          style:
-                                              TextStyle(
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.bold,
-                                                color: const Color(0xFFB2D348),
-                                                fontFamily: 'Ghibli')),
+                                          style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                              color: const Color(0xFFB2D348),
+                                              fontFamily: 'Ghibli')),
                                     ),
                                   ],
                                 );
                               },
                             );
                           } else {
-
                             // Show the project in TV modal
 
                             _showProjectsModal(context,
@@ -1151,10 +1171,8 @@ class _HomeScreenState extends State<HomeScreen>
                 }).toList(),
               ],
             ),
-          )
-        );
+          ));
     } else {
-
       // For other categories, display a blank screen
       return Container(
         alignment: Alignment.center,
@@ -1171,7 +1189,7 @@ class _HomeScreenState extends State<HomeScreen>
     if (isHovered) {
       textColor = const Color(0xFFFF9A62);
     } else if (isPressed) {
-      textColor = const Color(0xFF0D99FF);    
+      textColor = const Color(0xFF0D99FF);
     }
 
     return Container(
@@ -1298,8 +1316,7 @@ class _HomeScreenState extends State<HomeScreen>
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: const [
-          Icon(Icons.star,
-              size: 32, color: Color.fromARGB(255, 6, 63, 90)),
+          Icon(Icons.star, size: 32, color: Color.fromARGB(255, 6, 63, 90)),
           SizedBox(height: 24),
           Text(
             "WELCOME TO MY NES PORTFOLIO!",
@@ -1390,14 +1407,13 @@ class _HomeScreenState extends State<HomeScreen>
               ],
             ),
               */
-
           ],
         ),
       );
     } else if (selectedCategory == 'Contact') {
 
       // Contact information in NES style
-      
+
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -1483,6 +1499,35 @@ class _HomeScreenState extends State<HomeScreen>
               ),
             ],
           ),
+
+          // LinkedIn icon and link
+
+         
+
+          SizedBox(height: 24),
+          Row(
+            mainAxisAlignment:
+                MainAxisAlignment.center, // Center alignment for NES theme
+            children: [
+              GestureDetector(
+                onTap: () async {
+                  final Uri uri = Uri.parse(
+                      "https://www.linkedin.com/in/jeffrey-anderson-pdx/");
+                  if (await canLaunchUrl(uri)) {
+                    await launchUrl(uri, mode: LaunchMode.externalApplication);
+                  }
+                },
+                child: Image.asset(
+                  'assets/linked_in_nes.png',
+                  width: 40, // Adjust size here
+                  height: 40, // Adjust size here
+                ),
+              ),
+            ],
+          ),
+        
+
+
         ],
       );
     } else if (selectedCategory == 'Projects') {
@@ -1506,14 +1551,14 @@ class _HomeScreenState extends State<HomeScreen>
           const SizedBox(height: 32),
 
           // Project buttons in NES style from registry
-          
+
           ...projectsList.map((project) => Padding(
                 padding: const EdgeInsets.only(bottom: 16),
                 child: PixelButton(
                   isPrimary: true,
                   backgroundColor:
-                  const Color(0xFF4EBD5F),                                 // project button color
-                  textColor: Color(0xFF302e2c),                            // project button text color
+                      const Color(0xFF4EBD5F), // project button color
+                  textColor: Color(0xFF302e2c), // project button text color
                   onPressed: () {
                     if (project['id'] == 'this-website') {
                       // Show simple alert for website project
@@ -1546,7 +1591,7 @@ class _HomeScreenState extends State<HomeScreen>
                                   ),
                                   const SizedBox(height: 24),
                                   PixelButton(
-                                    isPrimary: true,                                      
+                                    isPrimary: true,
                                     onPressed: () {
                                       Navigator.of(context).pop();
                                     },
@@ -1605,7 +1650,7 @@ class _HomeScreenState extends State<HomeScreen>
             isPrimary: true,
             onPressed: () {
               _launchURL(
-                  'https://storage.googleapis.com/uxfolio/643d6d8beaacf70002256d70/Jeff_Resume_PhJ.webp');
+                  'https://storage.googleapis.com/uxfolio/643d6d8beaacf70002256d70/Resume_avP.pdf');
             },
             child: const Text(
               "VIEW FULL RESUME",
@@ -1666,7 +1711,6 @@ class _HomeScreenState extends State<HomeScreen>
             backgroundColor: const Color(0xFF302E2C),
             isPrimary: false,
             onPressed: () {
-
               // Already in NES theme, no need to change
             },
             child: const Text(
@@ -1681,7 +1725,6 @@ class _HomeScreenState extends State<HomeScreen>
         ],
       );
     } else {
-
       // Fallback for other categories
 
       return Center(
