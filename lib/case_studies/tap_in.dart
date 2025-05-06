@@ -5,7 +5,7 @@ import 'package:portfolio_website/components/project_data.dart';
 final ProjectData tapInProject = ProjectData(
   id: 'tap-in',
   title: 'Tap In',
-  subtitle: 'An all-encompassing B2C mobile application',
+  subtitle: 'An all-encompassing B2C\nmobile application',
   originalLink: 'https://jeffpdx.net/p/02ec6dbb',
   heroImage: 'assets/tapin_header.png',
   logoImage: 'assets/tapin_logo.png',

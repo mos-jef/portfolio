@@ -1,15 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 import 'screens/home_screen.dart';
 import 'models/theme_provider.dart';
 
 void main() {
-  runApp(
-    ChangeNotifierProvider(
-      create: (_) => ThemeProvider(),
-      child: const MyApp(),
-    ),
-  );
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Force landscape orientation
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.landscapeLeft,
+    DeviceOrientation.landscapeRight,
+  ]).then((_) {
+    runApp(
+      ChangeNotifierProvider(
+        create: (_) => ThemeProvider(),
+        child: const MyApp(),
+      ),
+    );
+  });
 }
 
 class MyApp extends StatelessWidget {
@@ -22,6 +32,15 @@ class MyApp extends StatelessWidget {
         return MaterialApp(
           title: 'Jeff\'s Portfolio',
           debugShowCheckedModeBanner: false,
+          builder: (context, child) => ResponsiveBreakpoints.builder(
+            child: child!,
+            breakpoints: [
+              const Breakpoint(start: 0, end: 599, name: MOBILE),
+              const Breakpoint(start: 600, end: 1199, name: TABLET),
+              const Breakpoint(
+                  start: 1200, end: double.infinity, name: DESKTOP),
+            ],
+          ),
           theme: ThemeData(
             // Use a dark theme for all UI elements
             brightness: Brightness.dark,

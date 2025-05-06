@@ -12,7 +12,7 @@ dependencies:
   provider: ^6.0.5
   google_fonts: ^4.0.3
   url_launcher: ^6.1.10
-  responsive_framework: ^0.2.0
+  responsive_framework: ^1.5.1
   nes_ui: ^0.24.0
   shared_preferences: ^2.1.0
   flutter_svg: ^2.0.5
@@ -74,6 +74,10 @@ flutter:
     - assets/backgroundheader.png
     - assets/linked_in_main.png
     - assets/linked_in_nes.png
+    - assets/switch_large.png
+    - assets/switch_med.png
+    - assets/gameboy.png
+    - assets/switch_small.png
 
     
     

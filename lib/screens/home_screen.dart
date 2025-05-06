@@ -23,6 +23,22 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
+  class SwitchImageConfig {
+  final String imagePath;
+  final double screenTopPercentage;
+  final double screenLeftPercentage;
+  final double screenWidthPercentage;
+  final double screenHeightPercentage;
+
+  SwitchImageConfig({
+    required this.imagePath,
+    required this.screenTopPercentage,
+    required this.screenLeftPercentage,
+    required this.screenWidthPercentage,
+    required this.screenHeightPercentage,
+  });
+}
+
 class _HomeScreenState extends State<HomeScreen>
     with SingleTickerProviderStateMixin {
   String? selectedCategory;
@@ -34,21 +50,18 @@ class _HomeScreenState extends State<HomeScreen>
   bool _isMenuVisible = false;
   bool hoveredNes = false;
 
-  // Menu configuration - all in absolute pixel values
-  final double _menuWidth = 1180; // Width in pixels
-  final double _menuHeight = 800; // Height in pixels
-  final double _menuRestPosition =
-      -380; // How far the menu comes in from the right (0 = full, negative = further in)
+  // Animated Menu configuration - all in absolute pixel values
+  final double _menuWidth = 1280; // Width in pixels
+  final double _menuHeight = 1090; // Height in pixels
+  final double _menuRestPosition = -380; // How far the menu comes in from the right (0 = full, negative = further in)
   final Duration _menuAnimationDuration = const Duration(milliseconds: 300);
-  final Curve _menuAnimationCurve =
-      Curves.easeOutQuart; // More dramatic ease-in
+  final Curve _menuAnimationCurve = Curves.easeOutQuart; // More dramatic ease-in
 
   // Menu text configuration
-  final double _menuTextSize = 23.0;
-  final double _menuTextSpacing = 25.0;
-  final double _menuTextTopOffset =
-      170.0; // Vertical position of first menu item
-  final double _menuTextLeftOffset = 500.0; // Horizontal position of menu items
+  final double _menuTextSize = 33.0;
+  final double _menuTextSpacing = 30.0;
+  final double _menuTextTopOffset = 220.0; // Vertical position of first menu item
+  final double _menuTextLeftOffset = 520.0; // Horizontal position of menu items
   final Color _menuTextColor = const Color(0xFF567185);
   final Color _menuTextHoverColor = const Color(0xFFCC510F);
   final double _menuTextStrokeWidth = 0.3;
@@ -59,9 +72,9 @@ class _HomeScreenState extends State<HomeScreen>
   final double _tvContentHeight = 1120.0; // Default height of content area
   final double _textIndent = 24.0; // Adjust this value to control indentation
   final double _tvContentPadding = 1.0;
-  final double _tvTextTitleSize = 28.0;
-  final double _tvTextSubtitleSize = 22.0;
-  final double _tvTextBodySize = 16.0;
+  final double _tvTextTitleSize = 30.0;
+  final double _tvTextSubtitleSize = 30.0;
+  final double _tvTextBodySize = 24.0;
   final double _tvTextSpacing = 20.0;
   final Map<String, double> _sectionHeights = {
     'About': 50.0, // Affects top margin/padding/height of about section
@@ -74,15 +87,42 @@ class _HomeScreenState extends State<HomeScreen>
   final Color _tvTextStrokeColor = const Color.fromARGB(255, 29, 29, 28);
 
   // Book text configuration
-  final double _bookTextSize = 28.0;
-  final double _bookTextSpacing = 14.1; // Spacing between book labels
-  final double _bookTextTopOffset = 74.0; // Vertical position adjustment
-  final double _bookTextLeftOffset = 318.0; // Horizontal position of first book
+  final double _bookTextSize = 40.0;
+  final double _bookTextSpacing = 14.3; // Spacing between book labels
+  final double _bookTextTopOffset = 94.0; // Vertical position adjustment
+  final double _bookTextLeftOffset = 460.0; // Horizontal position of first book
   final Color _bookTextColor = const Color(0xFFF1E6C5);
   final Color _bookTextHoverColor = const Color(0xFFFF9500);
   final double _bookTextStrokeWidth = 3.5;
   final Color _bookTextStrokeColor = const Color(0xFF193857);
 
+  // Define your configs here
+  final switchConfigMobile = SwitchImageConfig(
+    imagePath: 'assets/switch_small.png',
+    screenTopPercentage: 0.100,
+    screenLeftPercentage: 0.154,
+    screenWidthPercentage: 0.292,
+    screenHeightPercentage: 0.435,
+  );
+
+  final switchConfigTablet = SwitchImageConfig(
+    imagePath: 'assets/switch_med.png',
+    screenTopPercentage: 0.100,
+    screenLeftPercentage: 0.154,
+    screenWidthPercentage: 0.54,
+    screenHeightPercentage: 0.535,
+  );
+
+  final switchConfigDesktop = SwitchImageConfig(
+    imagePath: 'assets/switch_large.png',
+    screenTopPercentage: 0.154,
+    screenLeftPercentage: 0.184,
+    screenWidthPercentage: 0.58,
+    screenHeightPercentage: 0.485,
+  );
+
+
+ 
   @override
   void initState() {
     super.initState();
@@ -221,9 +261,37 @@ class _HomeScreenState extends State<HomeScreen>
             },
           );
         } else {
+
           // Show the project TV modal for other projects
 
-          _showProjectsModal(context, projectId: projectId);
+          if (MediaQuery.of(context).size.width < 600) {
+
+            // Mobile device - use desktop-sized image but scaled down
+
+            _showProjectsModal(context,
+                projectId: projectId,
+                forceDeviceType: true,
+                deviceType: 'desktop',
+                scaleFactor: 0.7);
+          } else if (MediaQuery.of(context).size.width < 1200) {
+
+            // Tablet device - use tablet-sized image with slight scale adjustment
+
+            _showProjectsModal(context,
+                projectId: projectId,
+                forceDeviceType: true,
+                deviceType: 'tablet',
+                scaleFactor: 1.1);
+          } else {
+
+            // Desktop - use desktop image at normal scale
+            
+            _showProjectsModal(context,
+                projectId: projectId,
+                forceDeviceType: true,
+                deviceType: 'desktop',
+                scaleFactor: 1.0);
+          }
         }
       },
       child: Container(
@@ -250,24 +318,69 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   // Implementation of the TV modal for projects
-  void _showProjectsModal(BuildContext context, {String projectId = 'tap-in'}) {
-    // Get screen dimensions for proper sizing
+
+  void _showProjectsModal(
+    BuildContext context, {
+    String projectId = 'tap-in',
+    double scaleFactor = 1.0,
+    bool forceDeviceType = false, // Add this parameter
+    String? deviceType, // Add this parameter: "mobile", "tablet", "desktop"
+  }) {
+
+    // Define fixed aspect ratio for the TV frame
+
+    const tvAspectRatio = 2500.0 / 1700.0;
+
+    // Get screen dimensions
     final screenSize = MediaQuery.of(context).size;
+    final screenWidth = screenSize.width;
+    final screenHeight = screenSize.height;
 
-    // Calculate modal size based on the TV image dimensions
-    final modalWidth = math.min(screenSize.width * 1.132, 3900.0);
-    final modalHeight = math.min(screenSize.height * 1.2, 1020.0);
+    // Select the appropriate config based on screen width
+    final SwitchImageConfig config;
+    if (forceDeviceType && deviceType != null) {
+      // Force a specific device type regardless of screen size
+      switch (deviceType) {
+        case "mobile":
+          config = switchConfigMobile;
+          break;
+        case "tablet":
+          config = switchConfigTablet;
+          break;
+        default:
+          config = switchConfigDesktop;
+      }
+    } else {
+      // Automatic selection based on screen width
+      if (screenWidth < 600) {
+        config = switchConfigMobile;
+      } else if (screenWidth < 1200) {
+        config = switchConfigTablet;
+      } else {
+        config = switchConfigDesktop;
+      }
+    }
 
-    // Calculate the scaling ratio to maintain aspect ratio
-    final scaleFactor = modalWidth / 2500.0;
+    // Determine best size while maintaining aspect ratio
+    double modalWidth;
+    double modalHeight;
 
-    // Calculate content area dimensions with scaling
-    final contentWidth = 1350.0 * scaleFactor;
-    final contentHeight = 910.0 * scaleFactor;
+    // If width is the constraining factor
+    if (screenWidth / screenHeight < tvAspectRatio) {
+      modalWidth = screenWidth * 1.12 * scaleFactor;
+      modalHeight = modalWidth / tvAspectRatio;
+    } else {
+      // Height is the constraining factor
+      modalHeight = screenHeight * 1.12 * scaleFactor;
+      modalWidth = modalHeight * tvAspectRatio;
+    }
 
-    // Position content within TV frame
-    final contentTop = modalHeight * 0.100;
-    final contentLeft = modalWidth * 0.154;
+    // Calculate content dimensions based on the config
+    final contentScaleFactor = modalWidth / 2766.0; // For internal calculations
+    final contentWidth = modalWidth * config.screenWidthPercentage;
+    final contentHeight = modalHeight * config.screenHeightPercentage;
+    final contentTop = modalHeight * config.screenTopPercentage;
+    final contentLeft = modalWidth * config.screenLeftPercentage;
 
     showDialog(
       context: context,
@@ -276,42 +389,48 @@ class _HomeScreenState extends State<HomeScreen>
         return Dialog(
           backgroundColor: Colors.transparent,
           insetPadding: EdgeInsets.zero,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              // TV Image Background
-              Image.asset(
-                'assets/switch_modal.png',
-                width: modalWidth,
-                height: modalHeight,
-                fit: BoxFit.cover,
-              ),
+          child: Center(
+            child: Container(
+              width: modalWidth,
+              height: modalHeight,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  // TV Image Background - now using the config's imagePath
+                  Positioned.fill(
+                    child: Image.asset(
+                      config.imagePath,
+                      fit: BoxFit.fill,
+                    ),
+                  ),
 
-              // Portfolio Content Area
-              Positioned(
-                top: contentTop,
-                left: contentLeft,
-                width: contentWidth,
-                height: contentHeight,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: PortfolioViewer(projectId: projectId),
-                ),
-              ),
+                  // Portfolio Content Area
+                  Positioned(
+                    top: contentTop,
+                    left: contentLeft,
+                    width: contentWidth,
+                    height: contentHeight,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: PortfolioViewer(projectId: projectId),
+                    ),
+                  ),
 
-              // Close button for switch modal
-              Positioned(
-                top: 10,
-                right: 10,
-                child: IconButton(
-                  icon: const Icon(Icons.close,
-                      color: const Color(0xFF51FF00), size: 40),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
+                  // Close button for switch modal
+                  Positioned(
+                    top: modalHeight * 0.12,
+                    right: modalWidth * 0.19,
+                    child: IconButton(
+                      iconSize: math.max(40, modalWidth * 0.025),
+                      icon: const Icon(Icons.highlight_off_rounded, color: Color(0xFFBE1DDE)),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         );
       },
@@ -326,21 +445,13 @@ class _HomeScreenState extends State<HomeScreen>
     final isNesTheme = themeProvider.isNesTheme;
 
     // Design dimensions (based on your background image dimensions)
-    const designWidth = 1366.0; // Common desktop width
-    const designHeight = 768.0; // Common desktop height
+    const designWidth = 1920.0; // Common desktop width
+    const designHeight = 1080.0; // Common desktop height
     const aspectRatio = designWidth / designHeight;
 
     // Get current screen dimensions
     final screenSize = MediaQuery.of(context).size;
-
-    // Calculate the scaling factor - used by FittedBox
-    if (screenSize.width / screenSize.height > aspectRatio) {
-      // Screen is wider than our design - constrain by height
-      // scaleFactor would be screenSize.height / designHeight
-    } else {
-      // Screen is taller than our design - constrain by width
-      // scaleFactor would be screenSize.width / designWidth
-    }
+    final isMobile = screenSize.width < 600;
 
     // Use fixed positions based on the design size
     const tvLeft = 0.252 * designWidth;
@@ -361,344 +472,353 @@ class _HomeScreenState extends State<HomeScreen>
     const whiteRectWidth = 0.18 * designWidth;
     const whiteRectHeight = 0.35 * designHeight;
 
+    // Choose between mobile and desktop layouts
+    if (isMobile) {
+      return _buildMobileLayout(isDarkMode, isNesTheme);
+    }
+
     return Scaffold(
-      body: Center(
-        child: AspectRatio(
-          aspectRatio: aspectRatio,
-          child: SizedBox(
-            width: designWidth,
-            height: designHeight,
-            child: FittedBox(
-              fit: BoxFit.contain,
-              alignment: Alignment.center,
-              child: SizedBox(
-                width: designWidth,
-                height: designHeight,
-                child: Stack(
-                  children: [
-                    // Full-screen background image (based on theme)
-                    SizedBox(
-                      width: designWidth,
-                      height: designHeight,
-                      child: Image.asset(
-                        isNesTheme
-                            ? isDarkMode
-                                ? 'assets/nes_land_night.png'
-                                : 'assets/nes_land_day.png'
-                            : isDarkMode
-                                ? 'assets/background_dark2.png'
-                                : 'assets/background_light2.png',
-                        fit: BoxFit.fill,
-                      ),
-                    ),
-
-                    // Invisible overlay that closes the menu when tapped
-                    if (_isMenuVisible && !isNesTheme)
-                      Positioned.fill(
-                        child: GestureDetector(
-                          onTap: _hideMenu,
-                          child: Container(color: Colors.transparent),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        child: Center(
+          child: AspectRatio(
+            aspectRatio: aspectRatio,
+            child: Container(
+              width: designWidth,
+              height: designHeight,
+              child: FittedBox(
+                fit: BoxFit.contain,
+                alignment: Alignment.center,
+                child: SizedBox(
+                  width: designWidth,
+                  height: designHeight,
+                  child: Stack(
+                    children: [
+                      // Full-screen background image (based on theme)
+                      SizedBox(
+                        width: designWidth,
+                        height: designHeight,
+                        child: Image.asset(
+                          isNesTheme
+                              ? isDarkMode
+                                  ? 'assets/nes_land_night.png'
+                                  : 'assets/nes_land_day.png'
+                              : isDarkMode
+                                  ? 'assets/background_dark2.png'
+                                  : 'assets/background_light2.png',
+                          fit: BoxFit.fill,
                         ),
                       ),
 
-                    // Different layouts based on theme
-                    if (!isNesTheme) ...[
-                      // Standard Theme UI Components
-
-                      // TV Screen (Content Display Area)
-
-                      Positioned(
-                        left: tvLeft,
-                        top: tvTop,
-                        width: tvWidth,
-                        height: tvHeight,
-                        child: Center(
-                          child: Container(
-                            width: _tvContentWidth,
-                            height: _tvContentHeight,
-                            padding: EdgeInsets.symmetric(
-                              horizontal: _tvContentPadding,
-                              vertical: _tvContentPadding,
-                            ),
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                  color: Colors.white.withAlpha(51),
-                                  width: 1), // thin border
-                            ),
-                            child: _buildTVContent(),
-                          ),
-                        ),
-                      ),
-
-                      // Transparent circular overlay for dark/light mode toggle
-                      Positioned(
-                        top: 10, // 20 pixels from the top
-                        right: 646, // 20 pixels from the right
-                        child: CircleThemeToggle(
-                          size: 73.0,
-                          borderColor: isDarkMode
-                              ? Colors.white.withAlpha(0)
-                              : const Color.fromARGB(255, 58, 44, 2)
-                                  .withAlpha(0),
-                          borderWidth: 1.5,
-                        ),
-                      ),
-
-                      // Book text labels on shelf
-                      Positioned(
-                        left: _bookTextLeftOffset,
-                        top: booksTop + _bookTextTopOffset,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            _buildBookTextItem('About', 0),
-                            SizedBox(width: _bookTextSpacing),
-                            _buildBookTextItem('Projects', 1),
-                            SizedBox(width: _bookTextSpacing),
-                            _buildBookTextItem('Resume', 2),
-                            SizedBox(width: _bookTextSpacing),
-                            _buildBookTextItem('Contact', 3),
-                            SizedBox(width: _bookTextSpacing),
-                            _buildBookTextItem('Menu', 4),
-                          ],
-                        ),
-                      ),
-
-                      // NES system clickable area with very visible settings for testing
-                      Positioned(
-                        // Adjust these values based on where the NES system appears in your background
-                        left: 650, // Estimate - you'll need to adjust
-                        top: 570, // Estimate - you'll need to adjust
-                        child: MouseRegion(
-                          onEnter: (_) => setState(() => hoveredNes = true),
-                          onExit: (_) => setState(() => hoveredNes = false),
-                          cursor: SystemMouseCursors.click,
+                      // Invisible overlay that closes the menu when tapped
+                      if (_isMenuVisible && !isNesTheme)
+                        Positioned.fill(
                           child: GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                selectedCategory = 'Menu';
-                              });
-                            },
+                            onTap: _hideMenu,
+                            child: Container(color: Colors.transparent),
+                          ),
+                        ),
+
+                      // Different layouts based on theme
+                      if (!isNesTheme) ...[
+                        // Standard Theme UI Components
+
+                        // TV Screen (Content Display Area)
+
+                        Positioned(
+                          left: tvLeft,
+                          top: tvTop,
+                          width: tvWidth,
+                          height: tvHeight,
+                          child: Center(
                             child: Container(
-                              width: 300,
-                              height: 100,
-                              decoration: BoxDecoration(
-                                color: hoveredNes
-                                    ? Colors.white.withAlpha(20)
-                                    : Colors.transparent,
-                                border: Border.all(
-                                  color: hoveredNes
-                                      ? Colors.white.withAlpha(0)
-                                      : Colors.white.withAlpha(0),
-                                  width: 1.0,
-                                ),
+                              width: _tvContentWidth,
+                              height: _tvContentHeight,
+                              padding: EdgeInsets.symmetric(
+                                horizontal: _tvContentPadding,
+                                vertical: _tvContentPadding,
                               ),
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                    color: Colors.white.withAlpha(51),
+                                    width: 1), // thin border
+                              ),
+                              child: _buildTVContent(),
                             ),
                           ),
                         ),
-                      ),
-                    ] else ...[
-                      // NES Theme UI Components
 
-                      // White rectangle menu area
+                        // Transparent circular overlay for dark/light mode toggle
+                        Positioned(
+                          top: 18, // 20 pixels from the top
+                          right: 909, // 20 pixels from the right
+                          child: CircleThemeToggle(
+                            size: 103.0,
+                            borderColor: isDarkMode
+                                ? Colors.white.withAlpha(0)
+                                : const Color.fromARGB(255, 58, 44, 2)
+                                    .withAlpha(0),
+                            borderWidth: 1.5,
+                          ),
+                        ),
 
-                      Positioned(
-                        left: whiteRectLeft,
-                        top: whiteRectTop,
-                        width: whiteRectWidth,
-                        height: whiteRectHeight,
-                        child: PixelContainer(
-                          backgroundColor: Colors.transparent,
-                          padding: const EdgeInsets.all(8),
-                          borderColor: Colors.transparent,
-                          borderWidth: 0,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            crossAxisAlignment: CrossAxisAlignment.center,
+                        // Book text labels on shelf
+                        Positioned(
+                          left: _bookTextLeftOffset,
+                          top: booksTop + _bookTextTopOffset,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              _buildNesMenuItem('About', isSmall: true),
-                              _buildNesMenuItem('Projects', isSmall: true),
-                              _buildNesMenuItem('Resume', isSmall: true),
-                              _buildNesMenuItem('Contact', isSmall: true),
-                              _buildNesMenuItem('Menu', isSmall: true),
-
-                              // Theme toggle in NES style
-                              PixelButton(
-                                isPrimary: true,
-                                onPressed: () {
-                                  themeProvider.toggleDarkMode(!isDarkMode);
-                                },
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 4, vertical: 2),
-                                height: 22,
-                                width: 50, // Narrow width for the button
-                                backgroundColor:
-                                    const Color(0xFF9370DB), // Purple color
-                                textColor: Colors.white,
-                                borderWidth: 1.0,
-                                borderRadius: 3.0,
-                                showShadow: false,
-                                child: Text(
-                                  isDarkMode ? 'LIGHT' : 'DARK',
-                                  style: const TextStyle(
-                                    fontFamily: 'NES',
-                                    fontSize: 8,
-                                  ),
-                                ),
-                              ),
+                              _buildBookTextItem('About', 0),
+                              SizedBox(width: _bookTextSpacing),
+                              _buildBookTextItem('Projects', 1),
+                              SizedBox(width: _bookTextSpacing),
+                              _buildBookTextItem('Resume', 2),
+                              SizedBox(width: _bookTextSpacing),
+                              _buildBookTextItem('Contact', 3),
+                              SizedBox(width: _bookTextSpacing),
+                              _buildBookTextItem('Menu', 4),
                             ],
                           ),
                         ),
-                      ),
 
-                      // Orange rectangle content area
-                      Positioned(
-                        left: orangeRectLeft,
-                        top: orangeRectTop,
-                        width: orangeRectWidth,
-                        height: orangeRectHeight,
-                        child: PixelContainer(
-                          backgroundColor: Colors.transparent,
-                          padding: const EdgeInsets.all(16),
-                          borderColor: Colors.transparent,
-                          borderWidth: 0,
-                          child: _buildNesContent(),
-                        ),
-                      ),
-                    ],
-
-                    // Animated menu with text (only shown when visible in standard theme)
-                    if (_isMenuVisible && !isNesTheme)
-                      Positioned(
-                        top: menuTop,
-                        right: _menuSlideAnimation.value,
-                        child: GestureDetector(
-                          onTap: () {},
-                          behavior: HitTestBehavior.opaque,
-                          child: SizedBox(
-                            width: _menuWidth,
-                            height: _menuHeight,
-                            child: Stack(
-                              children: [
-                                // Menu background image
-                                Image.asset(
-                                  'assets/menublank.png',
-                                  width: _menuWidth,
-                                  height: _menuHeight,
-                                  fit: BoxFit.contain,
+                        // NES system clickable area with very visible settings for testing
+                        Positioned(
+                          // Adjust these values based on where the NES system appears in your background
+                          left: 920, // Estimate - you'll need to adjust
+                          top: 800, // Estimate - you'll need to adjust
+                          child: MouseRegion(
+                            onEnter: (_) => setState(() => hoveredNes = true),
+                            onExit: (_) => setState(() => hoveredNes = false),
+                            cursor: SystemMouseCursors.click,
+                            child: GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  selectedCategory = 'Menu';
+                                });
+                              },
+                              child: Container(
+                                width: 380,
+                                height: 140,
+                                decoration: BoxDecoration(
+                                  color: hoveredNes
+                                      ? Colors.white.withAlpha(20)
+                                      : Colors.transparent,
+                                  border: Border.all(
+                                    color: hoveredNes
+                                        ? Colors.white.withAlpha(0)
+                                        : Colors.white.withAlpha(0),
+                                    width: 1.0,
+                                  ),
                                 ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ] else ...[
+                        // NES Theme UI Components
 
-                                // Menu text items
-                                Positioned(
-                                  left: _menuTextLeftOffset,
-                                  top: _menuTextTopOffset,
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      _buildMenuTextItem('About'),
-                                      SizedBox(height: _menuTextSpacing),
-                                      _buildMenuTextItem('Projects'),
-                                      SizedBox(height: _menuTextSpacing),
-                                      _buildMenuTextItem('Resume'),
-                                      SizedBox(height: _menuTextSpacing),
-                                      _buildMenuTextItem('Contact'),
-                                      SizedBox(height: _menuTextSpacing),
-                                      _buildMenuTextItem('Menu'),
-                                    ],
+                        // White rectangle menu area
+
+                        Positioned(
+                          left: whiteRectLeft,
+                          top: whiteRectTop,
+                          width: whiteRectWidth,
+                          height: whiteRectHeight,
+                          child: PixelContainer(
+                            backgroundColor: Colors.transparent,
+                            padding: const EdgeInsets.all(8),
+                            borderColor: Colors.transparent,
+                            borderWidth: 0,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                _buildNesMenuItem('About', isSmall: true),
+                                _buildNesMenuItem('Projects', isSmall: true),
+                                _buildNesMenuItem('Resume', isSmall: true),
+                                _buildNesMenuItem('Contact', isSmall: true),
+                                _buildNesMenuItem('Menu', isSmall: true),
+
+                                // Theme toggle in NES style
+                                PixelButton(
+                                  isPrimary: true,
+                                  onPressed: () {
+                                    themeProvider.toggleDarkMode(!isDarkMode);
+                                  },
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 4, vertical: 2),
+                                  height: 40,
+                                  width: 90, // Narrow width for the button
+                                  backgroundColor:
+                                      const Color(0xFF9370DB), // Purple color
+                                  textColor: Colors.white,
+                                  borderWidth: 2.0,
+                                  borderRadius: 8.0,
+                                  showShadow: false,
+                                  child: Text(
+                                    isDarkMode ? 'LIGHT' : 'DARK',
+                                    style: const TextStyle(
+                                      fontFamily: 'NES',
+                                      fontSize: 12,
+                                    ),
                                   ),
                                 ),
                               ],
                             ),
                           ),
                         ),
-                      ),
 
-                    // Close (X) button with improved responsiveness (for standard theme)
-                    if (_isMenuVisible && !isNesTheme)
-                      Positioned(
-                        top: 10,
-                        right: 20,
-                        child: Material(
-                          color: Colors.transparent,
-                          elevation: 0,
-                          child: InkWell(
-                            onTap: _forceCloseMenu,
-                            splashColor: const Color(0x33FFFFFF),
-                            highlightColor: const Color(0x22FFFFFF),
-                            child: Container(
-                              width: 50,
-                              height: 50,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(25),
+                        // Orange rectangle content area
+                        Positioned(
+                          left: orangeRectLeft,
+                          top: orangeRectTop,
+                          width: orangeRectWidth,
+                          height: orangeRectHeight,
+                          child: PixelContainer(
+                            backgroundColor: Colors.transparent,
+                            padding: const EdgeInsets.all(16),
+                            borderColor: Colors.transparent,
+                            borderWidth: 0,
+                            child: _buildNesContent(),
+                          ),
+                        ),
+                      ],
+
+                      // Animated menu with text (only shown when visible in standard theme)
+                      if (_isMenuVisible && !isNesTheme)
+                        Positioned(
+                          top: menuTop,
+                          right: _menuSlideAnimation.value,
+                          child: GestureDetector(
+                            onTap: () {},
+                            behavior: HitTestBehavior.opaque,
+                            child: SizedBox(
+                              width: _menuWidth,
+                              height: _menuHeight,
+                              child: Stack(
+                                children: [
+                                  // Menu background image
+                                  Image.asset(
+                                    'assets/menublank.png',
+                                    width: _menuWidth,
+                                    height: _menuHeight,
+                                    fit: BoxFit.contain,
+                                  ),
+
+                                  // Menu text items
+                                  Positioned(
+                                    left: _menuTextLeftOffset,
+                                    top: _menuTextTopOffset,
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        _buildMenuTextItem('About'),
+                                        SizedBox(height: _menuTextSpacing),
+                                        _buildMenuTextItem('Projects'),
+                                        SizedBox(height: _menuTextSpacing),
+                                        _buildMenuTextItem('Resume'),
+                                        SizedBox(height: _menuTextSpacing),
+                                        _buildMenuTextItem('Contact'),
+                                        SizedBox(height: _menuTextSpacing),
+                                        _buildMenuTextItem('Menu'),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                               ),
-                              child: const Center(
-                                child: Icon(
-                                  Icons.close,
-                                  color: Color.fromARGB(255, 19, 19, 19),
-                                  size: 32,
+                            ),
+                          ),
+                        ),
+
+                      // Close (X) button with improved responsiveness (for standard theme)
+                      if (_isMenuVisible && !isNesTheme)
+                        Positioned(
+                          top: 10,
+                          right: 20,
+                          child: Material(
+                            color: Colors.transparent,
+                            elevation: 0,
+                            child: InkWell(
+                              onTap: _forceCloseMenu,
+                              splashColor: const Color(0x33FFFFFF),
+                              highlightColor: const Color(0x22FFFFFF),
+                              child: Container(
+                                width: 50,
+                                height: 50,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(25),
+                                ),
+                                child: const Center(
+                                  child: Icon(
+                                    Icons.close,
+                                    color: Color.fromARGB(255, 19, 19, 19),
+                                    size: 32,
+                                  ),
                                 ),
                               ),
                             ),
                           ),
                         ),
-                      ),
 
-                    // Hamburger menu button with circular text (only when menu is hidden in standard theme)
-                    if (!_isMenuVisible && !isNesTheme)
-                      Positioned(
-                        top: 10,
-                        right: 20,
-                        child: Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            // Circular rotating text
-                            CircularText(
-                              text: "unem rof ereh paT ... ",
-                              radius:
-                                  35.0, // Adjust radius to fit around your icon
-                              textColor: const Color(0xFF1DF0E6),
-                              fontSize: 12.0,
-                            ),
-
-                            // The existing menu button
-                            IconButton(
-                              icon: const Icon(
-                                Icons.menu_rounded,
-                                color: const Color(0xFFF9D200),
-                                size: 40,
+                      // Hamburger menu button with circular text (only when menu is hidden in standard theme)
+                      if (!_isMenuVisible && !isNesTheme)
+                        Positioned(
+                          top: 10,
+                          right: 20,
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              // Circular rotating text
+                              CircularText(
+                                text: "unem rof ereh paT ... ",
+                                radius:
+                                    35.0, // Adjust radius to fit around your icon
+                                textColor: const Color(0xFF1DF0E6),
+                                fontSize: 12.0,
                               ),
-                              onPressed: () {
-                                setState(() {
-                                  _isMenuVisible = true;
-                                  _menuAnimationController.forward();
-                                });
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
 
-                    // Back to Main Theme button (only in NES theme)
-                    if (isNesTheme)
-                      Positioned(
-                        top: 20,
-                        right: 20,
-                        child: PixelButton(
-                          isPrimary: false,
-                          onPressed: () {
-                            themeProvider.toggleNesTheme(false);
-                          },
-                          child: const Text(
-                            'MAIN THEME',
-                            style: TextStyle(
-                              fontFamily: 'NES',
-                              fontSize: 12,
+                              // The existing menu button
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.menu_rounded,
+                                  color: const Color(0xFFF9D200),
+                                  size: 40,
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    _isMenuVisible = true;
+                                    _menuAnimationController.forward();
+                                  });
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+
+                      // Back to Main Theme button (only in NES theme)
+                      if (isNesTheme)
+                        Positioned(
+                          top: 20,
+                          right: 20,
+                          child: PixelButton(
+                            isPrimary: false,
+                            onPressed: () {
+                              themeProvider.toggleNesTheme(false);
+                            },
+                            child: const Text(
+                              'MAIN THEME',
+                              style: TextStyle(
+                                fontFamily: 'NES',
+                                fontSize: 12,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -791,6 +911,264 @@ class _HomeScreenState extends State<HomeScreen>
         ),
       ),
     );
+  }
+
+  Widget _buildMobileLayout(bool isDarkMode, bool isNesTheme) {
+    // Get screen dimensions
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      appBar: AppBar(
+        backgroundColor: isNesTheme
+            ? (isDarkMode ? Color(0xFF2B2A2F) : Color(0xFF4EBD5F))
+            : Colors.transparent,
+        elevation: 0,
+        title: Text(
+          "Jeff's Portfolio",
+          style: TextStyle(
+            fontFamily: isNesTheme ? 'NES' : 'Ghibli',
+            fontSize: isNesTheme ? 12 : 18,
+          ),
+        ),
+        actions: [
+          // Theme toggle button
+          IconButton(
+            icon: Icon(isDarkMode ? Icons.light_mode : Icons.dark_mode),
+            onPressed: () {
+              Provider.of<ThemeProvider>(context, listen: false)
+                  .toggleDarkMode(!isDarkMode);
+            },
+          ),
+          // NES theme toggle
+          IconButton(
+            icon: Icon(isNesTheme ? Icons.settings : Icons.videogame_asset),
+            onPressed: () {
+              Provider.of<ThemeProvider>(context, listen: false)
+                  .toggleNesTheme(!isNesTheme);
+            },
+          ),
+        ],
+      ),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage(
+              isNesTheme
+                  ? isDarkMode
+                      ? 'assets/nes_land_night.png'
+                      : 'assets/nes_land_day.png'
+                  : isDarkMode
+                      ? 'assets/background_dark2.png'
+                      : 'assets/background_light2.png',
+            ),
+            fit: BoxFit.cover,
+          ),
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SizedBox(height: 20),
+
+              // Header
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                child: Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: isNesTheme
+                        ? (isDarkMode
+                            ? Color(0xFF2B2A2F).withOpacity(0.8)
+                            : Color(0xFF4EBD5F).withOpacity(0.8))
+                        : Color(0xFF567185).withOpacity(0.8),
+                    borderRadius: BorderRadius.circular(isNesTheme ? 0 : 8),
+                    border: isNesTheme
+                        ? Border.all(color: Color(0xFF2B2A2F), width: 2)
+                        : null,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Hi! I'm Jeff!",
+                        style: TextStyle(
+                          fontFamily: isNesTheme ? 'NES' : 'Ghibli',
+                          fontSize: isNesTheme ? 16 : 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        "UX/UI Designer & Developer",
+                        style: TextStyle(
+                          fontFamily: isNesTheme ? 'NES' : 'Ghibli',
+                          fontSize: isNesTheme ? 12 : 18,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              SizedBox(height: 30),
+
+              // Content Area (instead of TV screen)
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                child: Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: isNesTheme
+                        ? (isDarkMode
+                            ? Color(0xFF1A191D).withOpacity(0.9)
+                            : Color(0xFFFFFFFF).withOpacity(0.9))
+                        : Colors.black.withOpacity(0.7),
+                    borderRadius: BorderRadius.circular(isNesTheme ? 0 : 12),
+                    border: isNesTheme
+                        ? Border.all(color: Color(0xFF2B2A2F), width: 2)
+                        : null,
+                  ),
+                  child: _buildMobileTVContent(),
+                ),
+              ),
+
+              SizedBox(height: 30),
+
+              // Navigation Buttons
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                child: Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  alignment: WrapAlignment.center,
+                  children: [
+                    _buildMobileNavButton('About'),
+                    _buildMobileNavButton('Projects'),
+                    _buildMobileNavButton('Resume'),
+                    _buildMobileNavButton('Contact'),
+                    _buildMobileNavButton('Menu'),
+                  ],
+                ),
+              ),
+
+              SizedBox(height: 40),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+// Helper method for mobile navigation buttons
+  Widget _buildMobileNavButton(String category) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final isNesTheme = themeProvider.isNesTheme;
+    final isSelected = selectedCategory == category;
+
+    if (isNesTheme) {
+      return PixelButton(
+        isPrimary: isSelected,
+        onPressed: () => _handleCategorySelection(category),
+        backgroundColor: isSelected ? Color(0xFF9370DB) : Color(0xFFED725C),
+        textColor: isSelected ? Colors.white : Colors.black,
+        child: Text(
+          category.toUpperCase(),
+          style: TextStyle(
+            fontFamily: 'NES',
+            fontSize: 10,
+          ),
+        ),
+      );
+    } else {
+      return ElevatedButton(
+        onPressed: () => _handleCategorySelection(category),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: isSelected ? Color(0xFFCC510F) : Color(0xFF567185),
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+        child: Text(
+          category,
+          style: TextStyle(
+            fontFamily: 'Ghibli',
+            color: Colors.white,
+            fontSize: 16,
+          ),
+        ),
+      );
+    }
+  }
+
+// Mobile version of TV content
+  Widget _buildMobileTVContent() {
+    // Get theme provider
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final isDarkMode = themeProvider.isDarkMode;
+    final isNesTheme = themeProvider.isNesTheme;
+
+    if (selectedCategory == null) {
+
+      // Default welcome message
+
+      return Container(
+        alignment: Alignment.centerLeft,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Hi! I'm Jeff!",
+              style: TextStyle(
+                fontFamily: isNesTheme ? 'NES' : 'Ghibli',
+                fontSize: isNesTheme ? 16 : 24,
+                fontWeight: FontWeight.bold,
+                color: isNesTheme
+                    ? (isDarkMode ? Colors.white : Color(0xFF302e2c))
+                    : Color.fromARGB(255, 228, 133, 69),
+              ),
+            ),
+            SizedBox(height: 16),
+            Text(
+              "I love to create...",
+              style: TextStyle(
+                fontFamily: isNesTheme ? 'NES' : 'Ghibli',
+                fontSize: isNesTheme ? 14 : 22,
+                fontStyle: FontStyle.italic,
+                color: isNesTheme
+                    ? (isDarkMode ? Colors.white : Color(0xFF302e2c))
+                    : const Color(0xFFFFB74D),
+              ),
+            ),
+            SizedBox(height: 24),
+            Text(
+              "Select a category below to explore",
+              style: TextStyle(
+                fontFamily: isNesTheme ? 'NES' : 'Ghibli',
+                fontSize: isNesTheme ? 10 : 16,
+                color: isNesTheme
+                    ? (isDarkMode ? Colors.white : Color(0xFF302e2c))
+                    : const Color(0xFFF5E7C8),
+              ),
+            ),
+          ],
+        ),
+      );
+    } else if (isNesTheme) {
+      // NES theme content uses existing method
+      return _buildNesContent();
+    } else {
+      // Standard theme content uses existing method
+      return _buildTVContent();
+    }
   }
 
   // TV content based on selected category - continued
@@ -1124,6 +1502,7 @@ class _HomeScreenState extends State<HomeScreen>
                               },
                             );
                           } else {
+
                             // Show the project in TV modal
 
                             _showProjectsModal(context,
@@ -1289,20 +1668,20 @@ class _HomeScreenState extends State<HomeScreen>
           ? const EdgeInsets.symmetric(
               horizontal: 4, vertical: 2) // Even smaller padding
           : const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      height: isSmall ? 22 : null, // button height
-      width: isSmall ? 80 : null, // Control button width
+      height: isSmall ? 40 : null, // button height
+      width: isSmall ? 120 : null, // Control button width
       backgroundColor: isSelected
           ? const Color(0xFF9370DB) // Custom color for selected
           : Color(0xFFED725C), // Custom color for normal
       textColor: isSelected ? Colors.white : Colors.black, // Text color
-      borderWidth: 1.0, // Thinner border
-      borderRadius: 4.0, // Slightly rounded corners
+      borderWidth: 2.0, // Thinner border
+      borderRadius: 8.0, // Slightly rounded corners
       showShadow: true, // No shadow for small buttons
       child: Text(
         category.toUpperCase(),
         style: TextStyle(
           fontFamily: 'NES',
-          fontSize: isSmall ? 8 : 12, // Even smaller font
+          fontSize: isSmall ? 12 : 16, // Even smaller font
         ),
       ),
     );
@@ -1316,10 +1695,10 @@ class _HomeScreenState extends State<HomeScreen>
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: const [
-          Icon(Icons.star, size: 32, color: Color.fromARGB(255, 6, 63, 90)),
+          Icon(Icons.yard, size: 32, color: Color.fromARGB(255, 6, 63, 90)),
           SizedBox(height: 24),
           Text(
-            "WELCOME TO MY NES PORTFOLIO!",
+            "WELCOME TO MY PORTFOLIO!",
             style: TextStyle(
               fontFamily: 'NES',
               fontSize: 20,
@@ -1604,10 +1983,31 @@ class _HomeScreenState extends State<HomeScreen>
                         },
                       );
                     } else {
+
                       // Show project in TV modal
-                      _showProjectsModal(context, projectId: project['id']!);
-                    }
-                  },
+
+                      final screenWidth = MediaQuery.of(context).size.width;
+    if (screenWidth < 600) {
+      _showProjectsModal(
+        context, 
+        projectId: project['id']!, 
+        forceDeviceType: true, 
+        deviceType: 'mobile', 
+        scaleFactor: 0.8
+      );
+    } else {
+      _showProjectsModal(
+        context, 
+        projectId: project['id']!, 
+        forceDeviceType: true, 
+        deviceType: screenWidth < 1200 ? 'tablet' : 'desktop', 
+        scaleFactor: screenWidth < 1200 ? 1.1 : 1.0
+      );
+    }
+  }
+},
+                    
+
                   child: Text(
                     project['title']!.toUpperCase(),
                     style: const TextStyle(
