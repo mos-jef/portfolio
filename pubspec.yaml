@@ -78,6 +78,20 @@ flutter:
     - assets/switch_med.png
     - assets/gameboy.png
     - assets/switch_small.png
+    
+    
+    # MOBILE UI
+
+    - assets/mobile/jeffjitsu.png
+    - assets/mobile/airholes.png
+    - assets/mobile/airx.png
+    - assets/mobile/burger.png
+    - assets/mobile/buttons.png
+    - assets/mobile/direction_pad.png
+    - assets/mobile/drawer.png
+    - assets/mobile/drawer_background.png
+    - assets/mobile/gameboy_body.png
+    - assets/mobile/landscape_mobile.png
 
     
     
