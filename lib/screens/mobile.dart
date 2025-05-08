@@ -12,7 +12,8 @@ class GameBoyMobileUI extends StatefulWidget {
   State<GameBoyMobileUI> createState() => _GameBoyMobileUIState();
 }
 
-class _GameBoyMobileUIState extends State<GameBoyMobileUI> {
+class _GameBoyMobileUIState extends State<GameBoyMobileUI>
+    with SingleTickerProviderStateMixin {
   String? selectedCategory;
   String? highlightedCategory;
   int highlightedIndex = 0;
@@ -23,19 +24,53 @@ class _GameBoyMobileUIState extends State<GameBoyMobileUI> {
     'Projects',
     'Resume',
     'Contact',
-    'Main Theme'
   ];
 
   // Transparent borders for debugging overlays (can be adjusted)
   final bool showOverlayBorders = true; // Set to false for production
   final Color overlayBorderColor = Colors.white.withAlpha(000);
 
+  // blinking text variables
+  late AnimationController _blinkController;
+  late Animation<double> _blinkAnimation;
+  final double _blinkSpeed = 0.5; // Adjust this value to control blink speed (lower = faster)
+
+  
+
   @override
   void initState() {
     super.initState();
+
     // Set the initial menu selection
     highlightedCategory = menuItems[0];
+
+    // Initialize the blink animation controller
+    _blinkController = AnimationController(
+      vsync: this,
+      duration: Duration(seconds: (_blinkSpeed).round()),
+    );
+
+    // Create the animation that goes from 0 to 1 and back
+    _blinkAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _blinkController,
+      curve: Curves.easeInOut,
+    ));
+
+    // Start the animation and make it repeat forever
+    _blinkController.repeat(reverse: true);
   }
+
+// Don't forget to dispose the controller in dispose()
+  @override
+  void dispose() {
+    _blinkController.dispose();
+    super.dispose();
+  }
+
+  
 
   void _handleCategorySelection(String category) {
     setState(() {
@@ -44,10 +79,12 @@ class _GameBoyMobileUIState extends State<GameBoyMobileUI> {
     });
 
     // Handle special actions for specific categories
+
     if (category == 'Resume') {
       _launchURL(
           'https://storage.googleapis.com/uxfolio/643d6d8beaacf70002256d70/Resume_avP.pdf');
     } else if (category == 'Main Theme') {
+
       // Switch back to main theme
       final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
       themeProvider.toggleNesTheme(false);
@@ -59,7 +96,9 @@ class _GameBoyMobileUIState extends State<GameBoyMobileUI> {
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } else {
+
       // Handle error
+
       debugPrint('Could not launch $url');
     }
   }
@@ -98,7 +137,9 @@ class _GameBoyMobileUIState extends State<GameBoyMobileUI> {
         selectedCategory = null;
       });
     } else {
+
       // If we're at the main menu, navigate back to previous screen
+
       Navigator.of(context).pop();
     }
   }
@@ -216,7 +257,9 @@ class _GameBoyMobileUIState extends State<GameBoyMobileUI> {
           ),
 
           // Screen Content (where menu/content will go)
+
           // Adjust these values based on your landscape_mobile.png layout
+
           Positioned(
             left: screenWidth * 0.187, // 19% from left
             top: screenHeight * 0.07, // 7% from top
@@ -385,7 +428,9 @@ class _GameBoyMobileUIState extends State<GameBoyMobileUI> {
 
   Widget _buildScreenContent() {
     if (selectedCategory == null) {
+
       // Main menu screen
+
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -402,6 +447,7 @@ class _GameBoyMobileUIState extends State<GameBoyMobileUI> {
           const SizedBox(height: 20),
 
           // Menu items with selection indicator
+
           ...menuItems.asMap().entries.map((entry) {
             final int index = entry.key;
             final String item = entry.value;
@@ -411,7 +457,9 @@ class _GameBoyMobileUIState extends State<GameBoyMobileUI> {
               padding: const EdgeInsets.symmetric(vertical: 10),
               child: Row(
                 children: [
+
                   // Selection indicator
+
                   SizedBox(
                     width: 20,
                     child: isSelected
@@ -420,7 +468,7 @@ class _GameBoyMobileUIState extends State<GameBoyMobileUI> {
                             style: TextStyle(
                               fontFamily: 'NES',
                               fontSize: 16,
-                              color: Colors.black,
+                              color: Color.fromARGB(255, 39, 39, 39),
                             ),
                           )
                         : null,
@@ -449,12 +497,14 @@ class _GameBoyMobileUIState extends State<GameBoyMobileUI> {
         ],
       );
     } else if (selectedCategory == 'About') {
+
       // About screen
+
       return SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
-            Text(
+          children: [
+            const Text(
               'ABOUT ME',
               style: TextStyle(
                 fontFamily: 'NES',
@@ -463,9 +513,9 @@ class _GameBoyMobileUIState extends State<GameBoyMobileUI> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: 20),
-            Text(
-              'I AM A UX/UI DESIGNER WITH 18+ YEARS AS A TITLE EXAMINER, TRANSLATING COMPLEX DATA INTO USER-FRIENDLY MODELS.',
+            const SizedBox(height: 20),
+            const Text(
+              'I am a UX/UI Designer with 18+ years as a title officer/examiner, Translating complex data into user-friendly models',
               style: TextStyle(
                 fontFamily: 'NES',
                 fontSize: 16,
@@ -473,19 +523,29 @@ class _GameBoyMobileUIState extends State<GameBoyMobileUI> {
                 height: 1.5,
               ),
             ),
-            SizedBox(height: 20),
-            Text(
-              'MY SKILLS INCLUDE RESEARCH, ATTENTION TO DETAIL, AND EFFECTIVE COMMUNICATION.',
-              style: TextStyle(
-                fontFamily: 'NES',
-                fontSize: 16,
-                color: Color.fromARGB(255, 39, 39, 39),
-                height: 1.5,
-              ),
+             const SizedBox(height: 40),
+
+            AnimatedBuilder(
+              animation: _blinkAnimation,
+              builder: (context, child) {
+                return Opacity(
+                  opacity: _blinkAnimation.value,
+                  child: const Text(
+                    'Be sure to view my portfolio on a desktop or tablet for an additional user experience!',
+                    style: TextStyle(
+                      fontFamily: 'NES',
+                      fontSize: 12,
+                      color: Color.fromARGB(255, 39, 39, 39),
+                      height: 1.5,
+                    ),
+                  ),
+                );
+              },
             ),
-            SizedBox(height: 20),
-            Text(
-              'PRESS B OR LEFT TO GO BACK',
+
+            const SizedBox(height: 40),
+            const Text(
+              'Press B or Left to go return to the main menu',
               style: TextStyle(
                 fontFamily: 'NES',
                 fontSize: 12,
@@ -527,17 +587,19 @@ class _GameBoyMobileUIState extends State<GameBoyMobileUI> {
                           builder: (BuildContext context) {
                             return AlertDialog(
                               title: const Text(
-                                "THIS WEBSITE",
+                                "This Site!",
                                 style: TextStyle(
                                   fontFamily: 'NES',
+                                  color: const Color(0xFFFFB74D),
                                   fontSize: 18,
-                                  fontWeight: FontWeight.bold,
+                                  fontWeight: FontWeight.normal,
                                 ),
                               ),
                               content: const Text(
-                                "I DESIGNED AND CODED THE ENTIRETY OF THIS PORTFOLIO SITE!",
+                                "I designed and coded the entirety of this site!",
                                 style: TextStyle(
                                   fontFamily: 'NES',
+                                  color: const Color(0xFFB2D348),
                                   fontSize: 14,
                                 ),
                               ),
@@ -557,7 +619,9 @@ class _GameBoyMobileUIState extends State<GameBoyMobileUI> {
                           },
                         );
                       } else {
+
                         // Show the project in the Game Boy modal
+
                         _showProjectsModal(context, projectId: project['id']!);
                       }
                     },
@@ -590,7 +654,7 @@ class _GameBoyMobileUIState extends State<GameBoyMobileUI> {
           ),
           const SizedBox(height: 10),
           const Text(
-            'PRESS B OR LEFT TO GO BACK',
+            'Press B or Left to go return to the main menu',
             style: TextStyle(
               fontFamily: 'NES',
               fontSize: 12,
@@ -601,7 +665,9 @@ class _GameBoyMobileUIState extends State<GameBoyMobileUI> {
         ],
       );
     } else if (selectedCategory == 'Contact') {
+
       // Contact screen
+
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -654,6 +720,7 @@ class _GameBoyMobileUIState extends State<GameBoyMobileUI> {
           const SizedBox(height: 20),
 
           // Location
+
           Row(
             children: const [
               Icon(Icons.location_on, color: Color.fromARGB(255, 39, 39, 39), size: 20),
@@ -707,7 +774,9 @@ class _GameBoyMobileUIState extends State<GameBoyMobileUI> {
         ],
       );
     } else {
+
       // Default empty screen
+
       return const Center(
         child: Text(
           'Press B or Left to go return to the main menu',

@@ -1199,17 +1199,24 @@ class _HomeScreenState extends State<HomeScreen>
                 fontStyle: FontStyle.italic,
                 textAlign: TextAlign.left,
               ),
-              SizedBox(height: _tvTextSpacing + 10),
+              SizedBox(height: _tvTextSpacing),
               _buildStrokedText(
                 "Click the hamburger icon in the right corner for a menu,\nor select a book below for an interactive experience",
                 color: const Color(0xFFF5E7C8),
                 size: _tvTextBodySize,
                 textAlign: TextAlign.left,
               ),
-              SizedBox(height: _tvTextSpacing + 10),
+              SizedBox(height: _tvTextSpacing),
               _buildStrokedText(
-                "...tap the clock to change the time of day",
+                "Explore my portfolio site for some of my creative/fun features:",
                 color: const Color(0xFFB2D348),
+                size: _tvTextBodySize,
+                textAlign: TextAlign.left,
+              ),
+              SizedBox(height: _tvTextSpacing),
+              _buildStrokedText(
+                "⦿ tap the clock to change between day/night/dark-mode/light-mode\n⦿ go to 'Menu' to change themes\n⦿ view with a mobile device to see yet another fun theme/UI",
+                color: const Color(0xFF23D9DF),
                 size: _tvTextBodySize,
                 textAlign: TextAlign.left,
               ),
@@ -1752,7 +1759,7 @@ class _HomeScreenState extends State<HomeScreen>
             ),
             SizedBox(height: 16),
             Text(
-              "I'M A SEASONED UX/UI DESIGNER WITH OVER 18 YEARS EXPERIENCE AS A TITLE EXAMINER. I EXCEL AT TRANSLATING COMPLEX DATA INTO USER-FRIENDLY MODELS.",
+              "I am a seasoned UX/UI Designer with over 18 years as a title officer/examiner, I excel at translating complex data into user-friendly models",
               style: TextStyle(
                 fontFamily: 'NES',
                 fontSize: 14,
