@@ -14,22 +14,42 @@ dependencies:
   url_launcher: ^6.1.10
   responsive_framework: ^1.5.1
   nes_ui: ^0.24.0
-  shared_preferences: ^2.1.0
-  flutter_svg: ^2.0.5
   webview_flutter: ^4.0.0
   easy_stepper: ^0.8.5+1
   carousel_slider: ^5.0.0
+  flutter_neumorphic_plus: ^3.3.0
+  curved_navigation_bar: ^1.0.6
+  google_nav_bar: ^5.0.7
+  line_icons: ^2.0.3
+  babstrap_settings_screen: ^0.1.7
+  day_night_themed_switcher: ^2.0.2
+  intl: ^0.20.2
+  firebase_core: ^3.15.1
+  cloud_firestore: ^5.6.11
+  firebase_auth: ^5.6.2
+  uuid: ^4.5.1
+  timeago: ^3.7.1
+  shared_preferences: ^2.5.3
+  emoji_picker_flutter: ^4.3.0
+  avatar_brick: ^1.0.0
+  animated_to: ^0.3.2
+  animated_emoji: ^3.2.1
+  flutter_svg: ^2.2.0
+
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^2.0.0
+  flutter_lints: ^2.0.3
 
 flutter:
   uses-material-design: true
   
   assets:
     - assets/
+    - assets/icons/
+    - assets/icons/animated_emojis/
+    - assets/packages/animated_emoji/lottie/
     
     #images:
       
@@ -78,6 +98,119 @@ flutter:
     - assets/switch_med.png
     - assets/gameboy.png
     - assets/switch_small.png
+    - assets/tapin_card.png
+    - assets/moments_card.png
+    - assets/coreai_card.png
+    - assets/plannie_card.png
+    - assets/icons/circle_linkedin.png
+    - assets/icons/linkedin_circle.png
+    - assets/jeffjitsulogo.png
+    - assets/jeffjitsulogo2.png
+    - assets/jeffjitsulogo3.png
+    - assets/jeffjitsulogo4.png
+    - assets/uxui_bg.png
+    
+    # ICONS:
+    - assets/icons/linkeddark.png
+    - assets/icons/resume.png
+    - assets/icons/contact.png
+    - assets/icons/liked_shaka.png
+    - assets/icons/unliked_shaka.png
+    - assets/icons/addmessage.png
+    
+    
+    # SVG ICONS:
+    - assets/icons/svg/add_circle_line.svg
+    - assets/icons/svg/arrow_left_circle_fill.svg
+    - assets/icons/svg/arrow_left_circle_line.svg
+    - assets/icons/svg/board_line.svg
+    - assets/icons/svg/campground_line.svg
+    - assets/icons/svg/chart_bar_2_line.svg
+    - assets/icons/svg/chart_bar_line.svg
+    - assets/icons/svg/comment_2_line.svg
+    - assets/icons/svg/components_line.svg
+    - assets/icons/svg/contacts_3_line.svg
+    - assets/icons/svg/display_line.svg
+    - assets/icons/svg/document_line.svg
+    - assets/icons/svg/documents_fill.svg
+    - assets/icons/svg/earth_latitude_fill.svg
+    - assets/icons/svg/font_size_line.svg
+    - assets/icons/svg/full_moon_line.svg
+    - assets/icons/svg/home_3_line.svg
+    - assets/icons/svg/IDcard_line.svg
+    - assets/icons/svg/left_fill.svg
+    - assets/icons/svg/left_small_line.svg
+    - assets/icons/svg/linkedin_fill.svg
+    - assets/icons/svg/linkedin_line.svg
+    - assets/icons/svg/menu_fill.svg
+    - assets/icons/svg/menu_line.svg
+    - assets/icons/svg/movie_line.svg
+    - assets/icons/svg/mushroom_line.svg
+    - assets/icons/svg/nintendo_switch_line.svg
+    - assets/icons/svg/palette_2_line.svg
+    - assets/icons/svg/palette_3_line.svg
+    - assets/icons/svg/palette_line.svg
+    - assets/icons/svg/presentation_1_line.svg
+    - assets/icons/svg/rocket_line.svg
+    - assets/icons/svg/section_line.svg
+    - assets/icons/svg/settings_3_line.svg
+    - assets/icons/svg/shadow_line.svg
+    - assets/icons/svg/sun_fog_line.svg
+    - assets/icons/svg/tree_4_line.svg
+    - assets/icons/svg/UFO_2_line.svg
+    - assets/icons/svg/umbrella_2_line.svg
+    - assets/icons/svg/user_4_line.svg
+    - assets/icons/svg/world_fill.svg
+    - assets/icons/svg/linkedbasicon.svg
+    - assets/icons/svg/resumebasicon.svg
+    - assets/icons/svg/contactbasicon.svg
+    - assets/icons/svg/editbasicon.svg
+    - assets/icons/svg/basiconedit.svg
+    - assets/icons/svg/pencil.svg
+    - assets/icons/svg/pencil3.svg
+    - assets/icons/svg/reactsmile.svg
+    - assets/icons/svg/unlikedshaka.svg
+    - assets/icons/svg/shakayellow.svg
+    - assets/icons/svg/emailbasicon.svg
+    - assets/icons/svg/phonebasicon.svg
+    - assets/icons/svg/settingsbasicon.svg
+    - assets/icons/svg/personbasicon.svg
+    - assets/icons/svg/chartbasicon.svg
+    - assets/icons/svg/computerbasicon.svg
+    - assets/icons/svg/housebasicon.svg
+    - assets/icons/svg/commentbasicon.svg
+    - assets/icons/svg/addbasicon.svg
+
+  
+      
+    
+    
+    # ABOUT IMAGES:
+    - assets/about/house1.png
+    - assets/about/brownbelt.png
+    - assets/about/fam1.png
+   
+    # WIREFRAME BACKGROUND
+    - assets/macbook_screen.png
+    - assets/iphone_screen.png
+    - assets/iPhone13_beige.png
+    - assets/macbook.png
+    - assets/macbook13.png
+    - assets/iphone14_black.png
+    - assets/chrome_dark.png
+
+    # Initial Avatars
+    - assets/favicon.png   # Default Avatar
+    - assets/me_avatar.png
+ 
+    
+   # AVATARS
+    - assets/avatars/avatar1.png
+    - assets/avatars/avatar2.png
+    - assets/avatars/avatar3.png
+    - assets/avatars/avatar4.png
+    - assets/avatars/avatar5.png
+    - assets/avatars/avatar6.png
     
     
     # MOBILE UI
@@ -182,13 +315,70 @@ flutter:
       - asset: assets/fonts/Eyad Al-Samman - Ghibli.otf
       - asset: assets/fonts/Eyad Al-Samman - Ghibli-Bold.otf
         weight: 700
+
   - family: Montserrat
     fonts:
       - asset: assets/fonts/Montserrat-Bold.ttf
       - asset: assets/fonts/Montserrat-Regular.ttf
+        
   - family: NES
     fonts:
       - asset: assets/fonts/PressStart2P-Regular.ttf
+        
   - family: SuperMario256
     fonts:
       - asset: assets/fonts/SuperMario256.ttf 
+        
+  - family: Cocogoose
+    fonts:
+      - asset: assets/fonts/cocogoose-gradient.ttf
+        weight: 700
+      - asset: assets/fonts/cocogoose-outlined.ttf     
+        weight: 400
+
+  - family: actionj
+    fonts:
+      - asset: assets/fonts/actionj.ttf
+
+  - family: PassionOne
+    fonts:
+      - asset: assets/fonts/PassionOne-Regular.ttf
+      - asset: assets/fonts/PassionOne-Black.ttf
+      - asset: assets/fonts/PassionOne-Bold.ttf
+
+  - family: MotterTektura
+    fonts:
+      - asset: assets/fonts/MotterTekturaNormal.ttf
+
+  - family: Stamped
+    fonts:
+      - asset: assets/fonts/stamped.ttf
+
+  - family: Eroded
+    fonts:
+      - asset: assets/fonts/eroded-personal-use-regular.ttf
+
+  - family: Bangers
+    fonts:
+      - asset: assets/fonts/Bangers.ttf
+
+  - family: SedgwickAveDisplay
+    fonts:
+      - asset: assets/fonts/SedgwickAveDisplay-Regular.ttf
+        
+        
+  - family: CHLORINR
+    fonts:
+      - asset: assets/fonts/CHLORINR.ttf
+        
+  - family: KOMIKAX_
+    fonts:
+      - asset: assets/fonts/KOMIKAX_.ttf
+        
+  - family: coolvetica
+    fonts:
+      - asset: assets/fonts/coolvetica.ttf  
+        
+  - family: exprswy
+    fonts:
+      - asset: assets/fonts/exprswy.ttf

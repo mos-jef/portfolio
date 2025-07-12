@@ -3,13 +3,14 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:portfolio_website/components/project_viewer.dart';
 import 'package:portfolio_website/components/projects_registry.dart';
+import 'package:portfolio_website/themes/wireframe/wireframe_desktop_theme.dart';
 import 'package:portfolio_website/widgets/circle_text_widget.dart';
 import 'package:portfolio_website/widgets/circle_theme_toggle.dart';
 import 'package:portfolio_website/widgets/pixel_widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
-
 import '../models/theme_provider.dart';
+
 
 // For conditional imports based on platform
 
@@ -23,7 +24,7 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-  class SwitchImageConfig {
+class SwitchImageConfig {
   final String imagePath;
   final double screenTopPercentage;
   final double screenLeftPercentage;
@@ -53,14 +54,17 @@ class _HomeScreenState extends State<HomeScreen>
   // Animated Menu configuration - all in absolute pixel values
   final double _menuWidth = 1280; // Width in pixels
   final double _menuHeight = 1090; // Height in pixels
-  final double _menuRestPosition = -380; // How far the menu comes in from the right (0 = full, negative = further in)
+  final double _menuRestPosition =
+      -380; // How far the menu comes in from the right (0 = full, negative = further in)
   final Duration _menuAnimationDuration = const Duration(milliseconds: 300);
-  final Curve _menuAnimationCurve = Curves.easeOutQuart; // More dramatic ease-in
+  final Curve _menuAnimationCurve =
+      Curves.easeOutQuart; // More dramatic ease-in
 
   // Menu text configuration
   final double _menuTextSize = 33.0;
   final double _menuTextSpacing = 30.0;
-  final double _menuTextTopOffset = 220.0; // Vertical position of first menu item
+  final double _menuTextTopOffset =
+      220.0; // Vertical position of first menu item
   final double _menuTextLeftOffset = 520.0; // Horizontal position of menu items
   final Color _menuTextColor = const Color(0xFF567185);
   final Color _menuTextHoverColor = const Color(0xFFCC510F);
@@ -121,8 +125,6 @@ class _HomeScreenState extends State<HomeScreen>
     screenHeightPercentage: 0.485,
   );
 
-
- 
   @override
   void initState() {
     super.initState();
@@ -261,11 +263,9 @@ class _HomeScreenState extends State<HomeScreen>
             },
           );
         } else {
-
           // Show the project TV modal for other projects
 
           if (MediaQuery.of(context).size.width < 600) {
-
             // Mobile device - use desktop-sized image but scaled down
 
             _showProjectsModal(context,
@@ -274,7 +274,6 @@ class _HomeScreenState extends State<HomeScreen>
                 deviceType: 'desktop',
                 scaleFactor: 0.7);
           } else if (MediaQuery.of(context).size.width < 1200) {
-
             // Tablet device - use tablet-sized image with slight scale adjustment
 
             _showProjectsModal(context,
@@ -283,9 +282,8 @@ class _HomeScreenState extends State<HomeScreen>
                 deviceType: 'tablet',
                 scaleFactor: 1.1);
           } else {
-
             // Desktop - use desktop image at normal scale
-            
+
             _showProjectsModal(context,
                 projectId: projectId,
                 forceDeviceType: true,
@@ -326,7 +324,6 @@ class _HomeScreenState extends State<HomeScreen>
     bool forceDeviceType = false, // Add this parameter
     String? deviceType, // Add this parameter: "mobile", "tablet", "desktop"
   }) {
-
     // Define fixed aspect ratio for the TV frame
 
     const tvAspectRatio = 2500.0 / 1700.0;
@@ -422,7 +419,8 @@ class _HomeScreenState extends State<HomeScreen>
                     right: modalWidth * 0.19,
                     child: IconButton(
                       iconSize: math.max(40, modalWidth * 0.025),
-                      icon: const Icon(Icons.highlight_off_rounded, color: Color(0xFFBE1DDE)),
+                      icon: const Icon(Icons.highlight_off_rounded,
+                          color: Color(0xFFBE1DDE)),
                       onPressed: () {
                         Navigator.of(context).pop();
                       },
@@ -443,6 +441,12 @@ class _HomeScreenState extends State<HomeScreen>
     final themeProvider = Provider.of<ThemeProvider>(context);
     final isDarkMode = themeProvider.isDarkMode;
     final isNesTheme = themeProvider.isNesTheme;
+    final isWireframeTheme = themeProvider.isWireframeTheme;
+
+    // Check if wireframe theme is active
+    if (isWireframeTheme) {
+      return const WireframeDesktopTheme();
+    }
 
     // Design dimensions (based on your background image dimensions)
     const designWidth = 1920.0; // Common desktop width
@@ -553,13 +557,16 @@ class _HomeScreenState extends State<HomeScreen>
                         Positioned(
                           top: 18, // 20 pixels from the top
                           right: 909, // 20 pixels from the right
-                          child: CircleThemeToggle(
-                            size: 103.0,
-                            borderColor: isDarkMode
-                                ? Colors.white.withAlpha(0)
-                                : const Color.fromARGB(255, 58, 44, 2)
-                                    .withAlpha(0),
-                            borderWidth: 1.5,
+                          child: MouseRegion(
+                            cursor: SystemMouseCursors.click,
+                            child: CircleThemeToggle(
+                              size: 103.0,
+                              borderColor: isDarkMode
+                                  ? Colors.white.withAlpha(0)
+                                  : const Color.fromARGB(255, 58, 44, 2)
+                                      .withAlpha(0),
+                              borderWidth: 1.5,
+                            ),
                           ),
                         ),
 
@@ -1066,7 +1073,7 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-// Helper method for mobile navigation buttons
+  // Helper method for mobile navigation buttons
   Widget _buildMobileNavButton(String category) {
     final themeProvider = Provider.of<ThemeProvider>(context);
     final isNesTheme = themeProvider.isNesTheme;
@@ -1108,7 +1115,7 @@ class _HomeScreenState extends State<HomeScreen>
     }
   }
 
-// Mobile version of TV content
+  // Mobile version of TV content
   Widget _buildMobileTVContent() {
     // Get theme provider
     final themeProvider = Provider.of<ThemeProvider>(context);
@@ -1116,7 +1123,6 @@ class _HomeScreenState extends State<HomeScreen>
     final isNesTheme = themeProvider.isNesTheme;
 
     if (selectedCategory == null) {
-
       // Default welcome message
 
       return Container(
@@ -1201,22 +1207,29 @@ class _HomeScreenState extends State<HomeScreen>
               ),
               SizedBox(height: _tvTextSpacing),
               _buildStrokedText(
-                "Click the hamburger icon in the right corner for a menu,\nor select a book below for an interactive experience",
+                "I am a UX/UI Designer and Graphic Artist with back-end experience",
                 color: const Color(0xFFF5E7C8),
                 size: _tvTextBodySize,
                 textAlign: TextAlign.left,
               ),
               SizedBox(height: _tvTextSpacing),
               _buildStrokedText(
-                "Explore my portfolio site for some of my creative/fun features:",
+                "Please, explore my portfolio and it's many interactive features",
                 color: const Color(0xFFB2D348),
                 size: _tvTextBodySize,
                 textAlign: TextAlign.left,
               ),
               SizedBox(height: _tvTextSpacing),
               _buildStrokedText(
-                "⦿ tap the clock to change between day/night/dark-mode/light-mode\n⦿ go to 'Menu' to change themes\n⦿ view with a mobile device to see yet another fun theme/UI",
+                "I am currently open to opportunities",
                 color: const Color(0xFF23D9DF),
+                size: _tvTextBodySize,
+                textAlign: TextAlign.left,
+              ),
+              SizedBox(height: _tvTextSpacing),
+              _buildStrokedText(
+                "Let's create something that is beneficial and impactful together",
+                color: const Color(0xFFE1F200),
                 size: _tvTextBodySize,
                 textAlign: TextAlign.left,
               ),
@@ -1243,7 +1256,6 @@ class _HomeScreenState extends State<HomeScreen>
         ),
       );
     } else if (selectedCategory == 'Contact') {
-
       // Contact information
 
       return Padding(
@@ -1366,7 +1378,6 @@ class _HomeScreenState extends State<HomeScreen>
                 ),
               ],
             ),
-
           ],
         ),
       );
@@ -1401,6 +1412,7 @@ class _HomeScreenState extends State<HomeScreen>
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   // Theme One button
+
                   GestureDetector(
                     onTap: () {
                       // Switch to theme one (main/primary theme)
@@ -1424,6 +1436,7 @@ class _HomeScreenState extends State<HomeScreen>
                   SizedBox(height: 12), // Spacing between buttons
 
                   // Theme Two button
+
                   GestureDetector(
                     onTap: () {
                       // Switch to theme two (NES theme)
@@ -1440,6 +1453,27 @@ class _HomeScreenState extends State<HomeScreen>
                         '2 THEME TWO',
                         isHovered: hoveredThemeButton == 'two',
                         isPressed: pressedThemeButton == 'two',
+                      ),
+                    ),
+                  ),
+
+                  // Theme Three button (Wireframe)
+
+                  GestureDetector(
+                    onTap: () {
+                      final themeProvider =
+                          Provider.of<ThemeProvider>(context, listen: false);
+                      themeProvider.setThemeMode(AppThemeMode.wireframe);
+                    },
+                    child: MouseRegion(
+                      cursor: SystemMouseCursors.click,
+                      onEnter: (_) =>
+                          setState(() => hoveredThemeButton = 'three'),
+                      onExit: (_) => setState(() => hoveredThemeButton = null),
+                      child: _buildThemeButton(
+                        '3 WIREFRAME',
+                        isHovered: hoveredThemeButton == 'three',
+                        isPressed: pressedThemeButton == 'three',
                       ),
                     ),
                   ),
@@ -1509,7 +1543,6 @@ class _HomeScreenState extends State<HomeScreen>
                               },
                             );
                           } else {
-
                             // Show the project in TV modal
 
                             _showProjectsModal(context,
@@ -1797,7 +1830,6 @@ class _HomeScreenState extends State<HomeScreen>
         ),
       );
     } else if (selectedCategory == 'Contact') {
-
       // Contact information in NES style
 
       return Column(
@@ -1888,12 +1920,9 @@ class _HomeScreenState extends State<HomeScreen>
 
           // LinkedIn icon and link
 
-         
-
           SizedBox(height: 24),
           Row(
-            mainAxisAlignment:
-                MainAxisAlignment.center, // Center alignment for NES theme
+            mainAxisAlignment:MainAxisAlignment.center, // Center alignment for NES theme
             children: [
               GestureDetector(
                 onTap: () async {
@@ -1911,9 +1940,6 @@ class _HomeScreenState extends State<HomeScreen>
               ),
             ],
           ),
-        
-
-
         ],
       );
     } else if (selectedCategory == 'Projects') {
@@ -1990,30 +2016,25 @@ class _HomeScreenState extends State<HomeScreen>
                         },
                       );
                     } else {
-
                       // Show project in TV modal
 
                       final screenWidth = MediaQuery.of(context).size.width;
-    if (screenWidth < 600) {
-      _showProjectsModal(
-        context, 
-        projectId: project['id']!, 
-        forceDeviceType: true, 
-        deviceType: 'mobile', 
-        scaleFactor: 0.8
-      );
-    } else {
-      _showProjectsModal(
-        context, 
-        projectId: project['id']!, 
-        forceDeviceType: true, 
-        deviceType: screenWidth < 1200 ? 'tablet' : 'desktop', 
-        scaleFactor: screenWidth < 1200 ? 1.1 : 1.0
-      );
-    }
-  }
-},
-                    
+                      if (screenWidth < 600) {
+                        _showProjectsModal(context,
+                            projectId: project['id']!,
+                            forceDeviceType: true,
+                            deviceType: 'mobile',
+                            scaleFactor: 0.8);
+                      } else {
+                        _showProjectsModal(context,
+                            projectId: project['id']!,
+                            forceDeviceType: true,
+                            deviceType:
+                                screenWidth < 1200 ? 'tablet' : 'desktop',
+                            scaleFactor: screenWidth < 1200 ? 1.1 : 1.0);
+                      }
+                    }
+                  },
 
                   child: Text(
                     project['title']!.toUpperCase(),
@@ -2099,10 +2120,9 @@ class _HomeScreenState extends State<HomeScreen>
           PixelButton(
             isPrimary: true,
             onPressed: () {
-              // Switch to theme one (main/primary theme)
               final themeProvider =
                   Provider.of<ThemeProvider>(context, listen: false);
-              themeProvider.toggleNesTheme(false); // Set to main theme
+              themeProvider.setThemeMode(AppThemeMode.main);
             },
             child: const Text(
               "MAIN THEME",
@@ -2126,6 +2146,24 @@ class _HomeScreenState extends State<HomeScreen>
                 fontFamily: 'NES',
                 fontSize: 16,
                 color: Color(0xFFF8E9D2),
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          PixelButton(
+            isPrimary: true,
+            backgroundColor: const Color(0xFF007BFF),
+            onPressed: () {
+              final themeProvider =
+                  Provider.of<ThemeProvider>(context, listen: false);
+              themeProvider.setThemeMode(AppThemeMode.wireframe);
+            },
+            child: const Text(
+              "WIREFRAME THEME",
+              style: TextStyle(
+                fontFamily: 'NES',
+                fontSize: 16,
+                color: Colors.white,
               ),
             ),
           ),

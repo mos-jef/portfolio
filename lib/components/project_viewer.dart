@@ -1,6 +1,7 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:easy_stepper/easy_stepper.dart';
 import 'package:flutter/material.dart';
+import 'package:portfolio_website/themes/wireframe/widgets/clickable_widget.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:portfolio_website/components/projects_registry.dart';
 import 'package:portfolio_website/components/project_data.dart';
@@ -283,7 +284,7 @@ class _PortfolioViewerState extends State<PortfolioViewer> {
 
   // Widget for interactive image (tap to enlarge)
   Widget _buildInteractiveImage(String imagePath, {double? width}) {
-    return GestureDetector(
+    return ClickableWidget(
       onTap: () => _showFullscreenImage(imagePath),
       child: Container(
         width: width,
