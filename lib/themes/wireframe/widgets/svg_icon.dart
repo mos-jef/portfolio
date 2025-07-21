@@ -72,11 +72,13 @@ class SvgIconPaths {
   static const String menuFill = 'assets/icons/svg/menu_fill.svg';
   static const String menuLine = 'assets/icons/svg/menu_line.svg';
 
-  // Back arrows
+  // Arrows
   static const String arrowLeftCircleLine ='assets/icons/svg/arrow_left_circle_line.svg';
   static const String arrowLeftCircleFill ='assets/icons/svg/arrow_left_circle_fill.svg';
   static const String leftFill = 'assets/icons/svg/left_fill.svg';
   static const String leftSmallLine = 'assets/icons/svg/left_small_line.svg';
+  static const String arrowup = 'assets/icons/svg/arrowup.svg';
+  static const String updown = 'assets/icons/svg/updown.svg';
 
   // Settings
   static const String settings3Line = 'assets/icons/svg/settings_3_line.svg';
@@ -107,6 +109,13 @@ class SvgIconPaths {
   static const String housebasicon = 'assets/icons/svg/housebasicon.svg';
   static const String addbasicon = 'assets/icons/svg/addbasicon.svg';
   static const String commentbasicon = 'assets/icons/svg/commentbasicon.svg';
+  static const String flash = 'assets/icons/svg/flash.svg';
+  static const String dashboard = 'assets/icons/svg/dashboard.svg';
+  static const String vibrate = 'assets/icons/svg/vibrate.svg';
+  static const String sound = 'assets/icons/svg/sound.svg';
+  static const String crescent_moon = 'assets/icons/svg/crescent_moon.svg';
+  static const String heart = 'assets/icons/svg/heart.svg';
+  static const String magnet = 'assets/icons/svg/magnet.svg';
 
   // New theme and settings icons
   static const String shadowLine = 'assets/icons/svg/shadow_line.svg';

@@ -4,6 +4,7 @@ import 'package:portfolio_website/models/theme_provider.dart';
 import 'package:portfolio_website/services/analytics_service.dart';
 import 'package:portfolio_website/themes/wireframe/components/wireframe_contact_overlay.dart';
 import 'package:portfolio_website/themes/wireframe/components/wireframe_desktop_analytics_modal.dart';
+import 'package:portfolio_website/themes/wireframe/scroll_theme/audio_feedback.dart';
 import 'package:portfolio_website/themes/wireframe/utils/wireframe_color_manager.dart';
 import 'package:portfolio_website/themes/wireframe/widgets/analytics_modal.dart';
 import 'package:portfolio_website/themes/wireframe/widgets/svg_icon.dart';
@@ -39,8 +40,22 @@ class _WireframeSettingsSectionState extends State<WireframeSettingsSection> {
   bool _isDarkMode = false;
   bool _compactMode = false;
   bool _isLargeTextMode = false;
+  bool _isScrollableModeEnabled = true;
   String _currentBaseTheme = 'default';
   String _currentFullTheme = 'default';
+
+  // Performance settings
+  bool _isHighQualityModeEnabled = true;
+  bool _showPerformanceMonitor = false;
+
+  // Audio settings
+  bool _isAudioFeedbackEnabled = true;
+  AudioTheme _currentAudioTheme = AudioTheme.subtle;
+
+  // Visual effects settings
+  bool _areParticleEffectsEnabled = true;
+  bool _isBreathingAnimationEnabled = true;
+  bool _isMagneticHoverEnabled = true;
 
   @override
   void initState() {
@@ -90,6 +105,22 @@ class _WireframeSettingsSectionState extends State<WireframeSettingsSection> {
 
                   // About Group
                   _buildAboutGroup(),
+
+                  // NEW CODE GOES HERE:
+                  SizedBox(height: widget.isMobile ? 16 : 20),
+
+                  // Performance & Quality Group
+                  _buildPerformanceQualityGroup(),
+
+                  SizedBox(height: widget.isMobile ? 16 : 20),
+
+                  // Audio & Haptics Group
+                  _buildAudioHapticsGroup(),
+
+                  SizedBox(height: widget.isMobile ? 16 : 20),
+
+                  // Visual Effects Group
+                  _buildVisualEffectsGroup(),
                 ],
               ),
             ),
@@ -299,6 +330,7 @@ class _WireframeSettingsSectionState extends State<WireframeSettingsSection> {
       backgroundColor: WireframeColorManager.colors.surface,
       items: [
         // Default Wireframe Theme
+
         CustomSettingsItem(
           onTap: () => _switchBaseTheme('default'),
           title: 'Default Wireframe',
@@ -328,6 +360,7 @@ class _WireframeSettingsSectionState extends State<WireframeSettingsSection> {
         ),
 
         // Athletic Theme
+
         CustomSettingsItem(
           onTap: () => _switchBaseTheme('athlete'),
           title: 'Athletic Theme',
@@ -355,6 +388,7 @@ class _WireframeSettingsSectionState extends State<WireframeSettingsSection> {
         ),
 
         // Ninja Theme
+
         CustomSettingsItem(
           onTap: () => _switchBaseTheme('ninja'),
           title: 'Ninja Theme',
@@ -382,6 +416,7 @@ class _WireframeSettingsSectionState extends State<WireframeSettingsSection> {
         ),
 
         // Corporate Theme
+
         CustomSettingsItem(
           onTap: () => _switchBaseTheme('corporate'),
           title: 'Corporate Theme',
@@ -409,6 +444,7 @@ class _WireframeSettingsSectionState extends State<WireframeSettingsSection> {
         ),
 
         // Creative Theme
+
         CustomSettingsItem(
           onTap: () => _switchBaseTheme('creative'),
           title: 'Creative Theme',
@@ -436,6 +472,36 @@ class _WireframeSettingsSectionState extends State<WireframeSettingsSection> {
         ),
       ],
     );
+
+    // Scrollable Story Mode
+    CustomSettingsItem(
+      onTap: () => _toggleScrollableMode(),
+      title: 'Scrollable Story Mode',
+      subtitle: _isScrollableModeEnabled
+          ? 'Interactive wireframe evolution story'
+          : 'Static wireframe interface',
+      titleStyle: TextStyle(
+        color: WireframeColorManager.colors.text,
+        fontSize: _getResponsiveFontSize(14, 16),
+        fontWeight:
+            _isScrollableModeEnabled ? FontWeight.w600 : FontWeight.normal,
+      ),
+      subtitleStyle: TextStyle(
+        color: WireframeColorManager.colors.textSecondary,
+        fontSize: _getResponsiveFontSize(12, 14),
+      ),
+      svgIconPath: SvgIconPaths.updown, // or another appropriate icon
+      svgIconColor: _isScrollableModeEnabled
+          ? WireframeColorManager.colors.primary
+          : WireframeColorManager.colors.textSecondary,
+      trailing: Icon(
+        _isScrollableModeEnabled ? Icons.toggle_on : Icons.toggle_off,
+        size: _getResponsiveSize(40, 50),
+        color: _isScrollableModeEnabled
+            ? WireframeColorManager.colors.primary
+            : WireframeColorManager.colors.textSecondary,
+      ),
+    );
   }
 
   Widget _buildAnalyticsGroup() {
@@ -448,7 +514,6 @@ class _WireframeSettingsSectionState extends State<WireframeSettingsSection> {
       ),
       backgroundColor: WireframeColorManager.colors.surface,
       items: [
-
         // Site Analytics
         CustomSettingsItem(
           onTap: widget
@@ -464,6 +529,231 @@ class _WireframeSettingsSectionState extends State<WireframeSettingsSection> {
             fontSize: _getResponsiveFontSize(12, 14),
           ),
           svgIconPath: SvgIconPaths.chartBar2Line,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPerformanceQualityGroup() {
+    return CustomSettingsGroup(
+      settingsGroupTitle: "Performance & Quality",
+      settingsGroupTitleStyle: TextStyle(
+        color: WireframeColorManager.colors.text,
+        fontSize: widget.isMobile ? 16 : 18,
+        fontWeight: FontWeight.w600,
+      ),
+      backgroundColor: WireframeColorManager.colors.surface,
+      items: [
+        // High Quality Mode
+        CustomSettingsItem(
+          onTap: () => _toggleHighQualityMode(),
+          title: 'High Quality Mode',
+          subtitle: _isHighQualityModeEnabled
+              ? 'Full effects and animations enabled'
+              : 'Reduced effects for better performance',
+          titleStyle: TextStyle(
+            color: WireframeColorManager.colors.text,
+            fontSize: _getResponsiveFontSize(14, 16),
+          ),
+          subtitleStyle: TextStyle(
+            color: WireframeColorManager.colors.textSecondary,
+            fontSize: _getResponsiveFontSize(12, 14),
+          ),
+          svgIconPath: SvgIconPaths.flash,
+          svgIconColor: _isHighQualityModeEnabled
+              ? WireframeColorManager.colors.primary
+              : WireframeColorManager.colors.textSecondary,
+          trailing: Icon(
+            _isHighQualityModeEnabled ? Icons.toggle_on : Icons.toggle_off,
+            size: _getResponsiveSize(40, 50),
+            color: _isHighQualityModeEnabled
+                ? WireframeColorManager.colors.primary
+                : WireframeColorManager.colors.textSecondary,
+          ),
+        ),
+
+        // Performance Monitor
+        CustomSettingsItem(
+          onTap: () => _togglePerformanceMonitor(),
+          title: 'Performance Monitor',
+          subtitle: 'Show FPS and performance metrics (debug)',
+          titleStyle: TextStyle(
+            color: WireframeColorManager.colors.text,
+            fontSize: _getResponsiveFontSize(14, 16),
+          ),
+          subtitleStyle: TextStyle(
+            color: WireframeColorManager.colors.textSecondary,
+            fontSize: _getResponsiveFontSize(12, 14),
+          ),
+          svgIconPath: SvgIconPaths.dashboard,
+          svgIconColor: WireframeColorManager.colors.textSecondary,
+          trailing: Icon(
+            _showPerformanceMonitor ? Icons.toggle_on : Icons.toggle_off,
+            size: _getResponsiveSize(40, 50),
+            color: _showPerformanceMonitor
+                ? WireframeColorManager.colors.primary
+                : WireframeColorManager.colors.textSecondary,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAudioHapticsGroup() {
+    return CustomSettingsGroup(
+      settingsGroupTitle: "Audio & Haptics",
+      settingsGroupTitleStyle: TextStyle(
+        color: WireframeColorManager.colors.text,
+        fontSize: widget.isMobile ? 16 : 18,
+        fontWeight: FontWeight.w600,
+      ),
+      backgroundColor: WireframeColorManager.colors.surface,
+      items: [
+        // Audio Feedback
+        CustomSettingsItem(
+          onTap: () => _toggleAudioFeedback(),
+          title: 'Haptic Feedback',
+          subtitle: _isAudioFeedbackEnabled
+              ? 'Tactile responses to interactions'
+              : 'Silent interaction mode',
+          titleStyle: TextStyle(
+            color: WireframeColorManager.colors.text,
+            fontSize: _getResponsiveFontSize(14, 16),
+          ),
+          subtitleStyle: TextStyle(
+            color: WireframeColorManager.colors.textSecondary,
+            fontSize: _getResponsiveFontSize(12, 14),
+          ),
+          svgIconPath: SvgIconPaths.vibrate,
+          svgIconColor: _isAudioFeedbackEnabled
+              ? WireframeColorManager.colors.primary
+              : WireframeColorManager.colors.textSecondary,
+          trailing: Icon(
+            _isAudioFeedbackEnabled ? Icons.toggle_on : Icons.toggle_off,
+            size: _getResponsiveSize(40, 50),
+            color: _isAudioFeedbackEnabled
+                ? WireframeColorManager.colors.primary
+                : WireframeColorManager.colors.textSecondary,
+          ),
+        ),
+
+        // Audio Theme Selector
+        CustomSettingsItem(
+          onTap: () => _showAudioThemeSelector(),
+          title: 'Feedback Style',
+          subtitle: _getAudioThemeDisplayName(_currentAudioTheme),
+          titleStyle: TextStyle(
+            color: WireframeColorManager.colors.text,
+            fontSize: _getResponsiveFontSize(14, 16),
+          ),
+          subtitleStyle: TextStyle(
+            color: WireframeColorManager.colors.textSecondary,
+            fontSize: _getResponsiveFontSize(12, 14),
+          ),
+          svgIconPath: SvgIconPaths.sound,
+          svgIconColor: WireframeColorManager.colors.textSecondary,
+          trailing: Icon(
+            Icons.arrow_forward_ios,
+            size: 16,
+            color: WireframeColorManager.colors.textSecondary,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildVisualEffectsGroup() {
+    return CustomSettingsGroup(
+      settingsGroupTitle: "Visual Effects",
+      settingsGroupTitleStyle: TextStyle(
+        color: WireframeColorManager.colors.text,
+        fontSize: widget.isMobile ? 16 : 18,
+        fontWeight: FontWeight.w600,
+      ),
+      backgroundColor: WireframeColorManager.colors.surface,
+      items: [
+        // Particle Effects
+        CustomSettingsItem(
+          onTap: () => _toggleParticleEffects(),
+          title: 'Particle Effects',
+          subtitle: _areParticleEffectsEnabled
+              ? 'Floating animations during transitions'
+              : 'Static wireframe transitions',
+          titleStyle: TextStyle(
+            color: WireframeColorManager.colors.text,
+            fontSize: _getResponsiveFontSize(14, 16),
+          ),
+          subtitleStyle: TextStyle(
+            color: WireframeColorManager.colors.textSecondary,
+            fontSize: _getResponsiveFontSize(12, 14),
+          ),
+          svgIconPath: SvgIconPaths.crescent_moon,
+          svgIconColor: _areParticleEffectsEnabled
+              ? WireframeColorManager.colors.primary
+              : WireframeColorManager.colors.textSecondary,
+          trailing: Icon(
+            _areParticleEffectsEnabled ? Icons.toggle_on : Icons.toggle_off,
+            size: _getResponsiveSize(40, 50),
+            color: _areParticleEffectsEnabled
+                ? WireframeColorManager.colors.primary
+                : WireframeColorManager.colors.textSecondary,
+          ),
+        ),
+
+        // Breathing Animation
+        CustomSettingsItem(
+          onTap: () => _toggleBreathingAnimation(),
+          title: 'Breathing Animation',
+          subtitle: _isBreathingAnimationEnabled
+              ? 'Subtle life-like wireframe movement'
+              : 'Static wireframe positioning',
+          titleStyle: TextStyle(
+            color: WireframeColorManager.colors.text,
+            fontSize: _getResponsiveFontSize(14, 16),
+          ),
+          subtitleStyle: TextStyle(
+            color: WireframeColorManager.colors.textSecondary,
+            fontSize: _getResponsiveFontSize(12, 14),
+          ),
+          svgIconPath: SvgIconPaths.heart,
+          svgIconColor: _isBreathingAnimationEnabled
+              ? WireframeColorManager.colors.primary
+              : WireframeColorManager.colors.textSecondary,
+          trailing: Icon(
+            _isBreathingAnimationEnabled ? Icons.toggle_on : Icons.toggle_off,
+            size: _getResponsiveSize(40, 50),
+            color: _isBreathingAnimationEnabled
+                ? WireframeColorManager.colors.primary
+                : WireframeColorManager.colors.textSecondary,
+          ),
+        ),
+
+        // Magnetic Hover
+        CustomSettingsItem(
+          onTap: () => _toggleMagneticHover(),
+          title: 'Magnetic Hover',
+          subtitle: _isMagneticHoverEnabled
+              ? 'Elements subtly attract cursor'
+              : 'Standard hover interactions',
+          titleStyle: TextStyle(
+            color: WireframeColorManager.colors.text,
+            fontSize: _getResponsiveFontSize(14, 16),
+          ),
+          subtitleStyle: TextStyle(
+            color: WireframeColorManager.colors.textSecondary,
+            fontSize: _getResponsiveFontSize(12, 14),
+          ),
+          svgIconPath: SvgIconPaths.magnet,
+          svgIconColor: _isMagneticHoverEnabled
+              ? WireframeColorManager.colors.primary
+              : WireframeColorManager.colors.textSecondary,
+          trailing: Icon(
+            _isMagneticHoverEnabled ? Icons.toggle_on : Icons.toggle_off,
+            size: _getResponsiveSize(40, 50),
+            color: _isMagneticHoverEnabled
+                ? WireframeColorManager.colors.primary
+                : WireframeColorManager.colors.textSecondary,
+          ),
         ),
       ],
     );
@@ -657,6 +947,23 @@ class _WireframeSettingsSectionState extends State<WireframeSettingsSection> {
     themeProvider.toggleNesTheme(true);
   }
 
+  void _toggleScrollableMode() {
+    setState(() {
+      _isScrollableModeEnabled = !_isScrollableModeEnabled;
+    });
+
+    // Here you would typically save this preference and notify parent widget
+    // You might want to use a callback or state management solution
+    _saveScrollableModePreference(_isScrollableModeEnabled);
+  }
+
+  void _saveScrollableModePreference(bool enabled) {
+    // Save to SharedPreferences or your preferred storage method
+    // SharedPreferences.getInstance().then((prefs) {
+    //   prefs.setBool('wireframe_scrollable_mode', enabled);
+    // });
+  }
+
   void _showAnalyticsModal() {
     showDialog(
       context: context,
@@ -788,4 +1095,73 @@ class _WireframeSettingsSectionState extends State<WireframeSettingsSection> {
     );
   }
 
+  void _toggleHighQualityMode() {
+    setState(() {
+      _isHighQualityModeEnabled = !_isHighQualityModeEnabled;
+    });
+    // Update AdaptiveQualityController
+    // AdaptiveQualityController.setHighQualityMode(_isHighQualityModeEnabled);
+  }
+
+  void _togglePerformanceMonitor() {
+    setState(() {
+      _showPerformanceMonitor = !_showPerformanceMonitor;
+    });
+    // Update performance debug overlay visibility
+  }
+
+  void _toggleAudioFeedback() {
+    setState(() {
+      _isAudioFeedbackEnabled = !_isAudioFeedbackEnabled;
+    });
+    AudioFeedback.setEnabled(_isAudioFeedbackEnabled);
+  }
+
+  void _showAudioThemeSelector() {
+    // Show bottom sheet or dialog for audio theme selection
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => AudioSettingsWidget(
+        onThemeChanged: (theme) {
+          setState(() {
+            _currentAudioTheme = theme;
+          });
+        },
+      ),
+    );
+  }
+
+  void _toggleParticleEffects() {
+    setState(() {
+      _areParticleEffectsEnabled = !_areParticleEffectsEnabled;
+    });
+    // Update particle effects settings
+  }
+
+  void _toggleBreathingAnimation() {
+    setState(() {
+      _isBreathingAnimationEnabled = !_isBreathingAnimationEnabled;
+    });
+    // Update breathing animation settings
+  }
+
+  void _toggleMagneticHover() {
+    setState(() {
+      _isMagneticHoverEnabled = !_isMagneticHoverEnabled;
+    });
+    // Update magnetic hover settings
+  }
+
+  String _getAudioThemeDisplayName(AudioTheme theme) {
+    switch (theme) {
+      case AudioTheme.none:
+        return 'Silent';
+      case AudioTheme.subtle:
+        return 'Subtle';
+      case AudioTheme.mechanical:
+        return 'Mechanical';
+      case AudioTheme.digital:
+        return 'Digital';
+    }
+  }
 }

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:portfolio_website/components/project_viewer.dart';
 import 'package:portfolio_website/components/projects_registry.dart';
 import 'package:portfolio_website/themes/wireframe/wireframe_desktop_theme.dart';
+import 'package:portfolio_website/themes/wireframe/wireframe_main_theme.dart';
 import 'package:portfolio_website/widgets/circle_text_widget.dart';
 import 'package:portfolio_website/widgets/circle_theme_toggle.dart';
 import 'package:portfolio_website/widgets/pixel_widgets.dart';
@@ -445,7 +446,7 @@ class _HomeScreenState extends State<HomeScreen>
 
     // Check if wireframe theme is active
     if (isWireframeTheme) {
-      return const WireframeDesktopTheme();
+      return WireframeMainTheme(enableScrollableMode: true);
     }
 
     // Design dimensions (based on your background image dimensions)
@@ -1132,7 +1133,7 @@ class _HomeScreenState extends State<HomeScreen>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "Hi! I'm Jeff!",
+              "Jeff Anderson",
               style: TextStyle(
                 fontFamily: isNesTheme ? 'NES' : 'Ghibli',
                 fontSize: isNesTheme ? 16 : 24,
@@ -1144,7 +1145,7 @@ class _HomeScreenState extends State<HomeScreen>
             ),
             SizedBox(height: 16),
             Text(
-              "I love to create...",
+              "I deliver pragmatic UX results ",
               style: TextStyle(
                 fontFamily: isNesTheme ? 'NES' : 'Ghibli',
                 fontSize: isNesTheme ? 14 : 22,
@@ -1156,7 +1157,7 @@ class _HomeScreenState extends State<HomeScreen>
             ),
             SizedBox(height: 24),
             Text(
-              "Select a category below to explore",
+              "With imaginative and stimulating appeal",
               style: TextStyle(
                 fontFamily: isNesTheme ? 'NES' : 'Ghibli',
                 fontSize: isNesTheme ? 10 : 16,
@@ -1199,7 +1200,7 @@ class _HomeScreenState extends State<HomeScreen>
               ),
               SizedBox(height: _tvTextSpacing),
               _buildStrokedText(
-                "I love to create...",
+                "UX/UI Designer, Developer, Graphic Artist with back-end experience",
                 color: const Color(0xFFFFB74D), // FFB74D
                 size: _tvTextTitleSize,
                 fontStyle: FontStyle.italic,
@@ -1207,14 +1208,14 @@ class _HomeScreenState extends State<HomeScreen>
               ),
               SizedBox(height: _tvTextSpacing),
               _buildStrokedText(
-                "I am a UX/UI Designer and Graphic Artist with back-end experience",
+                "I deliver pragmatic UX results",
                 color: const Color(0xFFF5E7C8),
                 size: _tvTextBodySize,
                 textAlign: TextAlign.left,
               ),
               SizedBox(height: _tvTextSpacing),
               _buildStrokedText(
-                "Please, explore my portfolio and it's many interactive features",
+                "With imaginative and stimulating appeal",
                 color: const Color(0xFFB2D348),
                 size: _tvTextBodySize,
                 textAlign: TextAlign.left,

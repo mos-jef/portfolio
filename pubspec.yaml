@@ -109,6 +109,25 @@ flutter:
     - assets/jeffjitsulogo3.png
     - assets/jeffjitsulogo4.png
     - assets/uxui_bg.png
+    - assets/cover_1.png
+    - assets/cover_2.png
+    - assets/cover_3.png
+    - assets/vinyl_half.png
+    - assets/vinyl.png
+    - assets/folder_backcover.png
+    - assets/folder_frontcover.png
+    - assets/Survey.png
+    - assets/Video.png
+    - assets/game_changer.png
+    - assets/whatsapp.png
+    
+    
+    
+    
+    
+    
+    
+    
     
     # ICONS:
     - assets/icons/linkeddark.png
@@ -180,6 +199,15 @@ flutter:
     - assets/icons/svg/housebasicon.svg
     - assets/icons/svg/commentbasicon.svg
     - assets/icons/svg/addbasicon.svg
+    - assets/icons/svg/updown.svg
+    - assets/icons/svg/arrowup.svg
+    - assets/icons/svg/flash.svg
+    - assets/icons/svg/dashboard.svg
+    - assets/icons/svg/vibrate.svg
+    - assets/icons/svg/sound.svg
+    - assets/icons/svg/crescent_moon.svg
+    - assets/icons/svg/heart.svg
+    - assets/icons/svg/magnet.svg
 
   
       
@@ -225,6 +253,22 @@ flutter:
     - assets/mobile/drawer_background.png
     - assets/mobile/gameboy_body.png
     - assets/mobile/landscape_mobile.png
+    
+    
+    
+
+    # TAP-IN
+      
+    - assets/tapin/wireframe1.png
+    - assets/tapin/wireframe2.png
+    - assets/tapin/wireframe3.png
+    - assets/tapin/penrose_triangle.svg
+    - assets/tapin/uxpyramid.svg
+    - assets/tapin/ux_pyramid.svg
+    - assets/tapin/uxpyramid.png
+    - assets/tapin/ux_pyramid.png
+    - assets/tapin/design_principles.svg
+    - assets/tapin/process_overview.svg
 
     
     
@@ -382,3 +426,23 @@ flutter:
   - family: exprswy
     fonts:
       - asset: assets/fonts/exprswy.ttf
+        
+  - family: Banidca
+    fonts:
+      - asset: assets/fonts/Bandica.otf  
+
+  - family: Ghasan
+    fonts:
+      - asset: assets/fonts/ghasan.ttf  
+
+  - family: SFPro
+    fonts:
+      - asset: assets/fonts/BlackItalic.otf
+      - asset: assets/fonts/DisplayBold.otf  
+      - asset: assets/fonts/HeavyItalic.otf 
+      - asset: assets/fonts/LightItalic.otf 
+      - asset: assets/fonts/Medium.otf 
+      - asset: assets/fonts/Regular.otf 
+      - asset: assets/fonts/SemiBold.otf 
+      - asset: assets/fonts/ThinItalic.otf      
+      - asset: assets/fonts/UltraLightItalic.otf        

@@ -115,7 +115,7 @@ class WireframeProfileHeader extends StatelessWidget {
 
                           // Quote
                           Text(
-                            '"Open to opportunities"',
+                            '"Open to new opportunities"',
                             style: TextStyle(
                               fontSize: WireframeLayoutConstants
                                   .mobileFontSizeCaption,
@@ -226,7 +226,7 @@ class WireframeProfileHeader extends StatelessWidget {
 
                       // Quote
                       Text(
-                        '"Open to opportunities"',
+                        '"Open to new opportunities"',
                         style: TextStyle(
                           fontSize:
                               WireframeLayoutConstants.desktopFontSizeBody,

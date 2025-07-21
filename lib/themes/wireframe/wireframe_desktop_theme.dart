@@ -1,5 +1,4 @@
 import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import 'package:portfolio_website/firestore/firestore_models.dart';
 import 'package:portfolio_website/firestore/firestore_service.dart';
@@ -8,14 +7,30 @@ import 'package:portfolio_website/services/analytics_service.dart';
 import 'package:portfolio_website/themes/wireframe/components/wireframe_contact_overlay.dart';
 import 'package:portfolio_website/themes/wireframe/components/wireframe_desktop_analytics_modal.dart';
 import 'package:portfolio_website/themes/wireframe/utils/wireframe_color_manager.dart';
+import 'package:portfolio_website/themes/wireframe/widgets/grid_background.dart';
+import 'package:portfolio_website/themes/wireframe/wireframe_desktop_mockup.dart';
+import 'package:portfolio_website/themes/wireframe/wireframe_layout_constants.dart';
+import 'package:portfolio_website/themes/wireframe/wireframe_main_theme.dart';
+import 'package:portfolio_website/themes/wireframe/wireframe_mobile_mockup.dart';
 import 'package:provider/provider.dart';
 
-import 'wireframe_desktop_mockup.dart';
-import 'wireframe_layout_constants.dart';
-import 'wireframe_mobile_mockup.dart';
-
 class WireframeDesktopTheme extends StatefulWidget {
-  const WireframeDesktopTheme({Key? key}) : super(key: key);
+  final bool isScrollableMode;
+  final double? fixedHeight;
+  final ScrollController? externalScrollController;
+  final GlobalKey? mobileTargetKey; //
+  final GlobalKey? desktopTargetKey; //
+  final GlobalKey? targetKey;
+
+  const WireframeDesktopTheme({
+    Key? key,
+    this.isScrollableMode = false,
+    this.fixedHeight,
+    this.externalScrollController,
+    this.mobileTargetKey, //
+    this.desktopTargetKey, //
+    this.targetKey,
+  }) : super(key: key);
 
   @override
   State<WireframeDesktopTheme> createState() => _WireframeDesktopThemeState();
@@ -49,6 +64,17 @@ class _WireframeDesktopThemeState extends State<WireframeDesktopTheme>
   bool _showMobileContactOverlay = false;
   bool _showMobileAnalyticsOverlay = false; //
   bool _showDesktopAnalyticsOverlay = false; //
+  bool _showBottomGrid = true; // Toggle for grid visibility
+
+  // Target tracking keys for perfect alignment
+  final GlobalKey _mobileTargetKey = GlobalKey(debugLabel: 'desktop_theme_mobile_target');
+  final GlobalKey _desktopTargetKey = GlobalKey(debugLabel: 'desktop_theme_desktop_target');
+
+  // Dynamic grid controls - matches top section exactly
+  double _gridSize = WireframeLayoutConstants.masterGridSize;
+  double _gridOpacity = WireframeLayoutConstants.masterGridOpacity;
+  double _gridStrokeWidth = WireframeLayoutConstants.masterGridStrokeWidth;
+  Color _gridColor = WireframeColorManager.colors.text;
 
   // Controllers
   final TextEditingController _mobileCommentController =
@@ -184,6 +210,28 @@ class _WireframeDesktopThemeState extends State<WireframeDesktopTheme>
 
   @override
   Widget build(BuildContext context) {
+    print(
+        '🔍 DEBUG: WireframeDesktopTheme.build() called with isScrollableMode: ${widget.isScrollableMode}');
+
+    return widget.isScrollableMode
+        ? _buildScrollableContent(context)
+        : _buildStandardContent(context);
+  }
+
+  Widget _buildScrollableContent(BuildContext context) {
+    // For scrollable mode, return just the content without Scaffold
+    return LayoutBuilder(builder: _buildContent);
+  }
+
+  Widget _buildStandardContent(BuildContext context) {
+    // For standard mode, wrap in Scaffold
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: LayoutBuilder(builder: _buildContent),
+    );
+  }
+
+  Widget _buildContent(BuildContext context, BoxConstraints constraints) {
     final screenSize = MediaQuery.of(context).size;
     final isSmallScreen =
         screenSize.width < WireframeLayoutConstants.desktopBreakpoint;
@@ -196,182 +244,194 @@ class _WireframeDesktopThemeState extends State<WireframeDesktopTheme>
       return _buildMobileFallback();
     }
 
-    return Scaffold(
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        // STATIC BACKGROUND - won't change with themes
-        decoration: BoxDecoration(
-          // Option 1: Solid color background
-
-          /*
-          color: Color(0xFFf5f5f5), // Light gray - won't change with themes
-          */
-
-          /* 
-           // Option 2: Gradient background 
-
-            radient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-            Color(0xFFf5f5f5),
-                 Color(0xFFe9ecef),
-               ],
-             ),
-             */
-
-          // Option 3: Radial gradient
-
-          gradient: RadialGradient(
-            center: Alignment.center,
-            radius: 1.5,
-            colors: [
-              Color(0xFF121014),
-              Color(0xFFBCB0AB),
-              Color(0xFFEFCBA7),
-            ],
+    return Stack(
+      children: [
+        // Full screen grid background
+        if (_showBottomGrid)
+          Positioned.fill(
+            child: GridBackground(
+              gridColor: Color(0xFF202124),
+              gridOpacity: _gridOpacity,
+              gridSize: _gridSize,
+              strokeWidth: _gridStrokeWidth,
+              backgroundColor:
+                  Color(0xFFF5E9D8), // grid background color for bottom
+              child: Container(),
+            ),
           ),
-        ),
-        child: Center(
-          child: Container(
-            width:
-                1600, // Change this value to make entire container wider/narrower
-            height:
-                900, // Change this value to make entire container taller/shorter
-            margin: EdgeInsets.symmetric(
-              horizontal: math.max(
-                  20,
+
+        // Content container (without competing background)
+        Container(
+          width: double.infinity,
+          height: widget.fixedHeight ?? double.infinity,
+          child: Center(
+            child: Container(
+              width: 1600, // Change this value to make entire container wider/narrower
+              height: widget.fixedHeight != null
+                  ? widget.fixedHeight! -
+                      (screenSize.height * 0.04) // 4% margins
+                  : math.min(screenSize.height * 0.8,
+                      900), // 80% of screen height, max 900
+
+              margin: EdgeInsets.symmetric(
+                horizontal: math.max(
+                  screenSize.width * 0.02, // 2% minimum margin
                   (screenSize.width -
-                          WireframeLayoutConstants.maxContainerWidth) /
-                      2),
-              vertical: math.max(20, (screenSize.height - 800) / 2),
-            ),
-            child: Row(
-              children: [
-                // Mobile Mockup Section
-                Expanded(
-                  flex: 1,
-                  child: WireframeMobileMockup(
-                    // State management props
-                    mobileCurrentView: mobileCurrentView,
-                    selectedCaseStudy: selectedCaseStudy,
-                    mobileNavIndex: _mobileNavIndex,
-                    showAvatarFullScreen: _showAvatarFullScreen,
-                    onShowAvatarFullScreen: _showAvatarFullScreenMethod,
-                    onHideAvatarFullScreen: _hideAvatarFullScreenMethod,
-                    onShowMobileAnalyticsModal: _showMobileAnalyticsModal,
-                    onHideMobileAnalyticsModal: _hideMobileAnalyticsModal,
-                    onShowMobileContactModal: _showMobileContactModal,
-                    onHideMobileContactModal: _hideMobileContactModal,
-                    showMobileAnalyticsOverlay: _showMobileAnalyticsOverlay,
-                    contactSlideAnimation: _contactSlideAnimation,
-                    analyticsSlideAnimation: _analyticsSlideAnimation,
-                    contactAnimationController: _contactAnimationController,
-                    analyticsAnimationController: _analyticsAnimationController,
+                          (WireframeLayoutConstants.maxContainerWidth *
+                              WireframeLayoutConstants.getResponsiveScale(
+                                  screenSize.width))) /
+                      2,
+                ),
+                vertical: widget.isScrollableMode
+                    ? screenSize.height * 0.02 // 2% of screen height
+                    : math.max(
+                        screenSize.height * 0.02,
+                        (screenSize.height -
+                                (800 *
+                                    WireframeLayoutConstants.getResponsiveScale(
+                                        screenSize.width))) /
+                            2),
+              ),
+              child: Row(
+                children: [
+                  // Mobile Mockup Section
+                  Expanded(
+                    flex: 1,
+                    child: Container(
+                      child: WireframeMobileMockup(
+                        // State management props
+                        mobileCurrentView: mobileCurrentView,
+                        selectedCaseStudy: selectedCaseStudy,
+                        mobileNavIndex: _mobileNavIndex,
+                        showAvatarFullScreen: _showAvatarFullScreen,
+                        onShowAvatarFullScreen: _showAvatarFullScreenMethod,
+                        onHideAvatarFullScreen: _hideAvatarFullScreenMethod,
+                        onShowMobileAnalyticsModal: _showMobileAnalyticsModal,
+                        onHideMobileAnalyticsModal: _hideMobileAnalyticsModal,
+                        onShowMobileContactModal: _showMobileContactModal,
+                        onHideMobileContactModal: _hideMobileContactModal,
+                        showMobileAnalyticsOverlay: _showMobileAnalyticsOverlay,
+                        contactSlideAnimation: _contactSlideAnimation,
+                        analyticsSlideAnimation: _analyticsSlideAnimation,
+                        contactAnimationController: _contactAnimationController,
+                        analyticsAnimationController:
+                            _analyticsAnimationController,
 
+                        // Overlay states
+                        showMobileDrawerOverlay: _showMobileDrawerOverlay,
+                        showMobileCommentOverlay: _showMobileCommentOverlay,
+                        showMobileContactOverlay: _showMobileContactOverlay,
 
-                    // Overlay states
-                    showMobileDrawerOverlay: _showMobileDrawerOverlay,
-                    showMobileCommentOverlay: _showMobileCommentOverlay,
-                    showMobileContactOverlay: _showMobileContactOverlay,
+                        // Animation controllers
+                        drawerSlideAnimation: _drawerSlideAnimation,
+                        drawerAnimationController: _drawerAnimationController,
+                        commentSlideAnimation: _commentSlideAnimation,
+                        commentAnimationController: _commentAnimationController,
 
-                    // Animation controllers
-                    drawerSlideAnimation: _drawerSlideAnimation,
-                    drawerAnimationController: _drawerAnimationController,
-                    commentSlideAnimation: _commentSlideAnimation,
-                    commentAnimationController: _commentAnimationController,
+                        // Controllers
+                        mobileCommentController: _mobileCommentController,
+                        mobileNameController: _mobileNameController,
+                        mobileEmailController: _mobileEmailController,
+                        mobileScrollController:
+                            widget.externalScrollController ??
+                                _mobileScrollController,
 
-                    // Controllers
-                    mobileCommentController: _mobileCommentController,
-                    mobileNameController: _mobileNameController,
-                    mobileEmailController: _mobileEmailController,
-                    mobileScrollController: _mobileScrollController,
+                        // Comment state
+                        commentStep: _commentStep,
+                        selectedAvatar: _selectedAvatar,
 
-                    // Comment state
-                    commentStep: _commentStep,
-                    selectedAvatar: _selectedAvatar,
+                        // Data
+                        posts: _posts
+                            .map((postData) => _convertToSocialPost(postData))
+                            .toList(),
 
-                    // Data
-                    posts: _posts
-                        .map((postData) => _convertToSocialPost(postData))
-                        .toList(),
-
-                    // Callbacks
-                    onMobileNavigation: _handleMobileNavigation,
-                    onCaseStudySelected: _handleCaseStudySelection,
-                    onShowMobileDrawer: _showMobileDrawer,
-                    onHideMobileDrawer: _hideMobileDrawer,
-                    onShowMobileCommentModal: _showMobileCommentModal,
-                    onShowContactBottomSheet: _showContactBottomSheetInMobile,
-                    onHideContactOverlay: _hideMobileContactOverlay,
-                    onAddMobileComment: _addMobileComment,
-                    onResetCommentModal: _resetCommentModal,
-                    onUpdateCommentStep: _updateCommentStep,
-                    onUpdateSelectedAvatar: _updateSelectedAvatar,
-                    onGoBackFromSettings: _goBackFromSettings,
+                        // Callbacks
+                        onMobileNavigation: _handleMobileNavigation,
+                        onCaseStudySelected: _handleCaseStudySelection,
+                        onShowMobileDrawer: _showMobileDrawer,
+                        onHideMobileDrawer: _hideMobileDrawer,
+                        onShowMobileCommentModal: _showMobileCommentModal,
+                        onShowContactBottomSheet:
+                            _showContactBottomSheetInMobile,
+                        onHideContactOverlay: _hideMobileContactOverlay,
+                        onAddMobileComment: _addMobileComment,
+                        onResetCommentModal: _resetCommentModal,
+                        onUpdateCommentStep: _updateCommentStep,
+                        onUpdateSelectedAvatar: _updateSelectedAvatar,
+                        onGoBackFromSettings: _goBackFromSettings,
+                        targetKey: widget.mobileTargetKey,
+                      ),
+                    ),
                   ),
-                ),
 
-                // Divider
-                Container(
-                  width: 1,
-                  margin: EdgeInsets.symmetric(vertical: 40),
-                  color: WireframeColorManager.colors.border,
-                ),
-
-                // Desktop Mockup Section
-                Expanded(
-                  flex: 3,
-                  child: WireframeDesktopMockup(
-                    // State management props
-                    selectedSection: selectedSection,
-                    hoveredItem: hoveredItem,
-                    desktopCurrentView: desktopCurrentView,
-                    desktopSelectedCaseStudy: desktopSelectedCaseStudy,
-
-                    // Overlay states
-                    showDesktopInlineComment: _showDesktopInlineComment,
-                    showDesktopAvatarFullScreen: _showDesktopAvatarFullScreen,
-                    onShowDesktopAvatarFullScreen:_showDesktopAvatarFullScreenMethod,
-                    onHideDesktopAvatarFullScreen: _hideDesktopAvatarFullScreenMethod,
-                    onShowContactModal: _showDesktopContactModal,
-
-                    // Controllers
-                    desktopCommentController: _desktopCommentController,
-                    mobileNameController: _mobileNameController,
-                    mobileEmailController: _mobileEmailController,
-                    desktopScrollController: _desktopScrollController,
-
-                    // Comment state
-                    commentStep: _commentStep,
-                    selectedAvatar: _selectedAvatar,
-
-                    // Data
-                    posts: _posts
-                        .map((postData) => _convertToSocialPost(postData))
-                        .toList(),
-
-                    // Callbacks
-                    onSectionChanged: _handleSectionChange,
-                    onHoveredItemChanged: _updateHoveredItem,
-                    onDesktopCaseStudySelected:
-                        _handleDesktopCaseStudySelection,
-                    onShowInlineDesktopCommentModal:
-                        _showInlineDesktopCommentModal,
-                    onHideInlineDesktopCommentModal:
-                        _hideInlineDesktopCommentModal,
-                    onAddDesktopComment: _addDesktopComment,
-                    onUpdateCommentStep: _updateCommentStep,
-                    onUpdateSelectedAvatar: _updateSelectedAvatar,
-                    onBackFromSettings: _goBackFromDesktopSettings,
+                  // Divider
+                  Container(
+                    width: 1,
+                    margin: EdgeInsets.symmetric(vertical: 40),
+                    color: WireframeColorManager.colors.border,
                   ),
-                ),
-              ],
+
+                  // Desktop Mockup Section
+                  Expanded(
+                    flex: 3,
+                    child: Container(
+                      child: WireframeDesktopMockup(
+                        // State management props
+                        selectedSection: selectedSection,
+                        hoveredItem: hoveredItem,
+                        desktopCurrentView: desktopCurrentView,
+                        desktopSelectedCaseStudy: desktopSelectedCaseStudy,
+
+                        // Overlay states
+                        showDesktopInlineComment: _showDesktopInlineComment,
+                        showDesktopAvatarFullScreen:
+                            _showDesktopAvatarFullScreen,
+                        onShowDesktopAvatarFullScreen:
+                            _showDesktopAvatarFullScreenMethod,
+                        onHideDesktopAvatarFullScreen:
+                            _hideDesktopAvatarFullScreenMethod,
+                        onShowContactModal: _showDesktopContactModal,
+
+                        // Controllers
+                        desktopCommentController: _desktopCommentController,
+                        mobileNameController: _mobileNameController,
+                        mobileEmailController: _mobileEmailController,
+                        desktopScrollController:
+                            widget.externalScrollController ??
+                                _desktopScrollController,
+
+                        // Comment state
+                        commentStep: _commentStep,
+                        selectedAvatar: _selectedAvatar,
+
+                        // Data
+                        posts: _posts
+                            .map((postData) => _convertToSocialPost(postData))
+                            .toList(),
+
+                        // Callbacks
+                        onSectionChanged: _handleSectionChange,
+                        onHoveredItemChanged: _updateHoveredItem,
+                        onDesktopCaseStudySelected:
+                            _handleDesktopCaseStudySelection,
+                        onShowInlineDesktopCommentModal:
+                            _showInlineDesktopCommentModal,
+                        onHideInlineDesktopCommentModal:
+                            _hideInlineDesktopCommentModal,
+                        onAddDesktopComment: _addDesktopComment,
+                        onUpdateCommentStep: _updateCommentStep,
+                        onUpdateSelectedAvatar: _updateSelectedAvatar,
+                        onBackFromSettings: _goBackFromDesktopSettings,
+                        targetKey: widget.desktopTargetKey,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
-      ),
+      ],
     );
   }
 
@@ -793,6 +853,12 @@ class _WireframeDesktopThemeState extends State<WireframeDesktopTheme>
       setState(() {
         _showDesktopAnalyticsOverlay = false;
       });
+    });
+  }
+
+  void _toggleBottomGrid() {
+    setState(() {
+      _showBottomGrid = !_showBottomGrid;
     });
   }
 

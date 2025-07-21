@@ -8,11 +8,12 @@ import 'package:portfolio_website/themes/wireframe/components/header_icons.dart'
 import 'package:portfolio_website/themes/wireframe/utils/wireframe_color_manager.dart';
 import 'package:portfolio_website/themes/wireframe/widgets/clickable_widget.dart';
 import 'package:portfolio_website/themes/wireframe/widgets/enhanced_social_post.dart';
+import 'package:portfolio_website/themes/wireframe/widgets/responsive_device_frame.dart';
 import 'package:portfolio_website/themes/wireframe/widgets/wireframe_about_section.dart';
 import 'package:portfolio_website/themes/wireframe/widgets/wireframe_custom_logo.dart';
 import 'package:portfolio_website/themes/wireframe/widgets/wireframe_settings_section.dart';
 import 'package:url_launcher/url_launcher.dart';
-
+import 'dart:math' as math;
 import 'components/wireframe_comment_modal.dart';
 import 'components/wireframe_floating_actions.dart';
 import 'components/wireframe_navigation.dart';
@@ -25,6 +26,9 @@ class WireframeDesktopMockup extends StatelessWidget {
   final String hoveredItem;
   final String desktopCurrentView;
   final String desktopSelectedCaseStudy;
+
+  // Targeting system
+  final GlobalKey? targetKey;
 
   // Overlay states
   final bool showDesktopInlineComment;
@@ -86,6 +90,7 @@ class WireframeDesktopMockup extends StatelessWidget {
     this.onShowAnalyticsModal,
     this.onBackFromSettings,
     this.onShowContactModal,
+    this.targetKey,
   }) : super(key: key);
 
   @override
@@ -102,8 +107,7 @@ class WireframeDesktopMockup extends StatelessWidget {
           // Desktop MacBook Frame
           Expanded(
             child: AspectRatio(
-              aspectRatio: 16 /
-                  10, // Adjust this to change MacBook proportions (width/height)
+              aspectRatio: 16 / 10, // Adjust this to change MacBook proportions
               child: Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
@@ -124,324 +128,357 @@ class WireframeDesktopMockup extends StatelessWidget {
                 ),
                 child: Stack(
                   children: [
-                    // Desktop content with explicit width/height control
+                    // Desktop content with minimal gaps
                     Positioned(
-                      top: 75, // Vertical position from top
-                      left: 30, // Horizontal position from left
-                      child: Container(
-                        width:
-                            980, // EXACT WIDTH: Change this to make wider/narrower
-                        height:
-                            610, // EXACT HEIGHT: Change this to make taller/shorter
-                        clipBehavior: Clip.hardEdge,
-                        decoration: BoxDecoration(
-                          color: WireframeColorManager.colors.onPrimary,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                              color: WireframeColorManager.colors.border,
-                              width: 2),
-                        ),
-                        child: Column(
-                          children: [
-                            // Desktop Content
-                            Expanded(
-                              child: Row(
-                                children: [
-                                  // Left Sidebar
-                                  _buildLeftSidebar(),
+                      top: 35, // Minimal top gap for browser chrome
+                      left: 5, // Minimal left gap
+                      right: 5, // Minimal right gap
+                      bottom: 5, // Minimal bottom gap
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          return Container(
+                            key: targetKey,
+                            width: math.min(
+                              constraints.maxWidth * 0.95,
+                              1200,
+                            ),
+                            height: math.min(
+                              constraints.maxHeight * 0.85,
+                              700,
+                            ),
+                            clipBehavior: Clip.hardEdge,
+                            decoration: BoxDecoration(
+                              color: WireframeColorManager.colors.onPrimary,
+                              borderRadius: BorderRadius.circular(0),
+                              border: Border.all(
+                                color: Colors.black26,
+                                width: 0.1,
+                              ),
+                            ),
+                            child: Column(
+                              children: [
+                                // Desktop Content
+                                Expanded(
+                                  child: Row(
+                                    children: [
+                                      // Left Sidebar
+                                      _buildLeftSidebar(),
 
-                                  // Main Content
-                                  Expanded(
-                                    flex: desktopSelectedCaseStudy.isNotEmpty
-                                        ? 3
-                                        : 2,
-                                    child: Stack(
-                                      children: [
-                                        // Main scrollable content - hide when comment modal is open
-                                        if (!showDesktopInlineComment)
-                                          CustomScrollView(
-                                            controller: desktopScrollController,
-                                            slivers: [
-                                              // Profile Header as sliver with floating icons - HIDE FOR SETTINGS
-                                              if (selectedSection != 'Settings')
-                                                SliverToBoxAdapter(
-                                                  child: Stack(
-                                                    children: [
-                                                      // Profile header
-                                                      WireframeProfileHeader(
-                                                        isMobile: false,
-                                                        currentView:
-                                                            selectedSection
-                                                                .toLowerCase(),
-                                                        onContactTap: () =>
-                                                            onShowContactModal
-                                                                ?.call(context),
-                                                        onLinkedInTap: () =>
-                                                            _launchLinkedIn(),
-                                                        onResumeTap: () =>
-                                                            _launchResume(),
-                                                        onAvatarTap:
-                                                            onShowDesktopAvatarFullScreen,
-                                                      ),
+                                      // Main Content
+                                      Expanded(
+                                        flex:
+                                            desktopSelectedCaseStudy.isNotEmpty
+                                                ? 3
+                                                : 2,
+                                        child: Stack(
+                                          children: [
+                                            // Main scrollable content - hide when comment modal is open
+                                            if (!showDesktopInlineComment)
+                                              CustomScrollView(
+                                                controller:
+                                                    desktopScrollController,
+                                                slivers: [
+                                                  // Profile Header as sliver with floating icons - HIDE FOR SETTINGS
+                                                  if (selectedSection !=
+                                                      'Settings')
+                                                    SliverToBoxAdapter(
+                                                      child: Stack(
+                                                        children: [
+                                                          // Profile header
+                                                          WireframeProfileHeader(
+                                                            isMobile: false,
+                                                            currentView:
+                                                                selectedSection
+                                                                    .toLowerCase(),
+                                                            onContactTap: () =>
+                                                                onShowContactModal
+                                                                    ?.call(
+                                                                        context),
+                                                            onLinkedInTap: () =>
+                                                                _launchLinkedIn(),
+                                                            onResumeTap: () =>
+                                                                _launchResume(),
+                                                            onAvatarTap:
+                                                                onShowDesktopAvatarFullScreen,
+                                                          ),
 
-                                                      // Floating header icons that scroll with content
-                                                      Positioned(
-                                                        top: 200,
-                                                        right: 50,
-                                                        child:
-                                                            WireframeHeaderIcons(
-                                                          isMobile: false,
-                                                          spacing: 16,
-                                                          onContactTap: () =>
-                                                              onShowContactModal
-                                                                  ?.call(
-                                                                      context), // FIXED: Use the callback parameter
-                                                          onLinkedInTap: () =>
-                                                              WireframeHeaderIconsUtils
-                                                                  .launchLinkedIn(),
-                                                          onResumeTap: () =>
-                                                              WireframeHeaderIconsUtils
-                                                                  .launchResume(),
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-
-                                              // Navigation as sliver
-                                              SliverToBoxAdapter(
-                                                child:
-                                                    WireframeDesktopNavigation(
-                                                  selectedSection:
-                                                      selectedSection,
-                                                  onSectionChanged:
-                                                      onSectionChanged,
-                                                ),
-                                              ),
-
-                                              // Separator line as sliver
-                                              SliverToBoxAdapter(
-                                                child: Container(
-                                                  height: 1,
-                                                  color:
-                                                      WireframeLayoutConstants
-                                                          .wireframeBorder,
-                                                  margin: const EdgeInsets
-                                                      .symmetric(horizontal: 0),
-                                                ),
-                                              ),
-
-                                              // REPLACE CONTENT AREA WITH DIRECT SLIVER CONTENT
-                                              ..._buildDesktopContentSlivers(
-                                                  context),
-                                            ],
-                                          ),
-
-                                        // Inline comment modal - show when active
-                                        if (showDesktopInlineComment)
-                                          Container(
-                                            width: double.infinity,
-                                            height: double.infinity,
-                                            color: WireframeColorManager
-                                                .colors.onPrimary,
-                                            child: Stack(
-                                              children: [
-                                                // Content area with top padding to avoid close button
-                                                Padding(
-                                                  padding:
-                                                      const EdgeInsets.only(
-                                                    top: 60,
-                                                    left: 24,
-                                                    right: 24,
-                                                    bottom: 24,
-                                                  ),
-                                                  child:
-                                                      WireframeDesktopCommentModal(
-                                                    commentController:
-                                                        desktopCommentController,
-                                                    nameController:
-                                                        mobileNameController,
-                                                    emailController:
-                                                        mobileEmailController,
-                                                    commentStep: commentStep,
-                                                    selectedAvatar:
-                                                        selectedAvatar,
-                                                    onAddComment:
-                                                        onAddDesktopComment,
-                                                    onUpdateStep:
-                                                        onUpdateCommentStep,
-                                                    onUpdateAvatar:
-                                                        onUpdateSelectedAvatar,
-                                                  ),
-                                                ),
-
-                                                // Close button in top right
-                                                Positioned(
-                                                  top: 16,
-                                                  right: 16,
-                                                  child: IconButton(
-                                                    icon: Icon(Icons.close,
-                                                        color: WireframeLayoutConstants
-                                                            .wireframeSecondary),
-                                                    onPressed:
-                                                        onHideInlineDesktopCommentModal,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-
-                                        // Floating Comment Button - Show unless in Settings, About, or Projects
-                                        if (!['Settings', 'About', 'Projects'].contains(selectedSection) &&
-                                            desktopSelectedCaseStudy.isEmpty &&
-                                            !showDesktopInlineComment)
-                                          Positioned(
-                                            bottom: 30,
-                                            right: 30,
-                                            child: SimpleFloatingCommentButton(
-                                              onTap:onShowInlineDesktopCommentModal,
-                                              hasAnimation: true,
-                                              hasEnhancedShadow: true,
-                                              animationDuration:Duration(milliseconds: 300),
-                                              size: 56.0,
-                                              hasPulseAnimation: true,
-                                              hasHoverAnimation: true,
-                                            ),
-                                          ),
-
-                                        // Desktop Avatar full-screen overlay
-                                        if (showDesktopAvatarFullScreen)
-                                          Positioned.fill(
-                                            child: ClickableWidget(
-                                              onTap:
-                                                  onHideDesktopAvatarFullScreen,
-                                              child: Container(
-                                                color: Colors.black
-                                                    .withValues(alpha: 0.9),
-                                                child: Stack(
-                                                  children: [
-                                                    // Full-screen avatar image
-                                                    Center(
-                                                      child: Container(
-                                                        width: double.infinity,
-                                                        height: double.infinity,
-                                                        child: Image.asset(
-                                                          'assets/me_avatar.png',
-                                                          fit: BoxFit.contain,
-                                                          alignment:
-                                                              Alignment.center,
-                                                          errorBuilder:
-                                                              (context, error,
-                                                                  stackTrace) {
-                                                            return Container(
-                                                              color: WireframeLayoutConstants
-                                                                  .wireframeAccent,
-                                                              child:
-                                                                  const Center(
-                                                                child: Icon(
-                                                                  Icons.person,
-                                                                  size: 150,
-                                                                  color: Colors
-                                                                      .white,
-                                                                ),
-                                                              ),
-                                                            );
-                                                          },
-                                                        ),
+                                                          // Floating header icons that scroll with content
+                                                          Positioned(
+                                                            top: 200,
+                                                            right: 50,
+                                                            child:
+                                                                WireframeHeaderIcons(
+                                                              isMobile: false,
+                                                              spacing: 16,
+                                                              onContactTap: () =>
+                                                                  onShowContactModal
+                                                                      ?.call(
+                                                                          context),
+                                                              onLinkedInTap: () =>
+                                                                  WireframeHeaderIconsUtils
+                                                                      .launchLinkedIn(),
+                                                              onResumeTap: () =>
+                                                                  WireframeHeaderIconsUtils
+                                                                      .launchResume(),
+                                                            ),
+                                                          ),
+                                                        ],
                                                       ),
                                                     ),
 
-                                                    // Close button
+                                                  // Navigation as sliver
+                                                  SliverToBoxAdapter(
+                                                    child:
+                                                        WireframeDesktopNavigation(
+                                                      selectedSection:
+                                                          selectedSection,
+                                                      onSectionChanged:
+                                                          onSectionChanged,
+                                                    ),
+                                                  ),
 
+                                                  // Separator line as sliver
+                                                  SliverToBoxAdapter(
+                                                    child: Container(
+                                                      height: 1,
+                                                      color:
+                                                          WireframeLayoutConstants
+                                                              .wireframeBorder,
+                                                      margin: const EdgeInsets
+                                                          .symmetric(
+                                                          horizontal: 0),
+                                                    ),
+                                                  ),
+
+                                                  // REPLACE CONTENT AREA WITH DIRECT SLIVER CONTENT
+                                                  ..._buildDesktopContentSlivers(
+                                                      context),
+                                                ],
+                                              ),
+
+                                            // Inline comment modal - show when active
+                                            if (showDesktopInlineComment)
+                                              Container(
+                                                width: double.infinity,
+                                                height: double.infinity,
+                                                color: WireframeColorManager
+                                                    .colors.onPrimary,
+                                                child: Stack(
+                                                  children: [
+                                                    // Content area with top padding to avoid close button
+                                                    Padding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                        top: 60,
+                                                        left: 24,
+                                                        right: 24,
+                                                        bottom: 24,
+                                                      ),
+                                                      child:
+                                                          WireframeDesktopCommentModal(
+                                                        commentController:
+                                                            desktopCommentController,
+                                                        nameController:
+                                                            mobileNameController,
+                                                        emailController:
+                                                            mobileEmailController,
+                                                        commentStep:
+                                                            commentStep,
+                                                        selectedAvatar:
+                                                            selectedAvatar,
+                                                        onAddComment:
+                                                            onAddDesktopComment,
+                                                        onUpdateStep:
+                                                            onUpdateCommentStep,
+                                                        onUpdateAvatar:
+                                                            onUpdateSelectedAvatar,
+                                                      ),
+                                                    ),
+
+                                                    // Close button in top right
                                                     Positioned(
-                                                      top: 30,
-                                                      right: 30,
-                                                      child: ClickableWidget(
-                                                        onTap:
-                                                            onHideDesktopAvatarFullScreen,
-                                                        child: Container(
-                                                          width: 50,
-                                                          height: 50,
-                                                          decoration:
-                                                              BoxDecoration(
-                                                            color: Colors.black
-                                                                .withValues(
-                                                                    alpha: 0.5),
-                                                            shape:
-                                                                BoxShape.circle,
-                                                          ),
-                                                          child: Icon(
-                                                            Icons.close,
-                                                            color:
-                                                                WireframeColorManager
-                                                                    .colors
-                                                                    .onPrimary,
-                                                            size: 30,
-                                                          ),
+                                                      top: 16,
+                                                      right: 16,
+                                                      child: IconButton(
+                                                        icon: Icon(
+                                                          Icons.close,
+                                                          color: WireframeLayoutConstants
+                                                              .wireframeSecondary,
                                                         ),
+                                                        onPressed:
+                                                            onHideInlineDesktopCommentModal,
                                                       ),
                                                     ),
                                                   ],
                                                 ),
                                               ),
-                                            ),
-                                          ),
-                                      ],
-                                    ),
-                                  ),
 
-                                  // Right Sidebar
-                                  Container(
-                                    width: desktopSelectedCaseStudy.isNotEmpty
-                                        ? 100
-                                        : 200,
-                                    decoration: const BoxDecoration(
-                                      border: Border(
-                                          left: BorderSide(
-                                              color: Color(0xFFE1E5E9))),
-                                    ),
-                                    child: Container(
-                                      color: WireframeColorManager
-                                          .colors.onPrimary,
-                                      // Blank space for future use
-                                    ),
+                                            // Floating Comment Button - Show unless in Settings, About, or Projects
+                                            if (![
+                                                  'Settings',
+                                                  'About',
+                                                  'Projects'
+                                                ].contains(selectedSection) &&
+                                                desktopSelectedCaseStudy
+                                                    .isEmpty &&
+                                                !showDesktopInlineComment)
+                                              Positioned(
+                                                bottom: 30,
+                                                right: 30,
+                                                child:
+                                                    SimpleFloatingCommentButton(
+                                                  onTap:
+                                                      onShowInlineDesktopCommentModal,
+                                                  hasAnimation: true,
+                                                  hasEnhancedShadow: true,
+                                                  animationDuration: Duration(
+                                                      milliseconds: 300),
+                                                  size: 56.0,
+                                                  hasPulseAnimation: true,
+                                                  hasHoverAnimation: true,
+                                                ),
+                                              ),
+
+                                            // Desktop Avatar full-screen overlay
+                                            if (showDesktopAvatarFullScreen)
+                                              Positioned.fill(
+                                                child: ClickableWidget(
+                                                  onTap:
+                                                      onHideDesktopAvatarFullScreen,
+                                                  child: Container(
+                                                    color: Colors.black
+                                                        .withValues(alpha: 0.9),
+                                                    child: Stack(
+                                                      children: [
+                                                        // Full-screen avatar image
+                                                        Center(
+                                                          child: Container(
+                                                            width:
+                                                                double.infinity,
+                                                            height:
+                                                                double.infinity,
+                                                            child: Image.asset(
+                                                              'assets/me_avatar.png',
+                                                              fit: BoxFit
+                                                                  .contain,
+                                                              alignment:
+                                                                  Alignment
+                                                                      .center,
+                                                              errorBuilder:
+                                                                  (context,
+                                                                      error,
+                                                                      stackTrace) {
+                                                                return Container(
+                                                                  color: WireframeLayoutConstants
+                                                                      .wireframeAccent,
+                                                                  child:
+                                                                      const Center(
+                                                                    child: Icon(
+                                                                      Icons
+                                                                          .person,
+                                                                      size: 150,
+                                                                      color: Colors
+                                                                          .white,
+                                                                    ),
+                                                                  ),
+                                                                );
+                                                              },
+                                                            ),
+                                                          ),
+                                                        ),
+
+                                                        // Close button
+                                                        Positioned(
+                                                          top: 30,
+                                                          right: 30,
+                                                          child:
+                                                              ClickableWidget(
+                                                            onTap:
+                                                                onHideDesktopAvatarFullScreen,
+                                                            child: Container(
+                                                              width: 50,
+                                                              height: 50,
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                color: Colors
+                                                                    .black
+                                                                    .withValues(
+                                                                        alpha:
+                                                                            0.5),
+                                                                shape: BoxShape
+                                                                    .circle,
+                                                              ),
+                                                              child: Icon(
+                                                                Icons.close,
+                                                                color: WireframeColorManager
+                                                                    .colors
+                                                                    .onPrimary,
+                                                                size: 30,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                          ],
+                                        ),
+                                      ),
+
+                                      // Right Sidebar
+                                      Container(
+                                        width: desktopSelectedCaseStudy
+                                                .isNotEmpty
+                                            ? math.min(
+                                                constraints.maxWidth * 0.15,
+                                                100) // 15% of width, max 100px
+                                            : math.min(
+                                                constraints.maxWidth * 0.25,
+                                                160), // 25% of width, max 160px
+                                        decoration: const BoxDecoration(
+                                          border: Border(
+                                            left: BorderSide(
+                                                color: Color(0xFFE1E5E9)),
+                                          ),
+                                        ),
+                                        child: Container(
+                                          color: WireframeColorManager
+                                              .colors.onPrimary,
+                                          // Blank space for future use
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
+                          );
+                        },
                       ),
                     ),
 
-                    // MacBook frame ON TOP (masks around the content)
-                    Positioned(
-                      top:
-                          0, // Negative value moves MacBook UP, positive moves DOWN
-                      left: 30,
-                      right: 0,
-                      bottom: 0,
+                    // MacBook frame ON TOP (masks around the content) - PERFECTLY ALIGNED
+                    Positioned.fill(
                       child: IgnorePointer(
                         // This lets touches pass through to content below
-                        child: Transform.scale(
-                          scale:
-                              1.00, // Change this value: 1.0 = normal, 1.2 = 20% larger, 0.8 = 20% smaller
-                          child: Image.asset(
-                            'assets/chrome_dark.png',
-                            fit: BoxFit.contain,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Container(
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                    color: const Color(
-                                        0xFFE8E8E8), // MacBook silver color
-                                    width: 20,
-                                  ),
-                                  borderRadius: BorderRadius.circular(12),
+                        child: Image.asset(
+                          'assets/chrome_dark.png',
+                          fit: BoxFit
+                              .fill, // Changed to fill for perfect alignment
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: const Color(
+                                      0xFFE8E8E8), // MacBook silver color
+                                  width: 20,
                                 ),
-                              );
-                            },
-                          ),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            );
+                          },
                         ),
                       ),
                     ),
@@ -583,7 +620,6 @@ class WireframeDesktopMockup extends StatelessWidget {
           ),
         ),
         const Spacer(),
-        
       ],
     );
   }

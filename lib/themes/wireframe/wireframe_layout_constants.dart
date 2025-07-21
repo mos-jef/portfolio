@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'utils/wireframe_color_manager.dart';
+import 'dart:math' as math;
 
 /// Shared layout constants and wireframe theme colors for the wireframe theme
 /// Centralizes all layout dimensions, breakpoints, and color definitions
@@ -10,9 +11,13 @@ class WireframeLayoutConstants {
   // ===== LAYOUT DIMENSIONS =====
 
   // Container constraints
-  static const double maxContainerWidth = 1400.0;
-  static const double minContainerWidth = 1200.0;
+  static const double maxContainerWidth = 1600.0; // Increased for larger screens
+  static const double minContainerWidth = 1000.0; // Reduced for smaller screens
+  static const double aspectRatioContainer = 16.0 / 9.0; // Fixed aspect ratio
   static const double desktopBreakpoint = 1200.0;
+
+  // Position stability constraints  
+  static const double maxResponsiveWidth = 1920.0; // Maximum before clamping
 
   // NEW: Modern desktop mockup dimensions (more squat/rectangular)
   static const double desktopMockupAspectRatio = 16.0 / 9.0; // Modern monitor ratio
@@ -62,6 +67,71 @@ class WireframeLayoutConstants {
   static const double smallAvatarSize = 32.0;
   static const double mediumAvatarSize = 40.0;
 
+  // ===== SCROLLABLE THEME DIMENSIONS =====
+
+// Hero section dimensions
+  static const double heroSectionMinHeight = 600.0;
+  static const double heroSectionMaxHeight = 1000.0;
+  static const double heroTitleFontSizeDesktop = 64.0;
+  static const double heroTitleFontSizeTablet = 48.0;
+  static const double heroTitleFontSizeMobile = 32.0;
+  static const double heroSubtitleFontSizeDesktop = 32.0;
+  static const double heroSubtitleFontSizeTablet = 24.0;
+  static const double heroSubtitleFontSizeMobile = 18.0;
+
+// Transition zone dimensions
+  static const double transitionZoneHeight = 400.0;
+  static const double transitionZoneHeightMobile = 300.0;
+
+// Static wireframe dimensions
+  static const double staticMobileWireframeWidth = 220.0;
+  static const double staticMobileWireframeHeight = 440.0;
+  static const double staticMobileWireframeWidthMobile = 180.0;
+  static const double staticMobileWireframeHeightMobile = 360.0;
+
+  static const double staticDesktopWireframeWidth = 300.0;
+  static const double staticDesktopWireframeHeight = 200.0;
+
+// Scroll animation thresholds
+  static const double scrollTransitionStart = 0.2;
+  static const double scrollTransitionEnd = 0.7;
+  static const double interactiveThemeStart = 0.6;
+
+// Responsive helper methods for scrollable theme
+  static double getHeroTitleFontSize(bool isMobile, bool isTablet) {
+    if (isMobile) return heroTitleFontSizeMobile;
+    if (isTablet) return heroTitleFontSizeTablet;
+    return heroTitleFontSizeDesktop;
+  }
+
+  static double getHeroSubtitleFontSize(bool isMobile, bool isTablet) {
+    if (isMobile) return heroSubtitleFontSizeMobile;
+    if (isTablet) return heroSubtitleFontSizeTablet;
+    return heroSubtitleFontSizeDesktop;
+  }
+
+  static double getStaticWireframeWidth(bool isMobile, String type) {
+    if (type == 'mobile') {
+      return isMobile
+          ? staticMobileWireframeWidthMobile
+          : staticMobileWireframeWidth;
+    }
+    return staticDesktopWireframeWidth;
+  }
+
+  static double getStaticWireframeHeight(bool isMobile, String type) {
+    if (type == 'mobile') {
+      return isMobile
+          ? staticMobileWireframeHeightMobile
+          : staticMobileWireframeHeight;
+    }
+    return staticDesktopWireframeHeight;
+  }
+
+  static double getTransitionZoneHeight(bool isMobile) {
+    return isMobile ? transitionZoneHeightMobile : transitionZoneHeight;
+  }
+
   // Card dimensions
   static const double mobileCardImageHeight = 120.0;
   static const double desktopCardImageHeight = 160.0;
@@ -100,7 +170,7 @@ class WireframeLayoutConstants {
   // ===== FONT SIZES =====
 
   // Mobile font sizes
-  static const double mobileFontSizeCaption = 14.0;
+  static const double mobileFontSizeCaption = 10.0;
   static const double mobileFontSizeBody = 12.0;
   static const double mobileFontSizeBodyLarge = 14.0;
   static const double mobileFontSizeTitle = 16.0;
@@ -150,8 +220,204 @@ class WireframeLayoutConstants {
   static const Duration animationDurationFast = Duration(milliseconds: 150);
   static const Duration animationDurationMedium = Duration(milliseconds: 300);
   static const Duration animationDurationSlow = Duration(milliseconds: 500);
-
   static const Curve animationCurveStandard = Curves.easeInOut;
+
+  // ===== UNIFIED GRID SYSTEM =====
+
+  // Master grid settings - single source of truth for all sections
+  static const double masterGridSize = 30.0; // Match your _gridSize
+  static const double masterGridOpacity = 0.05; // Match your _gridOpacity
+  static const double masterGridStrokeWidth = 1.0; // Match your _gridStrokeWidth
+
+  // ===== RESPONSIVE SCALING SYSTEM =====
+
+  // Responsive scaling factors
+  static double getResponsiveScale(double screenWidth) {
+    // Smoother scaling with better edge case handling
+    const baseWidth = 1200.0;
+    const minScale = 0.6;
+    const maxScale = 1.3;
+
+    double scale = screenWidth / baseWidth;
+    return scale.clamp(minScale, maxScale);
+  }
+
+    // ===== ENHANCED RESPONSIVE UTILITIES =====
+
+  /// Get responsive spacing based on screen size and base spacing
+  static double getResponsiveSpacing(double baseSpacing, double screenWidth) {
+    final scale = getResponsiveScale(screenWidth);
+    return baseSpacing * scale;
+  }
+
+  /// Get responsive font size with scaling
+  static double getResponsiveFontSizeWithScale(
+      double baseFontSize, double screenWidth) {
+    final scale = getResponsiveScale(screenWidth);
+    return baseFontSize * scale;
+  }
+
+  /// Get responsive container width with constraints
+  static double getResponsiveContainerWidth(
+    BoxConstraints constraints, {
+    double maxWidthRatio = 0.9,
+    double? maxWidth,
+  }) {
+    final calculatedWidth = constraints.maxWidth * maxWidthRatio;
+    return maxWidth != null
+        ? math.min(calculatedWidth, maxWidth)
+        : calculatedWidth;
+  }
+
+  /// Get responsive container height with constraints
+  static double getResponsiveContainerHeight(
+    BoxConstraints constraints, {
+    double maxHeightRatio = 0.8,
+    double? maxHeight,
+  }) {
+    final calculatedHeight = constraints.maxHeight * maxHeightRatio;
+    return maxHeight != null
+        ? math.min(calculatedHeight, maxHeight)
+        : calculatedHeight;
+  }
+
+  /// Get responsive position using percentage of container size
+  static double getResponsivePosition(
+    double percentage,
+    double containerSize, {
+    double? min,
+    double? max,
+  }) {
+    double position = containerSize * percentage;
+    if (min != null) position = math.max(position, min);
+    if (max != null) position = math.min(position, max);
+    return position;
+  }
+
+  /// Get responsive margin based on screen size
+  static EdgeInsets getResponsiveMargin(
+    Size screenSize, {
+    double horizontalRatio = 0.05, // 5% of screen width
+    double verticalRatio = 0.02, // 2% of screen height
+    double? minHorizontal,
+    double? minVertical,
+    double? maxHorizontal,
+    double? maxVertical,
+  }) {
+    double horizontal = screenSize.width * horizontalRatio;
+    double vertical = screenSize.height * verticalRatio;
+
+    if (minHorizontal != null) horizontal = math.max(horizontal, minHorizontal);
+    if (maxHorizontal != null) horizontal = math.min(horizontal, maxHorizontal);
+    if (minVertical != null) vertical = math.max(vertical, minVertical);
+    if (maxVertical != null) vertical = math.min(vertical, maxVertical);
+
+    return EdgeInsets.symmetric(horizontal: horizontal, vertical: vertical);
+  }
+
+  /// Get responsive padding based on screen size
+  static EdgeInsets getResponsivePadding(
+    Size screenSize, {
+    double horizontalRatio = 0.04, // 4% of screen width
+    double verticalRatio = 0.02, // 2% of screen height
+    double? minHorizontal,
+    double? minVertical,
+  }) {
+    double horizontal = math.max(
+      screenSize.width * horizontalRatio,
+      minHorizontal ?? spacingSmall,
+    );
+    double vertical = math.max(
+      screenSize.height * verticalRatio,
+      minVertical ?? spacingTiny,
+    );
+
+    return EdgeInsets.symmetric(horizontal: horizontal, vertical: vertical);
+  }
+
+  /// Get responsive icon size based on screen width
+  static double getResponsiveIconSize(
+    double screenWidth, {
+    double baseSize = 24.0,
+    double minSize = 16.0,
+    double maxSize = 48.0,
+  }) {
+    final responsiveSize = baseSize * getResponsiveScale(screenWidth);
+    return responsiveSize.clamp(minSize, maxSize);
+  }
+
+  /// Get responsive avatar size based on screen width
+  static double getResponsiveAvatarSize(
+    double screenWidth, {
+    double baseSize = 60.0,
+    double minSize = 32.0,
+    double maxSize = 120.0,
+  }) {
+    final responsiveSize = baseSize * getResponsiveScale(screenWidth);
+    return responsiveSize.clamp(minSize, maxSize);
+  }
+
+  /// Get responsive border radius based on container size
+  static double getResponsiveBorderRadius(
+    double containerSize, {
+    double ratio = 0.05, // 5% of container size
+    double minRadius = 4.0,
+    double maxRadius = 20.0,
+  }) {
+    final calculatedRadius = containerSize * ratio;
+    return calculatedRadius.clamp(minRadius, maxRadius);
+  }
+
+  /// Check if current screen size is mobile
+  static bool isCurrentlyMobile(BuildContext context) {
+    return MediaQuery.of(context).size.width < mobileBreakpoint;
+  }
+
+  /// Check if current screen size is tablet
+  static bool isCurrentlyTablet(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    return width >= mobileBreakpoint && width < desktopSmallBreakpoint;
+  }
+
+  /// Check if current screen size is desktop
+  static bool isCurrentlyDesktop(BuildContext context) {
+    return MediaQuery.of(context).size.width >= desktopSmallBreakpoint;
+  }
+
+  /// Get device type as string
+  static String getCurrentDeviceType(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    if (width < mobileBreakpoint) return 'mobile';
+    if (width < desktopSmallBreakpoint) return 'tablet';
+    return 'desktop';
+  }
+
+  /// Get responsive drawer width
+  static double getResponsiveDrawerWidth(
+    double screenWidth, {
+    double maxRatio = 0.4, // Maximum 40% of screen width
+    double preferredWidth = 280.0,
+  }) {
+    final maxWidth = screenWidth * maxRatio;
+    return math.min(preferredWidth, maxWidth);
+  }
+
+  /// Get responsive modal size
+  static Size getResponsiveModalSize(
+    Size screenSize, {
+    double widthRatio = 0.9, // 90% of screen width
+    double heightRatio = 0.8, // 80% of screen height
+    double? maxWidth,
+    double? maxHeight,
+  }) {
+    double width = screenSize.width * widthRatio;
+    double height = screenSize.height * heightRatio;
+
+    if (maxWidth != null) width = math.min(width, maxWidth);
+    if (maxHeight != null) height = math.min(height, maxHeight);
+
+    return Size(width, height);
+  }
 
   // ===== COLOR ACCESSORS (Using WireframeColorManager) =====
 
@@ -247,6 +513,48 @@ class WireframeLayoutConstants {
   static const double tabletBreakpoint = 900.0;
   static const double desktopSmallBreakpoint = 1200.0;
   static const double desktopLargeBreakpoint = 1600.0;
+
+  // ===== DEVICE FRAME ALIGNMENT CONSTANTS =====
+
+// iPhone 14 frame precise measurements (based on actual PNG dimensions)
+  static const double iPhoneActualFrameWidth = 320.0;
+  static const double iPhoneActualFrameHeight = 635.0;
+  static const double iPhoneActualScreenTop = 8.0;
+  static const double iPhoneActualScreenLeft = 10.0;
+  static const double iPhoneActualScreenWidth = 295.0;
+  static const double iPhoneActualScreenHeight = 620.0;
+  static const double iPhoneActualScreenRadius = 20.0;
+
+// Chrome browser frame precise measurements
+  static const double chromeActualFrameAspectRatio = 16.0 / 10.0;
+  static const double chromeActualHeaderHeight = 75.0;
+  static const double chromeActualSideMargin = 30.0;
+  static const double chromeActualBottomMargin = 85.0;
+
+// Device scaling helpers
+  static double getDeviceScale(
+      Size containerSize, double deviceWidth, double deviceHeight) {
+    double scaleX = containerSize.width / deviceWidth;
+    double scaleY = containerSize.height / deviceHeight;
+    return math.min(scaleX, scaleY) * 0.9; // 0.9 for padding
+  }
+
+// Content positioning helpers
+  static EdgeInsets getDeviceContentInsets({
+    required double frameWidth,
+    required double frameHeight,
+    required double screenTop,
+    required double screenLeft,
+    required double screenWidth,
+    required double screenHeight,
+  }) {
+    return EdgeInsets.only(
+      top: screenTop,
+      left: screenLeft,
+      right: frameWidth - screenLeft - screenWidth,
+      bottom: frameHeight - screenTop - screenHeight,
+    );
+  }
 
   // ===== ANIMATION DURATIONS =====
 

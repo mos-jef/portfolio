@@ -555,7 +555,6 @@ class _EnhancedSocialPostState extends State<EnhancedSocialPost>
   Map<String, int> _getPostReactions() {
     final reactions =
         FirestoreService().getReactionCounts(_currentPost.reactions);
-    print('🐛 DEBUG: Post reactions: $reactions'); // ✅ Add debug
     return reactions;
   }
 

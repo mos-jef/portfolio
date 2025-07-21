@@ -31,17 +31,25 @@ class WireframeHeaderIcons extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (isMobile) {
-      return _buildMobileIcons();
+      return _buildMobileIcons(context);
     } else {
-      return _buildDesktopIcons();
+      return _buildDesktopIcons(context);
     }
   }
 
-  Widget _buildMobileIcons() {
-    final baseSize = iconSize ?? 32.0;
-    final size = isLargeIconMode ? baseSize * 1.5 : baseSize; // Apply size multiplier
-    final iconSpacing = spacing ?? WireframeLayoutConstants.spacingSmall;
-
+  Widget _buildMobileIcons(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final baseSize = iconSize ?? WireframeLayoutConstants.getResponsiveIconSize(
+      screenWidth, 
+      baseSize: 32.0,
+      minSize: 24.0,
+      maxSize: 40.0,
+    );
+    final size = isLargeIconMode ? baseSize * 1.5 : baseSize;
+    final iconSpacing = spacing ?? WireframeLayoutConstants.getResponsiveSpacing(
+      WireframeLayoutConstants.spacingSmall, 
+      screenWidth,
+    );
     return Row(
       mainAxisAlignment: alignment,
       mainAxisSize: MainAxisSize.min,
@@ -67,20 +75,35 @@ class WireframeHeaderIcons extends StatelessWidget {
     );
   }
 
-  Widget _buildDesktopIcons() {
-    final iconSpacing = spacing ?? WireframeLayoutConstants.spacingMedium;
-    final baseSize = iconSize ?? 40.0;
-    final size =
-        isLargeIconMode ? baseSize * 1.5 : baseSize; // Apply size multiplier
+  Widget _buildDesktopIcons(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final iconSpacing = spacing ??
+        WireframeLayoutConstants.getResponsiveSpacing(
+          WireframeLayoutConstants.spacingMedium,
+          screenWidth,
+        );
+    final baseSize = iconSize ??
+        WireframeLayoutConstants.getResponsiveIconSize(
+          screenWidth,
+          baseSize: 40.0,
+          minSize: 32.0,
+          maxSize: 56.0,
+        );
+    final size = isLargeIconMode ? baseSize * 1.5 : baseSize;
     final labelSize = isLargeIconMode
-        ? 16.0
-        : WireframeLayoutConstants.desktopFontSizeCaption;
+        ? WireframeLayoutConstants.getResponsiveFontSizeWithScale(
+            16.0, screenWidth)
+        : WireframeLayoutConstants.getResponsiveFontSizeWithScale(
+            WireframeLayoutConstants.desktopFontSizeCaption,
+            screenWidth,
+          );
 
     return Row(
       mainAxisAlignment: alignment,
       mainAxisSize: MainAxisSize.min,
       children: [
         _buildDesktopIconWithLabel(
+          context,
           child: WireframeIconAssets.resumeIcon(
             size: size,
             onTap: onResumeTap,
@@ -91,6 +114,7 @@ class WireframeHeaderIcons extends StatelessWidget {
         ),
         SizedBox(width: iconSpacing),
         _buildDesktopIconWithLabel(
+          context,
           child: WireframeIconAssets.linkedinIcon(
             size: size,
             onTap: onLinkedInTap,
@@ -101,6 +125,7 @@ class WireframeHeaderIcons extends StatelessWidget {
         ),
         SizedBox(width: iconSpacing),
         _buildDesktopIconWithLabel(
+          context,
           child: WireframeIconAssets.contactIcon(
             size: size,
             onTap: () {
@@ -116,21 +141,31 @@ class WireframeHeaderIcons extends StatelessWidget {
     );
   }
 
-  Widget _buildDesktopIconWithLabel({
+  Widget _buildDesktopIconWithLabel(
+    BuildContext context, {
     required Widget child,
     required String label,
     double? labelSize,
   }) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final responsiveSpacing = WireframeLayoutConstants.getResponsiveSpacing(
+      WireframeLayoutConstants.spacingTiny,
+      screenWidth,
+    );
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         child,
-        SizedBox(height: WireframeLayoutConstants.spacingTiny),
+        SizedBox(height: responsiveSpacing),
         Text(
           label,
           style: TextStyle(
-            fontSize:
-                labelSize ?? WireframeLayoutConstants.desktopFontSizeCaption,
+            fontSize: labelSize ??
+                WireframeLayoutConstants.getResponsiveFontSizeWithScale(
+                  WireframeLayoutConstants.desktopFontSizeCaption,
+                  screenWidth,
+                ),
             color: WireframeColorManager.colors.textSecondary,
             fontWeight: FontWeight.w500,
           ),

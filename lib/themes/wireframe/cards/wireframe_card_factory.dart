@@ -762,7 +762,7 @@ class WireframeCardFactory {
             ),
             SizedBox(height: 8),
             Text(
-              '"Open to opportunities"',
+              '"Open to new opportunities"',
               style: TextStyle(
                 color: WireframeColorManager.colors.onSecondary,
                 fontSize: isMobile ? 11 : 12,

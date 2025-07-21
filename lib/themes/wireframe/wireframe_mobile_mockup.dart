@@ -13,12 +13,13 @@ import 'package:portfolio_website/themes/wireframe/widgets/enhanced_social_post.
 import 'package:portfolio_website/themes/wireframe/widgets/google_nav_bar.dart'
     as google_nav;
 import 'package:portfolio_website/themes/wireframe/widgets/real_time_clock.dart';
+import 'package:portfolio_website/themes/wireframe/widgets/responsive_device_frame.dart';
 import 'package:portfolio_website/themes/wireframe/widgets/svg_icon.dart';
 import 'package:portfolio_website/themes/wireframe/widgets/theme_responsive_icon.dart';
 import 'package:portfolio_website/themes/wireframe/widgets/wireframe_about_section.dart';
 import 'package:portfolio_website/themes/wireframe/widgets/wireframe_custom_logo.dart';
 import 'package:url_launcher/url_launcher.dart';
-
+import 'dart:math' as math;
 import 'components/wireframe_comment_modal.dart';
 import 'components/wireframe_content_areas.dart';
 import 'components/wireframe_profile_header.dart';
@@ -30,6 +31,9 @@ class WireframeMobileMockup extends StatelessWidget {
   final String mobileCurrentView;
   final String selectedCaseStudy;
   final int mobileNavIndex;
+
+  // Targeting system
+  final GlobalKey? targetKey;
 
   // Overlay states
   final bool showMobileDrawerOverlay;
@@ -126,6 +130,7 @@ class WireframeMobileMockup extends StatelessWidget {
     this.onHideMobileAnalyticsModal,
     this.onShowMobileContactModal,
     this.onHideMobileContactModal,
+    this.targetKey,
   }) : super(key: key);
 
   @override
@@ -140,448 +145,450 @@ class WireframeMobileMockup extends StatelessWidget {
 
           SizedBox(height: 20),
 
-          /// Mobile Device Frame with iPhone Image and drop shadow
-          Container(
-            width: WireframeLayoutConstants.iPhoneFrameWidth,
-            height: WireframeLayoutConstants.iPhoneFrameHeight,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(35),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.15),
-                  blurRadius: 20,
-                  offset: Offset(0, 8),
-                  spreadRadius: 2,
-                ),
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 40,
-                  offset: Offset(0, 16),
-                  spreadRadius: 4,
-                ),
-              ],
-            ),
-            child: Stack(
-              children: [
-                // Your mobile content FIRST (behind the iPhone frame)
-                Positioned(
-                  top: 8, // Position where iPhone screen would be
-                  left: 10, // Position where iPhone screen would be
-                  width: 295, // Fixed width instead of right: 25
-                  height: 620, // Fixed height instead of bottom: 85
-                  child: Container(
-                    clipBehavior: Clip.hardEdge,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Column(
+          /// Mobile Device Frame with iPhone Image and drop shadow - RESPONSIVE VERSION
+          Expanded(
+            child: IPhoneFrame(
+              key: targetKey,
+              content: Column(
+                children: [
+                  // Main content area with overlays
+                  Expanded(
+                    child: Stack(
                       children: [
-                        // Main content area with overlays
-                        Expanded(
-                          child: Stack(
-                            children: [
-                              // Main mobile device content with slide animation
-                              AnimatedBuilder(
-                                animation: drawerSlideAnimation,
-                                builder: (context, child) {
-                                  return Transform.translate(
-                                    offset: drawerSlideAnimation.value *
-                                        WireframeLayoutConstants
-                                            .iPhoneFrameWidth,
-                                    child: Container(
-                                      width: WireframeLayoutConstants
-                                          .iPhoneFrameWidth,
-                                      child: Column(
+                        // Main mobile device content with slide animation
+                        AnimatedBuilder(
+                          animation: drawerSlideAnimation,
+                          builder: (context, child) {
+                            return Transform.translate(
+                              offset: drawerSlideAnimation.value *
+                                  WireframeLayoutConstants.iPhoneFrameWidth,
+                              child: Container(
+                                width:
+                                    WireframeLayoutConstants.iPhoneFrameWidth,
+                                child: Column(
+                                  children: [
+                                    // Mobile Status Bar - FIXED at top
+                                    _buildMobileStatusBar(),
+
+                                    // Top app bar section with hamburger and title - FIXED at top
+                                    Container(
+                                      width: double.infinity,
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: WireframeLayoutConstants
+                                            .spacingStandard,
+                                        vertical: WireframeLayoutConstants
+                                            .spacingTiny,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: WireframeLayoutConstants
+                                            .wireframeWhite,
+                                        // Removed border to eliminate line
+                                      ),
+                                      child: Row(
                                         children: [
-                                          // Mobile Status Bar - FIXED at top
-                                          _buildMobileStatusBar(),
-
-                                          // Top app bar section with hamburger and title - FIXED at top
-                                          Container(
-                                            width: double.infinity,
-                                            padding: EdgeInsets.symmetric(
-                                              horizontal:
-                                                  WireframeLayoutConstants
-                                                      .spacingStandard,
-                                              vertical: WireframeLayoutConstants
-                                                  .spacingTiny,
-                                            ),
-                                            decoration: BoxDecoration(
+                                          // Hamburger menu
+                                          ClickableWidget(
+                                            onTap: () =>
+                                                onShowMobileDrawer(context),
+                                            child: Icon(
+                                              Icons.menu,
+                                              size: 24,
                                               color: WireframeLayoutConstants
-                                                  .wireframeWhite,
-                                              // Removed border to eliminate line
-                                            ),
-                                            child: Row(
-                                              children: [
-                                                // Hamburger menu
-                                                ClickableWidget(
-                                                  onTap: () =>
-                                                      onShowMobileDrawer(
-                                                          context),
-                                                  child: Icon(
-                                                    Icons.menu,
-                                                    size: 24,
-                                                    color:
-                                                        WireframeLayoutConstants
-                                                            .wireframeAccent,
-                                                  ),
-                                                ),
-
-                                                SizedBox(
-                                                    width:
-                                                        WireframeLayoutConstants
-                                                            .spacingStandard),
-
-                                                // Logo
-                                                WireframeCustomLogo(
-                                                  isMobile: true,
-                                                  width: 120,
-                                                  height: 28,
-                                                ),
-
-                                                Spacer(),
-
-                                                // Right side icons (notification and profile)
-                                               
-                                                SizedBox(width: WireframeLayoutConstants.spacingMedium),
-                                                Container(
-                                                  width: 18,
-                                                  height: 18,
-                                                  decoration: BoxDecoration(
-                                                    shape: BoxShape.circle,
-                                                    color:WireframeLayoutConstants .wireframeAccent.withAlpha(0),
-                                                  ),
-                                                ),
-                                              ],
+                                                  .wireframeAccent,
                                             ),
                                           ),
 
-                                          // SCROLLABLE CONTENT AREA
-                                          if (mobileCurrentView == 'case_study')
-                                            // Case study view - keep original behavior
-                                            Expanded(
-                                              child: WireframeMobileContentArea(
-                                                currentView: mobileCurrentView,
-                                                selectedCaseStudy:
-                                                    selectedCaseStudy,
-                                                posts: posts,
-                                                scrollController:
-                                                    mobileScrollController,
-                                                onCaseStudySelected:
-                                                    onCaseStudySelected,
-                                                onShowMobileContactModal:
-                                                    onShowMobileContactModal,
-                                              ),
-                                            )
-                                          else if (mobileCurrentView =='settings')
-                                            // Settings view - direct rendering without navigation/profile
-                                            Expanded(
-                                              child: Container(
-                                                width: double.infinity,
-                                                height: double.infinity,
-                                                color: WireframeColorManager
-                                                    .colors.background,
-                                                child: WireframeSettingsSection(
-                                                  isMobile: true,
-                                                  onAnalyticsTap:
-                                                      onShowAnalyticsModal !=
-                                                              null
-                                                          ? () =>
-                                                              onShowAnalyticsModal!(
-                                                                  context)
-                                                          : null,
-                                                  onBackPressed:
-                                                      onGoBackFromSettings,
-                                                  onThemeChanged: () {
-                                                    // Force rebuild when theme changes
-                                                  },
-                                                ),
-                                              ),
-                                            )
-                                          else
-                                            // Normal views with sticky navigation
-                                            Expanded(
-                                              child: CustomScrollView(
-                                                controller:
-                                                    mobileScrollController,
-                                                slivers: [
-                                                  if (mobileCurrentView !=
-                                                      'settings')
-                                                    SliverToBoxAdapter(
-                                                      child: Stack(
-                                                        children: [
-                                                          // Profile header
-                                                          WireframeProfileHeader(
-                                                            isMobile: true,
-                                                            currentView:mobileCurrentView,
-                                                            onContactTap: () =>onShowMobileContactModal?.call(),
-                                                            onLinkedInTap: () => _launchLinkedIn(),
-                                                            onResumeTap: () => _launchResume(),
-                                                            onAvatarTap: onShowAvatarFullScreen,
-                                                            onMenuTap: () =>onShowMobileDrawer(context),
-                                                          ),
+                                          SizedBox(
+                                              width: WireframeLayoutConstants
+                                                  .spacingStandard),
 
-                                                          // Floating avatar that scrolls with content
-                                                          Positioned(
-                                                            top:30, // Position relative to profile header
-                                                            left: 30,
-                                                            child:
-                                                                WireframeFloatingAvatar(
-                                                              size: 60,
-                                                              onTap:
-                                                                  onShowAvatarFullScreen,
-                                                            ),
-                                                          ),
+                                          Spacer(),
 
-                                                          // Floating header icons that scroll with content
-                                                          Positioned(
-                                                            top: 70,
-                                                            right: 16,
-                                                            child:
-                                                                WireframeHeaderIcons(
-                                                              isMobile: true,
-                                                              iconSize: 32,
-                                                              spacing: 8,
-                                                              onContactTap: () =>
-                                                                  onShowMobileContactModal
-                                                                      ?.call(), // Fixed to use modal
-                                                              onLinkedInTap: () =>
-                                                                  WireframeHeaderIconsUtils
-                                                                      .launchLinkedIn(),
-                                                              onResumeTap: () =>
-                                                                  WireframeHeaderIconsUtils
-                                                                      .launchResume(),
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ),
-
-                                                  // Sticky Navigation (stays below hamburger after scrolling)
-                                                  SliverAppBar(
-                                                    pinned: true,
-                                                    floating: false,
-                                                    backgroundColor:
-                                                        WireframeLayoutConstants.wireframeWhite,
-                                                    elevation: 0,
-                                                    toolbarHeight: 42,
-                                                    automaticallyImplyLeading: false,
-                                                    flexibleSpace: Container(
-                                                      padding:EdgeInsets.symmetric(horizontal:WireframeLayoutConstants.spacingTiny,vertical: 4,),
-                                                      child: Column(
-                                                        children: [
-                                                          Row(
-                                                            mainAxisAlignment:MainAxisAlignment.spaceEvenly,
-                                                            children: [_buildMobileNavItem('Home', 'home'),
-                                                              _buildMobileNavItem('Projects','projects'),
-                                                              _buildMobileNavItem('About','about'),
-                                                            ],
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  ),
-
-                                                  // Separator line (matching desktop)
-                                                  SliverToBoxAdapter(
-                                                    child: Container(
-                                                      height: 1,
-                                                      color:
-                                                          WireframeColorManager
-                                                              .colors.border,
-                                                      margin:
-                                                          EdgeInsets.symmetric(
-                                                        horizontal:
-                                                            WireframeLayoutConstants
-                                                                .spacingMedium,
-                                                      ),
-                                                    ),
-                                                  ),
-
-                                                  // Mobile Content Area as sliver list
-                                                  _buildContentSliver(context),
-                                                ],
-                                              ),
+                                          // Right side icons (notification and profile)
+                                          SizedBox(
+                                              width: WireframeLayoutConstants
+                                                  .spacingMedium),
+                                          Container(
+                                            width: 18,
+                                            height: 18,
+                                            decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              color: WireframeLayoutConstants
+                                                  .wireframeAccent
+                                                  .withAlpha(0),
                                             ),
+                                          ),
                                         ],
                                       ),
                                     ),
-                                  );
-                                },
+
+                                    // SCROLLABLE CONTENT AREA
+                                    if (mobileCurrentView == 'case_study')
+                                      // Case study view - keep original behavior
+                                      Expanded(
+                                        child: WireframeMobileContentArea(
+                                          currentView: mobileCurrentView,
+                                          selectedCaseStudy: selectedCaseStudy,
+                                          posts: posts,
+                                          scrollController:
+                                              mobileScrollController,
+                                          onCaseStudySelected:
+                                              onCaseStudySelected,
+                                          onShowMobileContactModal:
+                                              onShowMobileContactModal,
+                                        ),
+                                      )
+                                    else if (mobileCurrentView == 'settings')
+                                      // Settings view - direct rendering without navigation/profile
+                                      Expanded(
+                                        child: Container(
+                                          width: double.infinity,
+                                          height: double.infinity,
+                                          color: WireframeColorManager
+                                              .colors.background,
+                                          child: WireframeSettingsSection(
+                                            isMobile: true,
+                                            onAnalyticsTap:
+                                                onShowAnalyticsModal != null
+                                                    ? () =>
+                                                        onShowAnalyticsModal!(
+                                                            context)
+                                                    : null,
+                                            onBackPressed: onGoBackFromSettings,
+                                            onThemeChanged: () {
+                                              // Force rebuild when theme changes
+                                            },
+                                          ),
+                                        ),
+                                      )
+                                    else
+                                      // Normal views with sticky navigation
+                                      Expanded(
+                                        child: CustomScrollView(
+                                          controller: mobileScrollController,
+                                          slivers: [
+                                            if (mobileCurrentView != 'settings')
+                                              SliverToBoxAdapter(
+                                                child: Stack(
+                                                  children: [
+                                                    // Profile header
+                                                    WireframeProfileHeader(
+                                                      isMobile: true,
+                                                      currentView:
+                                                          mobileCurrentView,
+                                                      onContactTap: () =>
+                                                          onShowMobileContactModal
+                                                              ?.call(),
+                                                      onLinkedInTap: () =>
+                                                          _launchLinkedIn(),
+                                                      onResumeTap: () =>
+                                                          _launchResume(),
+                                                      onAvatarTap:
+                                                          onShowAvatarFullScreen,
+                                                      onMenuTap: () =>
+                                                          onShowMobileDrawer(
+                                                              context),
+                                                    ),
+
+                                                    // Floating avatar that scrolls with content
+                                                    Positioned(
+                                                      top: MediaQuery.of(
+                                                                  context)
+                                                              .size
+                                                              .height *
+                                                          0.03, // % from top
+                                                      left: MediaQuery.of(
+                                                                  context)
+                                                              .size
+                                                              .width *
+                                                          0.006, // % from left
+                                                      child:
+                                                          WireframeFloatingAvatar(
+                                                        size: MediaQuery.of(
+                                                                    context)
+                                                                .size
+                                                                .width *
+                                                            0.03, // e.g. 0.15 is 15% of screen width
+                                                        onTap:
+                                                            onShowAvatarFullScreen,
+                                                      ),
+                                                    ),
+
+                                                    // Floating header icons that scroll with content
+                                                    Positioned(
+                                                      top: MediaQuery.of(
+                                                                  context)
+                                                              .size
+                                                              .height *
+                                                          0.070, // % from top
+                                                      right: MediaQuery.of(
+                                                                  context)
+                                                              .size
+                                                              .width *
+                                                          0.005, // % from right
+                                                      child:
+                                                          WireframeHeaderIcons(
+                                                        isMobile: true,
+                                                        iconSize: MediaQuery.of(
+                                                                    context)
+                                                                .size
+                                                                .width *
+                                                            0.02, // 8% of screen width
+                                                        spacing: MediaQuery.of(
+                                                                    context)
+                                                                .size
+                                                                .width *
+                                                            0.002, // 2% of screen width
+                                                        onContactTap: () =>
+                                                            onShowMobileContactModal
+                                                                ?.call(), // Fixed to use modal
+                                                        onLinkedInTap: () =>
+                                                            WireframeHeaderIconsUtils
+                                                                .launchLinkedIn(),
+                                                        onResumeTap: () =>
+                                                            WireframeHeaderIconsUtils
+                                                                .launchResume(),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+
+                                            // Sticky Navigation (stays below hamburger after scrolling)
+                                            SliverAppBar(
+                                              pinned: true,
+                                              floating: false,
+                                              backgroundColor:
+                                                  WireframeLayoutConstants
+                                                      .wireframeWhite,
+                                              elevation: 0,
+                                              toolbarHeight: 42,
+                                              automaticallyImplyLeading: false,
+                                              flexibleSpace: Container(
+                                                padding: EdgeInsets.symmetric(
+                                                  horizontal:
+                                                      WireframeLayoutConstants
+                                                          .spacingTiny,
+                                                  vertical: 4,
+                                                ),
+                                                child: Column(
+                                                  children: [
+                                                    Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceEvenly,
+                                                      children: [
+                                                        _buildMobileNavItem(
+                                                            'Home', 'home'),
+                                                        _buildMobileNavItem(
+                                                            'Projects',
+                                                            'projects'),
+                                                        _buildMobileNavItem(
+                                                            'About', 'about'),
+                                                      ],
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+
+                                            // Separator line (matching desktop)
+                                            SliverToBoxAdapter(
+                                              child: Container(
+                                                height: 1,
+                                                color: WireframeColorManager
+                                                    .colors.border,
+                                                margin: EdgeInsets.symmetric(
+                                                  horizontal:
+                                                      WireframeLayoutConstants
+                                                          .spacingMedium,
+                                                ),
+                                              ),
+                                            ),
+
+                                            // Mobile Content Area as sliver list
+                                            _buildContentSliver(context),
+                                          ],
+                                        ),
+                                      ),
+                                  ],
+                                ),
                               ),
+                            );
+                          },
+                        ),
 
-                              // Drawer overlay
-                              if (showMobileDrawerOverlay)
-                                _buildMobileDrawerOverlay(),
+                        // Drawer overlay
+                        if (showMobileDrawerOverlay)
+                          _buildMobileDrawerOverlay(),
 
-                              // Comment overlay with proper visibility control
-                              if (showMobileCommentOverlay)
-                                Positioned.fill(
-                                  child: WireframeMobileCommentModal(
-                                    commentSlideAnimation:
-                                        commentSlideAnimation,
-                                    commentAnimationController:
-                                        commentAnimationController,
-                                    commentController: mobileCommentController,
-                                    nameController: mobileNameController,
-                                    emailController: mobileEmailController,
-                                    commentStep: commentStep,
-                                    selectedAvatar: selectedAvatar,
-                                    onAddComment: onAddMobileComment,
-                                    onResetModal: onResetCommentModal,
-                                    onUpdateStep: onUpdateCommentStep,
-                                    onUpdateAvatar: onUpdateSelectedAvatar,
-                                  ),
-                                ),
-
-                              // Contact overlay - New Modal Style
-                              if (showMobileContactOverlay)
-                                Positioned.fill(
-                                  child: WireframeMobileContactModal(
-                                    slideAnimation: contactSlideAnimation,
-                                    animationController:
-                                        contactAnimationController,
-                                    onClose: onHideMobileContactModal ??
-                                        () {}, // Fix callback
-                                  ),
-                                ),
-
-                              // Analytics overlay - New Modal Style
-                              if (showMobileAnalyticsOverlay)
-                                Positioned.fill(
-                                  child: WireframeMobileAnalyticsModal(
-                                    slideAnimation: analyticsSlideAnimation,
-                                    animationController:
-                                        analyticsAnimationController,
-                                    onClose: onHideMobileAnalyticsModal ??
-                                        () {}, // Fix callback
-                                  ),
-                                ),
-                            ],
+                        // Comment overlay with proper visibility control
+                        if (showMobileCommentOverlay)
+                          Positioned.fill(
+                            child: WireframeMobileCommentModal(
+                              commentSlideAnimation: commentSlideAnimation,
+                              commentAnimationController:
+                                  commentAnimationController,
+                              commentController: mobileCommentController,
+                              nameController: mobileNameController,
+                              emailController: mobileEmailController,
+                              commentStep: commentStep,
+                              selectedAvatar: selectedAvatar,
+                              onAddComment: onAddMobileComment,
+                              onResetModal: onResetCommentModal,
+                              onUpdateStep: onUpdateCommentStep,
+                              onUpdateAvatar: onUpdateSelectedAvatar,
+                            ),
                           ),
-                        ),
 
-                        // Curved Navigation Bar
-                        Container(
-                          height: 50,
-                          child: _buildWireframeGoogleNav(),
-                        ),
+                        // Contact overlay - New Modal Style
+                        if (showMobileContactOverlay)
+                          Positioned.fill(
+                            child: WireframeMobileContactModal(
+                              slideAnimation: contactSlideAnimation,
+                              animationController: contactAnimationController,
+                              onClose: onHideMobileContactModal ??
+                                  () {}, // Fix callback
+                            ),
+                          ),
+
+                        // Analytics overlay - New Modal Style
+                        if (showMobileAnalyticsOverlay)
+                          Positioned.fill(
+                            child: WireframeMobileAnalyticsModal(
+                              slideAnimation: analyticsSlideAnimation,
+                              animationController: analyticsAnimationController,
+                              onClose: onHideMobileAnalyticsModal ??
+                                  () {}, // Fix callback
+                            ),
+                          ),
+
+                        // Avatar full-screen overlay - FULLY RESPONSIVE
+                        if (showAvatarFullScreen)
+                          Positioned.fill(
+                            // This covers the entire available area responsively
+                            child: LayoutBuilder(
+                              builder: (context, constraints) {
+                                // Get the actual available space
+                                final availableWidth = constraints.maxWidth;
+                                final availableHeight = constraints.maxHeight;
+
+                                // Calculate responsive sizes
+                                final avatarSize = math.min(
+                                  availableWidth *
+                                      0.6, // 60% of available width
+                                  availableHeight *
+                                      0.4, // 40% of available height
+                                );
+
+                                final closeButtonSize =
+                                    availableWidth * 0.09; // % of width
+                                final borderRadius =
+                                    availableWidth * 0.02; // 8% of width
+
+                                return ClickableWidget(
+                                  onTap: onHideAvatarFullScreen,
+                                  child: Container(
+                                    clipBehavior: Clip.hardEdge,
+                                    decoration: BoxDecoration(
+                                      color: Colors.black.withAlpha(75),
+                                      borderRadius:
+                                          BorderRadius.circular(borderRadius),
+                                    ),
+                                    child: Stack(
+                                      children: [
+                                        // Full-screen avatar image - responsive size
+                                        Center(
+                                          child: Container(
+                                            width: avatarSize,
+                                            height: avatarSize,
+                                            child: ClipOval(
+                                              child: Image.asset(
+                                                'assets/me_avatar.png',
+                                                fit: BoxFit.cover,
+                                                alignment: Alignment.center,
+                                                errorBuilder: (context, error,
+                                                    stackTrace) {
+                                                  return Container(
+                                                    decoration: BoxDecoration(
+                                                      color:
+                                                          WireframeLayoutConstants
+                                                              .wireframeAccent,
+                                                      shape: BoxShape.circle,
+                                                    ),
+                                                    child: Center(
+                                                      child: Icon(
+                                                        Icons.person,
+                                                        size: avatarSize *
+                                                            0.5, // 50% of avatar size
+                                                        color:
+                                                            WireframeColorManager
+                                                                .colors.surface,
+                                                      ),
+                                                    ),
+                                                  );
+                                                },
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+
+                                        // Close button - responsive positioning and size
+                                        Positioned(
+                                          top: availableHeight *
+                                              0.03, // 3% from top
+                                          right: availableWidth *
+                                              0.05, // 5% from right
+                                          child: ClickableWidget(
+                                            onTap: onHideAvatarFullScreen,
+                                            child: Container(
+                                              width: closeButtonSize,
+                                              height: closeButtonSize,
+                                              decoration: BoxDecoration(
+                                                color: Colors.black
+                                                    .withValues(alpha: 0.7),
+                                                shape: BoxShape.circle,
+                                                border: Border.all(
+                                                  color: Colors.white
+                                                      .withValues(alpha: 0.3),
+                                                  width: math.max(
+                                                      1,
+                                                      availableWidth *
+                                                          0.003), // Responsive border width
+                                                ),
+                                              ),
+                                              child: Icon(
+                                                Icons.close,
+                                                color: Colors.white,
+                                                size: closeButtonSize *
+                                                    0.6, // 60% of button size
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
                       ],
                     ),
                   ),
-                ),
 
-                // iPhone frame ON TOP (masks around the content)
-                Positioned.fill(
-                  child: IgnorePointer(
-                    // This lets touches pass through to content below
-                    child: Transform.scale(
-                      scale: 1.027,
-                      child: Image.asset(
-                        'assets/iphone14_black.png',
-                        fit: BoxFit.contain,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color: Color(0xFFE8D5C4), // iPhone beige color
-                                width: 20,
-                              ),
-                              borderRadius: BorderRadius.circular(35),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
+                  // Curved Navigation Bar
+                  Container(
+                    height: 50,
+                    child: _buildWireframeGoogleNav(),
                   ),
-                ),
-
-                // Avatar full-screen overlay - CONSTRAINED TO DEVICE SIZE
-                if (showAvatarFullScreen)
-                  Positioned(
-                    top: 5, // Match the device content positioning
-                    left: 10,
-                    width: 290, // Match device width
-                    height: 623, // Match device height
-                    child: ClickableWidget(
-                      onTap: onHideAvatarFullScreen,
-                      child: Container(
-                        clipBehavior: Clip.hardEdge,
-                        decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.75),
-                          borderRadius:
-                              BorderRadius.circular(40), // Match device corners
-                        ),
-                        child: Stack(
-                          children: [
-                            // Full-screen avatar image
-                            Center(
-                              child: Container(
-                                width: 250, // Constrained width
-                                height: 250, // Constrained height
-                                child: Image.asset(
-                                  'assets/me_avatar.png',
-                                  fit: BoxFit
-                                      .cover, // Changed to cover for better fit
-                                  alignment: Alignment.center,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Container(
-                                      decoration: BoxDecoration(
-                                        color: WireframeLayoutConstants
-                                            .wireframeAccent,
-                                        borderRadius: BorderRadius.circular(
-                                            125), // Circular fallback
-                                      ),
-                                      child: Center(
-                                        child: Icon(
-                                          Icons.person,
-                                          size: 120,
-                                          color: WireframeColorManager
-                                              .colors.surface,
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                            ),
-                            // Close button
-                            Positioned(
-                              top: 20, // Closer to top edge
-                              right: 20,
-                              child: ClickableWidget(
-                                onTap: onHideAvatarFullScreen,
-                                child: Container(
-                                  width: 40,
-                                  height: 40,
-                                  decoration: BoxDecoration(
-                                    color: Colors.black.withOpacity(0.7),
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color: Colors.white.withOpacity(0.3),
-                                      width: 1,
-                                    ),
-                                  ),
-                                  child: Icon(
-                                    Icons.close,
-                                    color: Colors.white,
-                                    size: 24,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
+                ],
+              ),
             ),
           ),
-
-          SizedBox(height: 20),
-
-          
+          SizedBox(
+              height: MediaQuery.of(context).size.height *
+                  0.025), // 0.025 is same as 2.5% of screen height
         ],
       ),
     );
@@ -599,7 +606,6 @@ class WireframeMobileMockup extends StatelessWidget {
           ),
         ),
         Spacer(),
-        
       ],
     );
   }
@@ -732,15 +738,22 @@ class WireframeMobileMockup extends StatelessWidget {
           builder: (context, child) {
             return Row(
               children: [
-                // Drawer content
+                // Drawer content - responsive width
                 Transform.translate(
-                  offset:
-                      Offset((drawerAnimationController.value - 1) * 160, 0),
+                  offset: Offset(
+                      (drawerAnimationController.value - 1) *
+                          math.min(
+                              160, MediaQuery.of(context).size.width * 0.4),
+                      0),
                   child: ClickableWidget(
-                    onTap: () {}, // Prevent tap from bubbling up to parent
+                    onTap: () {},
                     child: Container(
-                      width: 160,
+                      width: math.min(
+                          160,
+                          MediaQuery.of(context).size.width *
+                              0.6), // Max 0.6 is 60% of screen
                       height: double.infinity,
+
                       decoration: BoxDecoration(
                         color: WireframeColorManager.colors.onPrimary,
                         boxShadow: [
@@ -755,8 +768,14 @@ class WireframeMobileMockup extends StatelessWidget {
                       child: Column(
                         children: [
                           // Drawer header (without X button)
+
                           Container(
-                            padding: EdgeInsets.only(left: 20, top: 40),
+                            padding: EdgeInsets.only(
+                              left: MediaQuery.of(context).size.width *
+                                  0.05, // 5% of screen width
+                              top: MediaQuery.of(context).size.height *
+                                  0.05, // 5% of screen height
+                            ),
                             decoration: BoxDecoration(
                               border: Border(
                                   bottom: BorderSide(
@@ -799,7 +818,8 @@ class WireframeMobileMockup extends StatelessWidget {
                                     },
                                   ),
                                   SizedBox(
-                                      height: WireframeLayoutConstants.spacingMedium),
+                                      height: WireframeLayoutConstants
+                                          .spacingMedium),
 
                                   // Analytics
                                   _buildDrawerButtonSVG(
@@ -812,7 +832,8 @@ class WireframeMobileMockup extends StatelessWidget {
                                     },
                                   ),
                                   SizedBox(
-                                      height: WireframeLayoutConstants.spacingMedium),
+                                      height: WireframeLayoutConstants
+                                          .spacingMedium),
 
                                   // Projects (replacing Comments)
                                   _buildDrawerButtonSVG(
@@ -821,10 +842,13 @@ class WireframeMobileMockup extends StatelessWidget {
                                     WireframeColorManager.colors.secondary,
                                     () {
                                       onHideMobileDrawer();
-                                      onMobileNavigation(1); // Navigate to projects
+                                      onMobileNavigation(
+                                          1); // Navigate to projects
                                     },
                                   ),
-                                  SizedBox(height: WireframeLayoutConstants.spacingMedium),
+                                  SizedBox(
+                                      height: WireframeLayoutConstants
+                                          .spacingMedium),
 
                                   // Resume
                                   _buildDrawerButtonSVG(
@@ -837,7 +861,8 @@ class WireframeMobileMockup extends StatelessWidget {
                                     },
                                   ),
                                   SizedBox(
-                                      height: WireframeLayoutConstants.spacingMedium),
+                                      height: WireframeLayoutConstants
+                                          .spacingMedium),
 
                                   // Settings
                                   _buildDrawerButtonSVG(
@@ -846,7 +871,8 @@ class WireframeMobileMockup extends StatelessWidget {
                                     WireframeColorManager.colors.secondary,
                                     () {
                                       onHideMobileDrawer();
-                                      onMobileNavigation(4); // Navigate to settings
+                                      onMobileNavigation(
+                                          4); // Navigate to settings
                                     },
                                   ),
                                   SizedBox(
@@ -860,11 +886,13 @@ class WireframeMobileMockup extends StatelessWidget {
                                     WireframeColorManager.colors.secondary,
                                     () {
                                       onHideMobileDrawer();
-                                      onMobileNavigation(3); // Navigate to about
+                                      onMobileNavigation(
+                                          3); // Navigate to about
                                     },
                                   ),
                                   SizedBox(
-                                      height: WireframeLayoutConstants.spacingMedium),
+                                      height: WireframeLayoutConstants
+                                          .spacingMedium),
 
                                   // LinkedIn
                                   _buildDrawerButtonSVG(
@@ -1243,7 +1271,8 @@ class WireframeMobileMockup extends StatelessWidget {
       case 'about':
         return SliverToBoxAdapter(
           child: Container(
-            height: 600, // Give it a fixed height to ensure it shows
+            height: MediaQuery.of(context).size.height *
+                0.6, // 60% of screen height
             child: WireframeAboutSection(isMobile: true),
           ),
         );
