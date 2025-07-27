@@ -1,6 +1,7 @@
 import 'package:babstrap_settings_screen/babstrap_settings_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:portfolio_website/models/theme_provider.dart';
+import 'package:portfolio_website/screens/mobile.dart';
 import 'package:portfolio_website/services/analytics_service.dart';
 import 'package:portfolio_website/themes/wireframe/components/wireframe_contact_overlay.dart';
 import 'package:portfolio_website/themes/wireframe/components/wireframe_desktop_analytics_modal.dart';
@@ -70,7 +71,7 @@ class _WireframeSettingsSectionState extends State<WireframeSettingsSection> {
     return Container(
       width: double.infinity,
       height: double.infinity,
-      color: WireframeColorManager.colors.background,
+      color: WireframeColorManager.colors.background.withAlpha(0),
       child: Column(
         children: [
           // Settings header (fixed height)
@@ -79,7 +80,7 @@ class _WireframeSettingsSectionState extends State<WireframeSettingsSection> {
           // Settings content using custom settings (flexible height)
           Expanded(
             child: Container(
-              color: WireframeColorManager.colors.background,
+              color: WireframeColorManager.colors.background.withAlpha(0),
               child: ListView(
                 padding: EdgeInsets.all(widget.isMobile ? 16 : 24),
                 children: [
@@ -98,29 +99,13 @@ class _WireframeSettingsSectionState extends State<WireframeSettingsSection> {
 
                   SizedBox(height: widget.isMobile ? 16 : 20),
 
-                  // Analytics & Data Group
-                  _buildAnalyticsGroup(),
-
-                  SizedBox(height: widget.isMobile ? 16 : 20),
-
                   // About Group
                   _buildAboutGroup(),
 
                   // NEW CODE GOES HERE:
                   SizedBox(height: widget.isMobile ? 16 : 20),
 
-                  // Performance & Quality Group
-                  _buildPerformanceQualityGroup(),
 
-                  SizedBox(height: widget.isMobile ? 16 : 20),
-
-                  // Audio & Haptics Group
-                  _buildAudioHapticsGroup(),
-
-                  SizedBox(height: widget.isMobile ? 16 : 20),
-
-                  // Visual Effects Group
-                  _buildVisualEffectsGroup(),
                 ],
               ),
             ),
@@ -155,19 +140,43 @@ class _WireframeSettingsSectionState extends State<WireframeSettingsSection> {
           ),
 
           Expanded(
-            child: Center(
-              child: Text(
-                'Settings',
-                style: TextStyle(
-                  fontSize: widget.isMobile ? 18 : 22,
-                  fontWeight: FontWeight.w600,
-                  color: WireframeColorManager.colors.text,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'Settings',
+                  style: TextStyle(
+                    fontSize: widget.isMobile ? 18 : 22,
+                    fontWeight: FontWeight.w600,
+                    color: WireframeColorManager.colors.text,
+                  ),
                 ),
-              ),
+                // Add drag instruction for desktop
+                if (!widget.isMobile) ...[
+                  SizedBox(width: 16),
+                  Image.asset(
+                    'assets/icons/hand_drag.png',
+                    width: 20,
+                    height: 20,
+                    color: WireframeColorManager.colors.secondary,
+                  ),
+                  SizedBox(width: 8),
+                  Text(
+                    'DRAG TO SCROLL',
+                    style: TextStyle(
+                      fontFamily: 'KOMIKAX_',
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: WireframeColorManager.colors.primary,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ],
+              ],
             ),
           ),
 
-          // Invisible spacer to center the title
+// Invisible spacer to center the title
           SizedBox(width: 48),
         ],
       ),
@@ -315,6 +324,38 @@ class _WireframeSettingsSectionState extends State<WireframeSettingsSection> {
             ),
           ),
         ),
+
+        // GameBoy Theme (NEW!)
+        CustomSettingsItem(
+          onTap: () => _switchToGameBoyTheme(),
+          title: 'GameBoy Theme',
+          subtitle: 'Retro handheld gaming experience',
+          titleStyle: TextStyle(
+            color: WireframeColorManager.colors.text,
+            fontSize: _getResponsiveFontSize(14, 16),
+          ),
+          subtitleStyle: TextStyle(
+            color: WireframeColorManager.colors.textSecondary,
+            fontSize: _getResponsiveFontSize(12, 14),
+          ),
+          svgIconPath: SvgIconPaths.nintendoSwitchLine, // You may need to add this icon path
+          svgIconColor: Color(0xFF8BAC0F), // GameBoy green
+          trailing: Container(
+            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: Color(0xFF8BAC0F),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              'Play Now!',
+              style: TextStyle(
+                fontSize: _getResponsiveFontSize(11, 13),
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -329,42 +370,15 @@ class _WireframeSettingsSectionState extends State<WireframeSettingsSection> {
       ),
       backgroundColor: WireframeColorManager.colors.surface,
       items: [
-        // Default Wireframe Theme
 
-        CustomSettingsItem(
-          onTap: () => _switchBaseTheme('default'),
-          title: 'Default Wireframe',
-          subtitle: 'Clean and minimal design',
-          titleStyle: TextStyle(
-            color: WireframeColorManager.colors.text,
-            fontSize: _getResponsiveFontSize(14, 16),
-            fontWeight: _currentBaseTheme == 'default'
-                ? FontWeight.w600
-                : FontWeight.normal,
-          ),
-          subtitleStyle: TextStyle(
-            color: WireframeColorManager.colors.textSecondary,
-            fontSize: _getResponsiveFontSize(12, 14),
-          ),
-          svgIconPath: SvgIconPaths.palette2Line,
-          svgIconColor: _currentBaseTheme == 'default'
-              ? WireframeColorManager.colors.primary
-              : WireframeColorManager.colors.textSecondary,
-          trailing: Icon(
-            _currentBaseTheme == 'default' ? Icons.toggle_on : Icons.toggle_off,
-            size: _getResponsiveSize(40, 50),
-            color: _currentBaseTheme == 'default'
-                ? WireframeColorManager.colors.primary
-                : WireframeColorManager.colors.textSecondary,
-          ),
-        ),
+        
 
         // Athletic Theme
 
         CustomSettingsItem(
           onTap: () => _switchBaseTheme('athlete'),
-          title: 'Athletic Theme',
-          subtitle: 'Energetic teal and sport vibes',
+          title: 'Monokai Theme',
+          subtitle: 'You know it, you love it',
           titleStyle: TextStyle(
             color: WireframeColorManager.colors.text,
             fontSize: _getResponsiveFontSize(14, 16),
@@ -392,7 +406,7 @@ class _WireframeSettingsSectionState extends State<WireframeSettingsSection> {
         CustomSettingsItem(
           onTap: () => _switchBaseTheme('ninja'),
           title: 'Ninja Theme',
-          subtitle: 'Earth tones and orange accents',
+          subtitle: 'Why is it called that?',
           titleStyle: TextStyle(
             color: WireframeColorManager.colors.text,
             fontSize: _getResponsiveFontSize(14, 16),
@@ -419,8 +433,8 @@ class _WireframeSettingsSectionState extends State<WireframeSettingsSection> {
 
         CustomSettingsItem(
           onTap: () => _switchBaseTheme('corporate'),
-          title: 'Corporate Theme',
-          subtitle: 'Professional blue design',
+          title: 'Pending Theme 1',
+          subtitle: 'Work in progress...',
           titleStyle: TextStyle(
             color: WireframeColorManager.colors.text,
             fontSize: _getResponsiveFontSize(14, 16),
@@ -447,8 +461,8 @@ class _WireframeSettingsSectionState extends State<WireframeSettingsSection> {
 
         CustomSettingsItem(
           onTap: () => _switchBaseTheme('creative'),
-          title: 'Creative Theme',
-          subtitle: 'Vibrant and artistic design',
+          title: 'Pending Theme 2',
+          subtitle: 'Work in progress...',
           titleStyle: TextStyle(
             color: WireframeColorManager.colors.text,
             fontSize: _getResponsiveFontSize(14, 16),
@@ -472,36 +486,6 @@ class _WireframeSettingsSectionState extends State<WireframeSettingsSection> {
         ),
       ],
     );
-
-    // Scrollable Story Mode
-    CustomSettingsItem(
-      onTap: () => _toggleScrollableMode(),
-      title: 'Scrollable Story Mode',
-      subtitle: _isScrollableModeEnabled
-          ? 'Interactive wireframe evolution story'
-          : 'Static wireframe interface',
-      titleStyle: TextStyle(
-        color: WireframeColorManager.colors.text,
-        fontSize: _getResponsiveFontSize(14, 16),
-        fontWeight:
-            _isScrollableModeEnabled ? FontWeight.w600 : FontWeight.normal,
-      ),
-      subtitleStyle: TextStyle(
-        color: WireframeColorManager.colors.textSecondary,
-        fontSize: _getResponsiveFontSize(12, 14),
-      ),
-      svgIconPath: SvgIconPaths.updown, // or another appropriate icon
-      svgIconColor: _isScrollableModeEnabled
-          ? WireframeColorManager.colors.primary
-          : WireframeColorManager.colors.textSecondary,
-      trailing: Icon(
-        _isScrollableModeEnabled ? Icons.toggle_on : Icons.toggle_off,
-        size: _getResponsiveSize(40, 50),
-        color: _isScrollableModeEnabled
-            ? WireframeColorManager.colors.primary
-            : WireframeColorManager.colors.textSecondary,
-      ),
-    );
   }
 
   Widget _buildAnalyticsGroup() {
@@ -514,10 +498,11 @@ class _WireframeSettingsSectionState extends State<WireframeSettingsSection> {
       ),
       backgroundColor: WireframeColorManager.colors.surface,
       items: [
+
         // Site Analytics
+
         CustomSettingsItem(
-          onTap: widget
-              .onAnalyticsTap, // This should work for both mobile and desktop
+          onTap: widget.onAnalyticsTap, // This should work for both mobile and desktop
           title: 'Site Analytics',
           subtitle: 'View engagement and traffic data',
           titleStyle: TextStyle(
@@ -822,12 +807,14 @@ class _WireframeSettingsSectionState extends State<WireframeSettingsSection> {
         ),
 
         // Get in Touch
+
         CustomSettingsItem(
           onTap: widget.isMobile
-              ? widget
-                  .onShowMobileContactModal // Uses existing mobile contact callback
-              : () => widget.onShowContactModal
-                  ?.call(context), // Uses existing desktop contact callback
+              ? widget.onShowMobileContactModal
+              : () {
+                  // Trigger the same contact modal as other desktop CTAs
+                  widget.onShowContactModal?.call(context);
+                },
           title: 'Get in Touch',
           subtitle: 'Contact information',
           titleStyle: TextStyle(
@@ -840,6 +827,7 @@ class _WireframeSettingsSectionState extends State<WireframeSettingsSection> {
           ),
           svgIconPath: SvgIconPaths.contacts3Line,
         ),
+
       ],
     );
   }
@@ -945,6 +933,18 @@ class _WireframeSettingsSectionState extends State<WireframeSettingsSection> {
   void _switchToNESTheme() {
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
     themeProvider.toggleNesTheme(true);
+  }
+
+  void _switchToGameBoyTheme() {
+    // Navigate to GameBoy mobile UI
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => const GameBoyMobileUI(),
+      ),
+    );
+
+    // Track analytics (using correct syntax)
+    AnalyticsService().trackEvent('theme_switch_gameboy');
   }
 
   void _toggleScrollableMode() {

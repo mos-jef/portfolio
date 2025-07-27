@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:portfolio_website/themes/wireframe/utils/wireframe_color_manager.dart';
 import 'package:portfolio_website/themes/wireframe/widgets/clickable_widget.dart';
+import 'package:portfolio_website/widgets/border_beam.dart';
 
 class WireframeFloatingAvatar extends StatelessWidget {
   final VoidCallback? onTap;
@@ -18,30 +19,28 @@ class WireframeFloatingAvatar extends StatelessWidget {
     this.borderColor,
   }) : super(key: key);
 
-  @override
+ @override
   Widget build(BuildContext context) {
     return ClickableWidget(
       onTap: onTap,
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          image: DecorationImage(
-            image: AssetImage(imagePath),
-            fit: BoxFit.cover,
-          ),
-          border: Border.all(
-            color: WireframeColorManager.colors.surface, // RESPONSIVE COLOR
-            width: borderWidth,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 4,
-              offset: Offset(-6, -6),
+      child: BorderBeam(
+        duration: 10, // Slower for floating avatar
+        borderWidth: borderWidth,
+        colorFrom: WireframeColorManager.colors.primary,
+        colorTo: WireframeColorManager.colors.secondary ??
+            WireframeColorManager.colors.primary,
+        staticBorderColor: WireframeColorManager.colors.surface,
+        borderRadius: BorderRadius.circular(size / 2),
+        child: Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            image: DecorationImage(
+              image: AssetImage(imagePath),
+              fit: BoxFit.cover,
             ),
-          ],
+          ),
         ),
       ),
     );

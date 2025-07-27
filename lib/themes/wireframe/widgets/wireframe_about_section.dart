@@ -22,7 +22,7 @@ class _WireframeAboutSectionState extends State<WireframeAboutSection> {
     AboutPost(
       id: '1',
       imagePath: 'assets/about/house1.png',
-      caption: 'Home is where creativity flows and ideas come to life.',
+      caption: '',
       size: PostSize.large,
     ),
     AboutPost(
@@ -41,26 +41,63 @@ class _WireframeAboutSectionState extends State<WireframeAboutSection> {
     ),
     AboutPost(
       id: '4',
-      imagePath: 'assets/about/fam1.png',
+      imagePath: 'assets/about/fam2.png',
       caption:
-          'Family keeps me grounded and reminds me what truly matters in life.',
+          '',
       size: PostSize.medium,
     ),
     AboutPost(
       id: '5',
       imagePath: 'assets/about/fam1.png',
       caption:
-          'Family keeps me grounded and reminds me what truly matters in life.',
+          '',
       size: PostSize.large,
     ),
     AboutPost(
       id: '6',
-      imagePath: 'assets/about/fam1.png',
+      imagePath: 'assets/about/sauvies.png',
       caption:
-          'Family keeps me grounded and reminds me what truly matters in life.',
+          '',
+      size: PostSize.small,
+    ),
+    AboutPost(
+      id: '7',
+      imagePath: 'assets/about/sauvies2.png',
+      caption: '',
+      size: PostSize.small,
+    ),
+    AboutPost(
+      id: '8',
+      imagePath: 'assets/about/wedding.png',
+      caption: '',
+      size: PostSize.small,
+    ),
+    AboutPost(
+      id: '9',
+      imagePath: 'assets/about/sunset.png',
+      caption: '',
+      size: PostSize.small,
+    ),
+    AboutPost(
+      id: '10',
+      imagePath: 'assets/about/lackamas.png',
+      caption: '',
+      size: PostSize.small,
+    ),
+    AboutPost(
+      id: '11',
+      imagePath: 'assets/about/bjj.png',
+      caption: '',
+      size: PostSize.small,
+    ),
+    AboutPost(
+      id: '12',
+      imagePath: 'assets/about/beard.png',
+      caption: '',
       size: PostSize.small,
     ),
   ];
+  
 
   @override
   Widget build(BuildContext context) {

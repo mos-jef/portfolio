@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:portfolio_website/themes/wireframe/utils/wireframe_color_manager.dart';
+import 'package:mouse_follower/mouse_follower.dart';
+import 'package:portfolio_website/components/project_data.dart';
+import 'package:portfolio_website/revised_case_studies/top_bar.dart';
+import 'package:portfolio_website/widgets/case_study_carousel.dart';
+import 'package:portfolio_website/widgets/cursor.dart';
+import 'package:flutter/foundation.dart';
+import 'package:portfolio_website/widgets/floating_back_to_top_button.dart';
 
 class TapInCaseStudy extends StatefulWidget {
   const TapInCaseStudy({Key? key}) : super(key: key);
@@ -25,71 +31,22 @@ class _TapInCaseStudyState extends State<TapInCaseStudy> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
+Widget build(BuildContext context) {
+  return GlobalMouseFollower(
+  primaryColor: Color(0xFF2FBF71),
+  hoverColor: Color(0xFF2FBF71),
+  hoverText: 'TAP IN',
+  child: Scaffold(
       backgroundColor: Colors.white,
-      body: Stack(
-        children: [
-          // Main scrollable content
-
-          CustomScrollView(
+    body: Stack(
+      children: [
+        // Main scrollable content with top padding to avoid overlap
+        Padding(
+          padding: EdgeInsets.only(top: 70.0), // Match top bar height
+          child: CustomScrollView(
             controller: _scrollController,
             slivers: [
-              // Custom app bar with back button
-
-              SliverAppBar(
-                backgroundColor: Colors.white,
-                elevation: 0,
-                pinned: true,
-                automaticallyImplyLeading: false,
-                toolbarHeight: 80,
-                flexibleSpace: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 40, vertical: 20),
-                  child: Row(
-                    children: [
-                      // Back button
-
-                      GestureDetector(
-                        onTap: () => Navigator.of(context).pop(),
-                        child: Container(
-                          width: 50,
-                          height: 50,
-                          decoration: BoxDecoration(
-                            color: WireframeColorManager.colors.surface,
-                            borderRadius: BorderRadius.circular(25),
-                            border: Border.all(
-                              color: WireframeColorManager.colors.border,
-                              width: 1,
-                            ),
-                          ),
-                          child: Icon(
-                            Icons.arrow_back,
-                            color: WireframeColorManager.colors.text,
-                            size: 24,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 20),
-
-                      // Case study title
-
-                      Text(
-                        'Tap In',
-                        style: TextStyle(
-                          fontSize: 32,
-                          fontFamily: 'SFPro',
-                          fontWeight:
-                              FontWeight.w600, // This will use SFPro SemiBold
-                          color: WireframeColorManager.colors.text,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
               // Main content area - Updated with case study content
-
               SliverToBoxAdapter(
                 child: Container(
                   padding: EdgeInsets.all(40),
@@ -97,29 +54,27 @@ class _TapInCaseStudyState extends State<TapInCaseStudy> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Section 1: Balancing Innovation and Zeitgeist
-
                       _buildCaseStudySection(
                         title: '',
                         isNarrow: true,
-                        transparentBorder: false, // Keep border for now, change to true later
-                        customHeight: 1100, // Taller section
-                        showDivider: true, // Shows the divider
-                        dividerColor: Color(0xFF838383), // (Figma hex format)
-                        dividerHeight: 1.0, // 1px thick
-                        dividerWidth: 0.7, // 70% of screen width
+                        transparentBorder: false,
+                        customHeight: 1100,
+                        showDivider: true,
+                        dividerColor: Color(0xFF838383),
+                        dividerHeight: 1.0,
+                        dividerWidth: 0.7,
                         content: Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             LayoutBuilder(
                               builder: (context, constraints) {
-                                // Calculate responsive font size based on container width
-                                final responsiveFontSize = constraints.maxWidth * 0.08; // 8% of container width
-                                final clampedFontSize = responsiveFontSize.clamp(24.0, 72.0); // Min 24px, Max 72px
+                                final responsiveFontSize = constraints.maxWidth * 0.08;
+                                final clampedFontSize = responsiveFontSize.clamp(24.0, 72.0);
 
                                 return Text(
                                   'Balancing Innovation\nand Zeitgeist',
                                   style: TextStyle(
-                                    fontSize: clampedFontSize, // DYNAMIC SIZE
+                                    fontSize: clampedFontSize,
                                     fontFamily: 'Ghasan',
                                     fontWeight: FontWeight.w600,
                                     color: Colors.black87,
@@ -130,19 +85,13 @@ class _TapInCaseStudyState extends State<TapInCaseStudy> {
                             ),
                             LayoutBuilder(
                               builder: (context, constraints) {
-                                final responsiveVerticalSpacing =
-                                    constraints.maxWidth * 0.05;
-                                final responsiveSmallSpacing =
-                                    constraints.maxWidth * 0.025;
-                                final responsiveLargeSpacing =
-                                    constraints.maxWidth * 0.075;
+                                final responsiveVerticalSpacing = constraints.maxWidth * 0.05;
+                                final responsiveSmallSpacing = constraints.maxWidth * 0.025;
+                                final responsiveLargeSpacing = constraints.maxWidth * 0.075;
 
                                 return Column(
                                   children: [
-                                    SizedBox(
-                                        height: responsiveVerticalSpacing.clamp(
-                                            20.0,
-                                            60.0)), // Dynamic spacing (was 40)
+                                    SizedBox(height: responsiveVerticalSpacing.clamp(20.0, 60.0)),
                                     Text(
                                       '1. Overview',
                                       style: TextStyle(
@@ -152,10 +101,7 @@ class _TapInCaseStudyState extends State<TapInCaseStudy> {
                                         color: Colors.black87,
                                       ),
                                     ),
-                                    SizedBox(
-                                        height: responsiveSmallSpacing.clamp(
-                                            15.0,
-                                            30.0)), // Dynamic spacing (was 20)
+                                    SizedBox(height: responsiveSmallSpacing.clamp(15.0, 30.0)),
                                     Text(
                                       'This case study showcases how I\nbalanced\nInnovation with convention\nwhile creating a custom\nSocial Media Platform from scratch.\nDiscover how I did this by joining\nand downloading Tap In',
                                       style: TextStyle(
@@ -166,10 +112,7 @@ class _TapInCaseStudyState extends State<TapInCaseStudy> {
                                       ),
                                       textAlign: TextAlign.center,
                                     ),
-                                    SizedBox(
-                                        height: responsiveLargeSpacing.clamp(
-                                            40.0,
-                                            80.0)), // Dynamic spacing (was 60)
+                                    SizedBox(height: responsiveLargeSpacing.clamp(40.0, 80.0)),
                                     _buildWireframeImages(),
                                   ],
                                 );
@@ -183,74 +126,74 @@ class _TapInCaseStudyState extends State<TapInCaseStudy> {
 
                       // Section 2: Role
 
-_buildCaseStudySection(
-  title: '',
-  transparentBorder: false,
-  customHeight: 900,
-  showDivider: true, // Shows the divider
-  dividerColor: Color(0xFF838383), // (Figma hex format)
-  dividerHeight: 1.0, // 1px thick
-  dividerWidth: 0.7, // 70% of screen width
-  content: Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      // Header section
-      Text(
-        '2. ROLE',
-        style: TextStyle(
-          fontSize: 24, // Same as Section 1's "1. Overview"
-          fontFamily: 'SFPro',
-          fontWeight: FontWeight.w600,
-          color: Colors.black87,
-        ),
-      ),
-      LayoutBuilder(
-        builder: (context, constraints) {
-          final responsiveVerticalSpacing = constraints.maxWidth * 0.05;
-          final responsiveHorizontalSpacing = constraints.maxWidth * 0.075;
-          final responsiveSmallSpacing = constraints.maxWidth * 0.035;
-          
-          return Column(
-            children: [
-              SizedBox(height: responsiveVerticalSpacing.clamp(25.0, 60.0)),
-              // Content row with text and image
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Left side - Text content
-                  Expanded(
-                    flex: 2,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Transcending\nDesign\nCustom',
-                          style: TextStyle(
-                            fontSize: 60,
-                            fontFamily: 'Ghasan',
-                            fontWeight: FontWeight.w600,
-                            color: Colors.black87,
-                            height: 1.2,
-                          ),
-                        ),
-                        SizedBox(height: responsiveSmallSpacing.clamp(20.0, 40.0)),
-                        Container(
-                          width: double.infinity,
-                          child: Text(
-                            'After spending years in jiu-jitsu, I felt it was time to shake things up. So, I took on a six-month contract with a global BJJ franchise — my first venture into social media. This role wasn\'t just about bringing my existing skills to the table; it was about diving headfirst into a new domain and making a meaningful impact for people and a sport I cherish',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontFamily: 'SFPro',
-                              color: Colors.black87,
-                              height: 1.5,
-                            ),
-                            textAlign: TextAlign.left,
-                          ),
-                        ),
-                      ],
+              _buildCaseStudySection(
+                title: '',
+                transparentBorder: false,
+                customHeight: 900,
+                showDivider: true, // Shows the divider
+                dividerColor: Color(0xFF838383), // (Figma hex format)
+                dividerHeight: 1.0, // 1px thick
+                dividerWidth: 0.7, // 70% of screen width
+                content: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // Header section
+                    Text(
+                      '2. ROLE',
+                      style: TextStyle(
+                        fontSize: 24, // Same as Section 1's "1. Overview"
+                        fontFamily: 'SFPro',
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                      ),
                     ),
-                  ),
-                  SizedBox(width: responsiveHorizontalSpacing.clamp(40.0, 80.0)),
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        final responsiveVerticalSpacing = constraints.maxWidth * 0.05;
+                        final responsiveHorizontalSpacing = constraints.maxWidth * 0.075;
+                        final responsiveSmallSpacing = constraints.maxWidth * 0.035;
+                        
+                        return Column(
+                          children: [
+                            SizedBox(height: responsiveVerticalSpacing.clamp(25.0, 60.0)),
+                            // Content row with text and image
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Left side - Text content
+                                Expanded(
+                                  flex: 2,
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Transcending\nDesign\nCustom',
+                                        style: TextStyle(
+                                          fontSize: 60,
+                                          fontFamily: 'Ghasan',
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.black87,
+                                          height: 1.2,
+                                        ),
+                                      ),
+                                      SizedBox(height: responsiveSmallSpacing.clamp(20.0, 40.0)),
+                                      Container(
+                                        width: double.infinity,
+                                        child: Text(
+                                          'After spending years in jiu-jitsu, I felt it was time to shake things up. So, I took on a six-month contract with a global BJJ franchise — my first venture into social media. This role wasn\'t just about bringing my existing skills to the table; it was about diving headfirst into a new domain and making a meaningful impact for people and a sport I cherish',
+                                          style: TextStyle(
+                                            fontSize: 20,
+                                            fontFamily: 'SFPro',
+                                            color: Colors.black87,
+                                            height: 1.5,
+                                          ),
+                                          textAlign: TextAlign.left,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                SizedBox(width: responsiveHorizontalSpacing.clamp(40.0, 80.0)),
 
                                     // Right side - Penrose Triangle
 
@@ -813,7 +756,6 @@ _buildCaseStudySection(
 
                       SizedBox(height: 60),
 
-                      // Section 5: Discovery Process
 
                       // Section 5: Obstacles Engender Creativity
                       _buildCaseStudySection(
@@ -1197,13 +1139,15 @@ _buildCaseStudySection(
                         content: Container(
                           padding: EdgeInsets.all(30),
                           decoration: BoxDecoration(
-                            color: Color(0xFFE8E8E8), // Light gray background like screenshot
+                            color: Color(0xFFE8E8E8).withAlpha(0), // Light gray background like screenshot
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
+
                               // Header
+
                               Text(
                                 '5. UX Design',
                                 style: TextStyle(
@@ -1217,8 +1161,7 @@ _buildCaseStudySection(
                               SizedBox(height: 15),
 
                               // Main title
-                              Text(
-                                'Research',
+                              Text('Research',
                                 style: TextStyle(
                                   fontSize: 60, // Same as other main titles
                                   fontFamily: 'Ghasan',
@@ -1230,10 +1173,12 @@ _buildCaseStudySection(
                               SizedBox(height: 40),
 
                               // Content row
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+
+                              Row(crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
+
                                   // Left side - Text content
+
                                   Expanded(
                                     flex: 3,
                                     child: Column(
@@ -1266,13 +1211,15 @@ _buildCaseStudySection(
                                   SizedBox( width: 60), // Space between text and icons
 
                                   // Right side - Interactive icons
+
                                   Expanded(
                                     flex: 2,
                                     child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceEvenly,
+                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                       children: [
+
                                         // Questions/Survey icon
+                                        
                                         _buildInteractiveIcon(
                                           imagePath: 'assets/Survey.png',
                                           label: 'Questions',
@@ -1319,9 +1266,10 @@ _buildCaseStudySection(
                         content: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+
                             // Left side - Title and description
-                            Expanded(
-                              flex: 2, // Takes up 2/5 of the width
+
+                            Expanded(flex: 2, // Takes up 2/5 of the width
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -1364,6 +1312,48 @@ _buildCaseStudySection(
                       ),
 
                       SizedBox(height: 60),
+
+                      // NEW: Interface Showcase Carousel Section
+                        _buildCaseStudySection(
+                          title: '',
+                          customHeight: 1300, // Height for carousel section
+                          showDivider: true,
+                          dividerColor: Color(0xFF838383),
+                          dividerHeight: 1.0,
+                          dividerWidth: 0.7,
+                          content: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Interface Showcase',
+                                style: TextStyle(
+                                  fontSize: 60,
+                                  fontFamily: 'Ghasan',
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.black87,
+                                  height: 1.2,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              SizedBox(height: 20),
+                              Text(
+                                'Explore all 42 screens of the Tap In application',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontFamily: 'SFPro',
+                                  color: Colors.black87,
+                                  height: 1.5,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              SizedBox(height: 40),
+                              // The carousel widget
+                              CaseStudyCarouselPresets.tapInCarousel(compactMode: true),
+                            ],
+                          ),
+                        ),
+
+                        SizedBox(height: 60),
 
                       // Section 8: Takeaways
                       _buildCaseStudySection(
@@ -1432,7 +1422,36 @@ _buildCaseStudySection(
               ),
             ],
           ),
-        ],
+        ),
+        
+            // Fixed top bar that never moves
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: CaseStudyTopBar(
+                caseStudyTitle: 'Tap In',
+                onBackPressed: () => Navigator.of(context).pop(),
+                currentTheme: PortfolioTheme.wireframe,
+                onMainAreaPressed: () {
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                },
+              ),
+            ),
+
+            // ⭐ NEW: Floating back to top button
+            FloatingBackToTopButton(
+              scrollController: _scrollController,
+              bottom: 24.0,
+              right: 24.0,
+              size: 56.0,
+              backgroundColor: Colors.white,
+              borderColor: Colors.black,
+              iconColor: Colors.black,
+              borderWidth: 1.0,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1521,8 +1540,7 @@ _buildCaseStudySection(
     required String label,
     required VoidCallback onTap,
   }) {
-    return MouseRegion(
-      cursor: SystemMouseCursors.click, // Hand cursor on hover
+    return MouseOnHoverEvent(
       child: GestureDetector(
         onTap: onTap,
         child: Container(
@@ -2863,3 +2881,138 @@ class PyramidPainter extends CustomPainter {
   @override
   bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
+
+// Tap In Project Data
+final ProjectData tapInStudy = ProjectData(
+  id: 'tap-in',
+  title: 'Tap In',
+  subtitle: 'An all-encompassing B2C mobile application',
+  originalLink: 'https://jeffpdx.net/p/02ec6dbb',
+  heroImage: 'assets/tapin_header.png',
+  logoImage: 'assets/tapin_logo.png',
+  pages: [
+    // Page 1: Project Overview
+    ProjectPage(
+      title: 'Project Overview',
+      sections: [
+        ContentSection(
+          text:
+              'Jiu-jitsu is a highly social activity, with millions of practitioners worldwide, yet lacks a dedicated application for the communication needs of practitioners and gyms.',
+        ),
+        ContentSection(
+          subtitle: 'Problem',
+          text:
+              'The nature of jiu-jitsu fosters friendships and gym loyalty to a degree rarely found elsewhere among fitness gyms or competitive sports clubs. However, when outside of the gym interacting with teammates and gym-related events generally requires the utilization of several disparate media and social applications.',
+        ),
+        ContentSection(
+          subtitle: 'Solution',
+          text:
+              'Tap In remedies these problems by serving as a central hub for gym-related information, content, events, and social media. Gym members can now find the assemblage of gym-specific content in a single resource.',
+        ),
+        ContentSection(
+          subtitle: 'Tools',
+          text: 'Miro, Figma, Procreate, Figjam, Zoom, Loom',
+        ),
+        ContentSection(
+          subtitle: 'My Role',
+          text:
+              'Senior Software Engineer\nSenior UX/UI Designer & Researcher\n\n• Ideation\n• Mental Models\n• Journey Maps\n• User Stories\n• Ethnographic Research\n• Sketching\n• JTBD Interviews\n• Wireframing\n• Prototyping\n• Usability Testing\n• Redesign',
+        ),
+        ContentSection(
+          subtitle: 'Timeline',
+          text: '10 months',
+        ),
+        ContentSection(
+          subtitle: 'Process',
+          text: 'Discovery, Research, Ideation, Design, Testing, Reflection',
+        ),
+      ],
+    ),
+
+    // Page 2: Research
+    ProjectPage(
+      title: 'Research',
+      sections: [
+        ContentSection(
+          subtitle: 'Secondary Research',
+          text:
+              'My secondary research was primarily focused on the role of digital engagement with fitness and martial arts gyms.\n\nI discovered that online engagement with gyms plays a more-than-anomalous part in growing/retaining membership as well as fostering positive opinions of a given gym regardless of long-term membership or new/prospective member.',
+        ),
+        ContentSection(
+          subtitle: 'Primary Research',
+          text:
+              'I conducted interviews with 12 jiu-jitsu practitioners from various experience levels and gym affiliations to understand their current pain points and desired features.',
+        ),
+        ContentSection(
+          subtitle: 'Key Findings',
+          text:
+              '• 85% of practitioners use multiple apps to stay connected with their gym community\n• Scheduling and event coordination are major pain points\n• Users want a centralized hub for gym-related social interactions\n• Privacy and gym-specific content are highly valued',
+        ),
+      ],
+    ),
+
+    // Page 3: Design Process
+    ProjectPage(
+      title: 'Design Process',
+      sections: [
+        ContentSection(
+          subtitle: 'Wireframing',
+          text:
+              'Starting with low-fidelity wireframes, I mapped out the core user flows and key features. The wireframing process helped identify the most critical features and optimal user journey.',
+        ),
+        ContentSection(
+          subtitle: 'Prototyping',
+          text:
+              'High-fidelity prototypes were created in Figma, focusing on the social feed, scheduling system, and profile management features.',
+        ),
+        ContentSection(
+          subtitle: 'User Testing',
+          text:
+              'Conducted usability testing with 8 participants to validate design decisions and identify areas for improvement.',
+        ),
+      ],
+    ),
+
+    // Page 4: Final Design
+    ProjectPage(
+      title: 'Final Design',
+      sections: [
+        ContentSection(
+          subtitle: 'Key Features',
+          text:
+              '• Gym-specific social feed\n• Integrated scheduling system\n• Training log and progress tracking\n• Event coordination and announcements\n• Private messaging and group chats',
+        ),
+        ContentSection(
+          subtitle: 'Design System',
+          text:
+              'Created a comprehensive design system with consistent typography, color palette, and component library to ensure scalability and maintainability.',
+        ),
+      ],
+    ),
+
+    // Page 5: Reflection
+    ProjectPage(
+      title: 'Reflection',
+      sections: [
+        ContentSection(
+          subtitle: 'Challenges',
+          text:
+              'The main challenge was balancing the social aspects with the practical gym management features while maintaining a clean, intuitive interface.',
+        ),
+        ContentSection(
+          subtitle: 'Learnings',
+          text:
+              'This project taught me the importance of deeply understanding niche communities and their specific needs. The jiu-jitsu community has unique social dynamics that required careful consideration.',
+        ),
+        ContentSection(
+          subtitle: 'Next Steps',
+          text:
+              'Future iterations would focus on expanding the training analytics features and integrating with popular fitness tracking devices.',
+        ),
+        ContentSection(
+          text: 'Thank you for reading my case study!',
+        ),
+      ],
+    ),
+  ],
+);

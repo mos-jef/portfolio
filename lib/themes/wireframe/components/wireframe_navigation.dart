@@ -172,13 +172,17 @@ class WireframeDesktopSidebar extends StatelessWidget {
             if (context.mounted) {
               showDialog(
                 context: context,
-                builder: (context) => WireframeDesktopContactModal(
-                  onClose: () => Navigator.of(context).pop(),
+                builder: (context) => Material(
+                  type: MaterialType.transparency,
+                  child: WireframeDesktopContactModal(
+                    onClose: () => Navigator.of(context).pop(),
+                  ),
                 ),
               );
             }
           },
         ),
+
         _buildNeumorphicSidebarItem(
           null,
           'Analytics',
@@ -347,12 +351,12 @@ class WireframeDesktopSidebar extends StatelessWidget {
 
 /// Case study navigation bar for mobile
 class WireframeCaseStudyNavBar extends StatelessWidget {
-  final String selectedCaseStudy;
+  final String selectedCaseStudy; // <-- Make it final
   final VoidCallback onBackPressed;
 
   const WireframeCaseStudyNavBar({
     Key? key,
-    required this.selectedCaseStudy,
+    this.selectedCaseStudy = '', // <-- Add as constructor parameter
     required this.onBackPressed,
   }) : super(key: key);
 

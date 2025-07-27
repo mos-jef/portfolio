@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mouse_follower/mouse_follower.dart';
 import 'package:portfolio_website/themes/wireframe/utils/wireframe_color_manager.dart';
 import 'package:portfolio_website/themes/wireframe/widgets/clickable_widget.dart';
 import 'package:portfolio_website/themes/wireframe/widgets/svg_icon.dart';
@@ -188,9 +189,7 @@ class _FloatingCommentButtonState extends State<FloatingCommentButton>
         width: widget.size,
         height: widget.size,
         decoration: BoxDecoration(
-          boxShadow: widget.hasEnhancedShadow
-              ? _getEnhancedShadow()
-              : _getStandardShadow(),
+          boxShadow: [], // Empty list = no shadow
         ),
         child: SvgIcon(
           assetPath: SvgIconPaths.addCircleFill,
@@ -204,7 +203,7 @@ class _FloatingCommentButtonState extends State<FloatingCommentButton>
   List<BoxShadow> _getStandardShadow() {
     return [
       BoxShadow(
-        color: Colors.black.withOpacity(0.2),
+        color: Colors.black.withOpacity(0.0),
         blurRadius: 8,
         offset: Offset(0, 4),
       ),
@@ -214,17 +213,17 @@ class _FloatingCommentButtonState extends State<FloatingCommentButton>
   List<BoxShadow> _getEnhancedShadow() {
     return [
       BoxShadow(
-        color: WireframeColorManager.colors.primary.withOpacity(0.3),
+        color: Colors.black.withOpacity(0.0), // ALWAYS black
         blurRadius: 20,
         offset: Offset(0, 8),
       ),
       BoxShadow(
-        color: Colors.black.withOpacity(0.1),
+        color: Colors.black.withOpacity(0.0), // ALWAYS black
         blurRadius: 4,
         offset: Offset(0, 2),
       ),
       BoxShadow(
-        color: WireframeColorManager.colors.primary.withOpacity(0.2),
+        color: Colors.black.withOpacity(0.0), // ALWAYS black
         blurRadius: 30,
         offset: Offset(0, 0),
       ),
@@ -268,7 +267,7 @@ class WireframeFloatingActionButton extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: effectiveBackgroundColor,
-        boxShadow: hasShadow ? WireframeLayoutConstants.shadowMedium : null,
+         boxShadow: [], // No shadow at all
       ),
       child: Material(
         color: Colors.transparent,
@@ -417,7 +416,7 @@ class _WireframeSpeedDialState extends State<WireframeSpeedDial>
                               border: Border.all(
                                 color: WireframeColorManager.colors.border,
                               ),
-                              boxShadow: WireframeLayoutConstants.shadowLight,
+                              boxShadow: [], // No shadow at all
                             ),
                             child: Text(
                               action.label!,
@@ -534,7 +533,7 @@ class WireframeFloatingBadge extends StatelessWidget {
         color: effectiveBackgroundColor,
         borderRadius:
             BorderRadius.circular(WireframeLayoutConstants.radiusSmall),
-        boxShadow: WireframeLayoutConstants.shadowLight,
+        boxShadow: [], // No shadow at all
       ),
       child: Text(
         text,
@@ -896,16 +895,13 @@ class _SimpleFloatingCommentButtonState
 
   @override
   Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (_) => _handleHover(true),
-      onExit: (_) => _handleHover(false),
-      child: AnimatedBuilder(
-        animation: Listenable.merge([
-          _tapAnimationController,
-          _pulseAnimationController,
-          _hoverAnimationController,
-        ]),
-        builder: (context, child) {
+    return AnimatedBuilder(
+  animation: Listenable.merge([
+    _tapAnimationController,
+    _pulseAnimationController,
+    _hoverAnimationController,
+  ]),
+  builder: (context, child) {
           double combinedScale = _hoverAnimation.value;
 
           if (widget.hasPulseAnimation) {
@@ -917,10 +913,16 @@ class _SimpleFloatingCommentButtonState
           }
 
           return Transform.scale(
-            scale: combinedScale,
-            child: ClickableWidget(
-              onTap: _handleTap,
-              child: Container(
+      scale: combinedScale,
+      child: MouseOnHoverEvent(
+        onHoverMouseCursor: SystemMouseCursors.click,
+        child: MouseRegion(
+          onEnter: (_) => _handleHover(true),
+          onExit: (_) => _handleHover(false),
+          child: ClickableWidget(
+            onTap: _handleTap,
+            enableMouseFollowerHover: false, // Disable since we're manually wrapping
+            child: Container(
                 width: widget.size,
                 height: widget.size,
                 decoration: BoxDecoration(
@@ -950,12 +952,13 @@ class _SimpleFloatingCommentButtonState
                   assetPath: SvgIconPaths.addCircleLine,
                   size: widget.size * 0.02,
                   color: WireframeColorManager.colors.primary,
+                 ),
                 ),
               ),
             ),
-          );
-        },
-      ),
+          ) 
+        );
+      },
     );
   }
 }

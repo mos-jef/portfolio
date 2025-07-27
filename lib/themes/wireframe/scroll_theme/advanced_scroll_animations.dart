@@ -688,7 +688,7 @@ class _ConstructionLinePainter extends CustomPainter {
   }
 
   void _drawVerticalLine(Canvas canvas, Size size, Paint paint) {
-    final x = size.width * 0.2;
+    final x = size.width * 0.0;
     final startY = 0.0;
     final endY = size.height * progress;
 

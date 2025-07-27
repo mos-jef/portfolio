@@ -1,6 +1,7 @@
 // File: lib/widgets/clickable_widget.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:mouse_follower/mouse_follower.dart';
 
 /// A reusable widget that makes any child clickable with proper cursor behavior
 class ClickableWidget extends StatelessWidget {
@@ -10,6 +11,7 @@ class ClickableWidget extends StatelessWidget {
   final VoidCallback? onDoubleTap;
   final SystemMouseCursor cursor;
   final bool enabled;
+  final bool enableMouseFollowerHover; // Add option to disable if needed
 
   const ClickableWidget({
     Key? key,
@@ -19,6 +21,7 @@ class ClickableWidget extends StatelessWidget {
     this.onDoubleTap,
     this.cursor = SystemMouseCursors.click,
     this.enabled = true,
+    this.enableMouseFollowerHover = true, // Default to true
   }) : super(key: key);
 
   @override
@@ -31,23 +34,44 @@ class ClickableWidget extends StatelessWidget {
       );
     }
 
-    // If no interactions provided, just return child with cursor
-    if (onTap == null && onLongPress == null && onDoubleTap == null) {
-      return MouseRegion(
-        cursor: cursor,
-        child: child,
-      );
-    }
+    // Build the base interactive widget
+    Widget interactiveWidget = child;
 
-    // Return interactive widget
-    return MouseRegion(
-      cursor: cursor,
-      child: GestureDetector(
+    // Wrap with GestureDetector if any interactions are provided
+    if (onTap != null || onLongPress != null || onDoubleTap != null) {
+      interactiveWidget = GestureDetector(
         onTap: onTap,
         onLongPress: onLongPress,
         onDoubleTap: onDoubleTap,
         child: child,
-      ),
+      );
+    }
+
+    // Check if we're on mobile to disable MouseFollower effects
+    final isMobile = MediaQuery.of(context).size.width < 600;
+
+    // Always wrap with MouseOnHoverEvent for hover effects (unless disabled or on mobile)
+    if (enableMouseFollowerHover &&
+        !isMobile &&
+        (onTap != null || onLongPress != null || onDoubleTap != null)) {
+      try {
+        return MouseOnHoverEvent(
+          onHoverMouseCursor: cursor,
+          child: interactiveWidget,
+        );
+      } catch (e) {
+        // Fallback to regular MouseRegion if MouseFollowerProvider isn't available
+        return MouseRegion(
+          cursor: cursor,
+          child: interactiveWidget,
+        );
+      }
+    }
+
+// If no mouse follower hover or on mobile, just use MouseRegion
+    return MouseRegion(
+      cursor: isMobile ? SystemMouseCursors.basic : cursor,
+      child: interactiveWidget,
     );
   }
 }
@@ -63,6 +87,7 @@ class ClickableContainer extends StatelessWidget {
   final double? height;
   final SystemMouseCursor cursor;
   final bool enabled;
+  final bool enableMouseFollowerHover;
 
   const ClickableContainer({
     Key? key,
@@ -75,6 +100,7 @@ class ClickableContainer extends StatelessWidget {
     this.height,
     this.cursor = SystemMouseCursors.click,
     this.enabled = true,
+    this.enableMouseFollowerHover = true,
   }) : super(key: key);
 
   @override
@@ -99,6 +125,18 @@ class ClickableContainer extends StatelessWidget {
       return container;
     }
 
+    // Use MouseOnHoverEvent for clickable containers
+    if (enableMouseFollowerHover) {
+      return MouseOnHoverEvent(
+        onHoverMouseCursor: cursor,
+        child: GestureDetector(
+          onTap: onTap,
+          child: container,
+        ),
+      );
+    }
+
+    // Fallback to regular MouseRegion
     return MouseRegion(
       cursor: cursor,
       child: GestureDetector(
@@ -117,6 +155,7 @@ class ClickableText extends StatelessWidget {
   final TextStyle? hoverStyle;
   final SystemMouseCursor cursor;
   final bool enabled;
+  final bool enableMouseFollowerHover;
 
   const ClickableText({
     Key? key,
@@ -126,6 +165,7 @@ class ClickableText extends StatelessWidget {
     this.hoverStyle,
     this.cursor = SystemMouseCursors.click,
     this.enabled = true,
+    this.enableMouseFollowerHover = true,
   }) : super(key: key);
 
   @override
@@ -143,6 +183,18 @@ class ClickableText extends StatelessWidget {
       );
     }
 
+    // Use MouseOnHoverEvent for clickable text
+    if (enableMouseFollowerHover) {
+      return MouseOnHoverEvent(
+        onHoverMouseCursor: cursor,
+        child: GestureDetector(
+          onTap: onTap,
+          child: textWidget,
+        ),
+      );
+    }
+
+    // Fallback to regular implementation
     return MouseRegion(
       cursor: cursor,
       child: GestureDetector(

@@ -1,10 +1,17 @@
+import 'dart:ui';
+
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:portfolio_website/components/project_viewer.dart';
+import 'package:portfolio_website/components/projects_registry.dart';
 import 'package:portfolio_website/firestore/firestore_models.dart';
 import 'package:portfolio_website/firestore/firestore_service.dart';
+import 'package:portfolio_website/revised_case_studies/moments.dart';
+import 'package:portfolio_website/revised_case_studies/tap_in.dart';
 import 'package:portfolio_website/services/analytics_service.dart';
 import 'package:portfolio_website/themes/wireframe/cards/wireframe_project_cards.dart';
 import 'package:portfolio_website/themes/wireframe/components/header_icons.dart';
+import 'package:portfolio_website/themes/wireframe/components/wireframe_content_areas.dart';
 import 'package:portfolio_website/themes/wireframe/utils/wireframe_color_manager.dart';
 import 'package:portfolio_website/themes/wireframe/widgets/clickable_widget.dart';
 import 'package:portfolio_website/themes/wireframe/widgets/enhanced_social_post.dart';
@@ -12,6 +19,7 @@ import 'package:portfolio_website/themes/wireframe/widgets/responsive_device_fra
 import 'package:portfolio_website/themes/wireframe/widgets/wireframe_about_section.dart';
 import 'package:portfolio_website/themes/wireframe/widgets/wireframe_custom_logo.dart';
 import 'package:portfolio_website/themes/wireframe/widgets/wireframe_settings_section.dart';
+import 'package:portfolio_website/widgets/scroll_gesture_interceptor.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:math' as math;
 import 'components/wireframe_comment_modal.dart';
@@ -25,7 +33,6 @@ class WireframeDesktopMockup extends StatelessWidget {
   final String selectedSection;
   final String hoveredItem;
   final String desktopCurrentView;
-  final String desktopSelectedCaseStudy;
 
   // Targeting system
   final GlobalKey? targetKey;
@@ -52,7 +59,6 @@ class WireframeDesktopMockup extends StatelessWidget {
   // Callbacks
   final Function(String) onSectionChanged;
   final Function(String) onHoveredItemChanged;
-  final Function(String) onDesktopCaseStudySelected;
   final VoidCallback onShowInlineDesktopCommentModal;
   final VoidCallback onHideInlineDesktopCommentModal;
   final VoidCallback onAddDesktopComment;
@@ -67,7 +73,6 @@ class WireframeDesktopMockup extends StatelessWidget {
     required this.selectedSection,
     required this.hoveredItem,
     required this.desktopCurrentView,
-    required this.desktopSelectedCaseStudy,
     required this.showDesktopInlineComment,
     required this.desktopCommentController,
     required this.mobileNameController,
@@ -78,7 +83,6 @@ class WireframeDesktopMockup extends StatelessWidget {
     required this.posts,
     required this.onSectionChanged,
     required this.onHoveredItemChanged,
-    required this.onDesktopCaseStudySelected,
     required this.onShowInlineDesktopCommentModal,
     required this.onHideInlineDesktopCommentModal,
     required this.onAddDesktopComment,
@@ -100,7 +104,7 @@ class WireframeDesktopMockup extends StatelessWidget {
       child: Column(
         children: [
           // Desktop Header
-          _buildSectionHeader('Desktop', ''),
+          _buildSectionHeader('', ''),
 
           const SizedBox(height: 20),
 
@@ -166,19 +170,30 @@ class WireframeDesktopMockup extends StatelessWidget {
 
                                       // Main Content
                                       Expanded(
-                                        flex:
-                                            desktopSelectedCaseStudy.isNotEmpty
-                                                ? 3
-                                                : 2,
+                                        flex: 2,
                                         child: Stack(
                                           children: [
+
                                             // Main scrollable content - hide when comment modal is open
-                                            if (!showDesktopInlineComment)
-                                              CustomScrollView(
-                                                controller:
-                                                    desktopScrollController,
-                                                slivers: [
+
+                                            ScrollGestureInterceptor(
+                                              scrollController: desktopScrollController,
+                                              enableScrollIsolation: true,
+                                              onScrollStart: () { print( 'Desktop content scroll started'); },
+                                              onScrollEnd: () {
+                                                print('Desktop content scroll ended'); },
+
+                                                child: DeviceContentDragBehavior.wrap(
+                                                  controller: desktopScrollController,
+                                                  isVertical: true,
+                                                  child: ScrollConfiguration(
+                                                    behavior: _ContentAreaScrollBehavior(),
+                                                    child: CustomScrollView(
+                                                      controller: desktopScrollController,
+                                                      slivers: [
+
                                                   // Profile Header as sliver with floating icons - HIDE FOR SETTINGS
+
                                                   if (selectedSection !=
                                                       'Settings')
                                                     SliverToBoxAdapter(
@@ -253,8 +268,11 @@ class WireframeDesktopMockup extends StatelessWidget {
                                                   // REPLACE CONTENT AREA WITH DIRECT SLIVER CONTENT
                                                   ..._buildDesktopContentSlivers(
                                                       context),
-                                                ],
+                                                 ],
+                                                ),
                                               ),
+                                            ),
+                                          ),
 
                                             // Inline comment modal - show when active
                                             if (showDesktopInlineComment)
@@ -319,8 +337,6 @@ class WireframeDesktopMockup extends StatelessWidget {
                                                   'About',
                                                   'Projects'
                                                 ].contains(selectedSection) &&
-                                                desktopSelectedCaseStudy
-                                                    .isEmpty &&
                                                 !showDesktopInlineComment)
                                               Positioned(
                                                 bottom: 30,
@@ -427,28 +443,24 @@ class WireframeDesktopMockup extends StatelessWidget {
                                         ),
                                       ),
 
-                                      // Right Sidebar
-                                      Container(
-                                        width: desktopSelectedCaseStudy
-                                                .isNotEmpty
-                                            ? math.min(
-                                                constraints.maxWidth * 0.15,
-                                                100) // 15% of width, max 100px
-                                            : math.min(
-                                                constraints.maxWidth * 0.25,
-                                                160), // 25% of width, max 160px
-                                        decoration: const BoxDecoration(
-                                          border: Border(
-                                            left: BorderSide(
-                                                color: Color(0xFFE1E5E9)),
+                                      // Right Sidebar - HIDDEN for Settings view
+                                      if (selectedSection != 'Settings')
+                                        Container(
+                                          width: math.min(
+                                              constraints.maxWidth * 0.25,
+                                              160), // 25% of width, max 160px
+                                          decoration: const BoxDecoration(
+                                            border: Border(
+                                              left: BorderSide(
+                                                  color: Color(0xFFE1E5E9)),
+                                            ),
+                                          ),
+                                          child: Container(
+                                            color: WireframeColorManager
+                                                .colors.onPrimary,
+                                            // Blank space for future use
                                           ),
                                         ),
-                                        child: Container(
-                                          color: WireframeColorManager
-                                              .colors.onPrimary,
-                                          // Blank space for future use
-                                        ),
-                                      ),
                                     ],
                                   ),
                                 ),
@@ -619,6 +631,8 @@ class WireframeDesktopMockup extends StatelessWidget {
             color: WireframeColorManager.colors.text,
           ),
         ),
+
+        
         const Spacer(),
       ],
     );
@@ -833,80 +847,28 @@ class WireframeDesktopMockup extends StatelessWidget {
   List<Widget> _buildDesktopContentSlivers(BuildContext context) {
     if (selectedSection == 'Settings') {
       return [
-        SliverToBoxAdapter(
-          child: Container(
-            height: 500, // Fixed height to prevent layout issues
-            child: WireframeSettingsSection(
-              isMobile: false,
-              onAnalyticsTap: onShowAnalyticsModal != null
-                  ? () => onShowAnalyticsModal!(context)
-                  : null,
-              onBackPressed: onBackFromSettings,
-              onThemeChanged: () {
-                // Handle theme changes
-              },
-            ),
+        SliverFillRemaining(
+          hasScrollBody: true,
+          child: WireframeSettingsSection(
+            isMobile: false,
+            onAnalyticsTap: onShowAnalyticsModal != null
+                ? () => onShowAnalyticsModal!(context)
+                : null,
+            onBackPressed: onBackFromSettings,
+            onThemeChanged: () {
+              // Handle theme changes
+            },
           ),
         ),
       ];
+
     } else if (selectedSection == 'Projects') {
-      if (desktopSelectedCaseStudy.isNotEmpty) {
-        return [
-          // Back button as sliver
-          SliverToBoxAdapter(
-            child: Container(
-              width: double.infinity,
-              padding: EdgeInsets.only(
-                left: 8.0,
-                right: WireframeLayoutConstants.spacingStandard,
-                top: WireframeLayoutConstants.spacingSmall,
-                bottom: WireframeLayoutConstants.spacingSmall,
-              ),
-              child: Row(
-                children: [
-                  ClickableWidget(
-                    onTap: () => onDesktopCaseStudySelected(''),
-                    child: Container(
-                      padding:
-                          EdgeInsets.all(WireframeLayoutConstants.spacingTiny),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.arrow_back_ios,
-                            size: 18,
-                            color: WireframeLayoutConstants.wireframeAccent,
-                          ),
-                          SizedBox(width: 4),
-                          Text(
-                            'Back to Projects',
-                            style: TextStyle(
-                              fontSize:
-                                  WireframeLayoutConstants.desktopFontSizeBody,
-                              color: WireframeLayoutConstants.wireframeAccent,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          // Case study content as sliver
-          SliverFillRemaining(
-            child: PortfolioViewer(projectId: desktopSelectedCaseStudy),
-          ),
-        ];
-      } else {
-        return [
-          SliverToBoxAdapter(
-            child: _buildDesktopProjectsList(),
-          ),
-        ];
-      }
+      // Always show projects list since case studies now launch in browser
+      return [
+        SliverToBoxAdapter(
+          child: _buildDesktopProjectsList(context),
+        ),
+      ];
     } else if (selectedSection == 'About') {
       return [
         SliverToBoxAdapter(
@@ -979,53 +941,93 @@ class WireframeDesktopMockup extends StatelessWidget {
     }
   }
 
-  Widget _buildDesktopProjectsList() {
+  Widget _buildDesktopProjectsList(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(WireframeLayoutConstants.spacingStandard),
       child: Column(
-        children: [
-          DesktopWireframeProjectCard(
-            projectId: 'tap-in',
-            title: 'Tap In',
-            role:
-                'Senior Software Engineer, Senior UX/UI Designer & Researcher for B2C application',
-            description:
-                'An inclusive mobile app that caters to the increasing demand for a unified integration of diverse Jiu-Jitsu training and cultural aspects.',
-            heroImagePath: 'assets/tapin_card.png', // Same as mobile
-            onTap: () => onDesktopCaseStudySelected('tap-in'),
-          ),
-          SizedBox(height: WireframeLayoutConstants.spacingStandard),
-          DesktopWireframeProjectCard(
-            projectId: 'moments',
-            title: 'Moments',
-            role: 'UX/UI Designer & Researcher (5-member team)',
-            description:
-                'A burgeoning B2C social media application aiming to redefine the landscape',
-            heroImagePath: 'assets/moments_card.png', // Same as mobile
-            onTap: () => onDesktopCaseStudySelected('moments'),
-          ),
-          SizedBox(height: WireframeLayoutConstants.spacingStandard),
-          DesktopWireframeProjectCard(
-            projectId: 'core-ai',
-            title: 'CoreAi',
-            role: 'UX/UI Designer (5-member team)',
-            description:
-                'An innovative B2B SaaS AI platform that analyzes associate metrics and offers actionable insights for continuous improvement',
-            heroImagePath: 'assets/coreai_card.png', // Same as mobile
-            onTap: () => onDesktopCaseStudySelected('core-ai'),
-          ),
-          SizedBox(height: WireframeLayoutConstants.spacingStandard),
-          DesktopWireframeProjectCard(
-            projectId: 'plannie',
-            title: 'Plannie',
-            role: 'UX/UI Designer for B2C enhancement project',
-            description:
-                'Event planning platform that seamlessly connects planners and clients through an intuitive interface',
-            heroImagePath: 'assets/plannie_card.png', // Same as mobile
-            onTap: () => onDesktopCaseStudySelected('plannie'),
-          ),
-        ],
+        children: ProjectsRegistry().getAllProjects().map((project) {
+          return Column(
+            children: [
+              DesktopWireframeProjectCard(
+                projectId: project.id,
+                title: project.title,
+                role: 'UX/UI Designer & Developer', // Use consistent role
+                description: project.subtitle, // Use subtitle as description
+                heroImagePath: project.logoImage.isNotEmpty
+                    ? project.logoImage
+                    : 'assets/backgroundheader.png',
+                onTap: () => _navigateToCaseStudy(context, project.id),
+              ),
+              if (project != ProjectsRegistry().getAllProjects().last)
+                SizedBox(height: WireframeLayoutConstants.spacingStandard),
+            ],
+          );
+        }).toList(),
       ),
     );
   }
+
+  void _navigateToCaseStudy(BuildContext context, String projectId) {
+    switch (projectId) {
+      case 'tap-in':
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => TapInCaseStudy(),
+          ),
+        );
+        break;
+      case 'moments':
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => MomentsCaseStudy(),
+          ),
+        );
+        break;
+      default:
+        print('Case study not implemented yet: $projectId');
+        break;
+    }
+  }
+}
+
+class _DesktopScrollBehavior extends ScrollBehavior {
+  @override
+  Widget buildScrollbar(
+      BuildContext context, Widget child, ScrollableDetails details) {
+    return child;
+  }
+
+  @override
+  ScrollPhysics getScrollPhysics(BuildContext context) {
+    return const ClampingScrollPhysics();
+  }
+
+  @override
+  Set<PointerDeviceKind> get dragDevices => {
+        PointerDeviceKind.touch,
+        PointerDeviceKind.mouse,
+        PointerDeviceKind.stylus,
+        PointerDeviceKind.trackpad,
+      };
+}
+
+class _ContentAreaScrollBehavior extends ScrollBehavior {
+  @override
+  Widget buildScrollbar(
+      BuildContext context, Widget child, ScrollableDetails details) {
+    return child;
+  }
+
+  @override
+  ScrollPhysics getScrollPhysics(BuildContext context) {
+    return const ClampingScrollPhysics();
+  }
+
+  @override
+  Set<PointerDeviceKind> get dragDevices => {
+        PointerDeviceKind.touch,
+        PointerDeviceKind.mouse,
+        PointerDeviceKind.stylus,
+        PointerDeviceKind.trackpad,
+      };
 }

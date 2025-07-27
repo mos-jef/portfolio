@@ -32,13 +32,19 @@ class ResponsiveDeviceFrame extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
+
         // Calculate optimal scale while maintaining aspect ratio
+
         double deviceAspectRatio = deviceWidth / deviceHeight;
-        double containerAspectRatio =
-            constraints.maxWidth / constraints.maxHeight;
+        double containerAspectRatio = constraints.maxWidth / constraints.maxHeight;
 
         double scale;
-        if (containerAspectRatio > deviceAspectRatio) {
+        // Add special handling for very small screens
+
+        if (constraints.maxWidth < 800) {
+          // For small screens, prioritize fitting width and allow some height overflow
+          scale = constraints.maxWidth / deviceWidth;
+        } else if (containerAspectRatio > deviceAspectRatio) {
           // Container is wider - scale based on height
           scale = constraints.maxHeight / deviceHeight;
         } else {
@@ -46,8 +52,8 @@ class ResponsiveDeviceFrame extends StatelessWidget {
           scale = constraints.maxWidth / deviceWidth;
         }
 
-        // Apply maximum scale limit and padding factor
-        scale = (scale * 0.9).clamp(0.1, maxScale ?? 1.0);
+        // Apply maximum scale limit and padding factor with better small screen handling
+        scale = (scale * 0.85).clamp(0.3, maxScale ?? 1.0); // Increased minimum scale and reduced padding
 
         double scaledWidth = deviceWidth * scale;
         double scaledHeight = deviceHeight * scale;

@@ -16,8 +16,8 @@ class WireframeColorManager {
   static const String ninjaLightTheme = 'ninja_light';
   static const String ninjaDarkTheme = 'ninja_dark';
 
-  // Current active theme (can be changed dynamically)
-  static String _currentTheme = defaultTheme;
+  // Current active theme (can be changed dynamically) - Athletic Dark as default
+  static String _currentTheme = athleteDarkTheme;
 
   /// Get the current active theme name
   static String get currentTheme => _currentTheme;
@@ -29,8 +29,8 @@ class WireframeColorManager {
     }
   }
 
-  // Theme mode management
-  static bool _isDarkMode = false;
+  // Theme mode management - Start in dark mode for Athletic Dark default
+  static bool _isDarkMode = true;
 
   /// Get current theme mode
   static bool get isDarkMode => _isDarkMode;

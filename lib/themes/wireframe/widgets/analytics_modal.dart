@@ -341,7 +341,7 @@ class _AnalyticsModalState extends State<AnalyticsModal>
   Widget _buildMetricsGrid(List<_MetricData> metrics) {
     return GridView.builder(
       shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
+      physics:  AlwaysScrollableScrollPhysics(), // ← Allows scrolling within bounds
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: widget.isMobile ? 2 : 4,
         crossAxisSpacing: 16,

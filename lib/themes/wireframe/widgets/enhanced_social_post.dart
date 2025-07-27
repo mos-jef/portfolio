@@ -1,4 +1,5 @@
 // File: lib/themes/wireframe/widgets/enhanced_social_post.dart
+import 'dart:async';
 import 'package:animated_emoji/animated_emoji.dart';
 import 'package:flutter/material.dart';
 import 'package:portfolio_website/services/analytics_service.dart';
@@ -47,18 +48,23 @@ class EnhancedSocialPost extends StatefulWidget {
 
 class _EnhancedSocialPostState extends State<EnhancedSocialPost>
     with TickerProviderStateMixin {
-  late SocialPost _currentPost;
+  // Use ValueNotifier to prevent flickering
+  late ValueNotifier<SocialPost> _postNotifier;
   late AnimationController _likeAnimationController;
   late Animation<double> _likeScaleAnimation;
   bool _showEmojiPicker = false;
   bool _isEditing = false;
   late TextEditingController _editController;
 
+  // Debouncing timer to prevent excessive updates
+  Timer? _updateDebounceTimer;
+  static const Duration _debounceDuration = Duration(milliseconds: 300);
+
   @override
   void initState() {
     super.initState();
-    _currentPost = widget.post;
-    _editController = TextEditingController(text: _currentPost.content);
+    _postNotifier = ValueNotifier<SocialPost>(widget.post);
+    _editController = TextEditingController(text: widget.post.content);
 
     // Initialize the animation controller
     _likeAnimationController = AnimationController(
@@ -79,178 +85,172 @@ class _EnhancedSocialPostState extends State<EnhancedSocialPost>
   void dispose() {
     _likeAnimationController.dispose();
     _editController.dispose();
+    _postNotifier.dispose();
+    _updateDebounceTimer?.cancel();
     super.dispose();
+  }
+
+  // Debounced update method to prevent excessive parent rebuilds
+  void _debouncedParentUpdate() {
+    _updateDebounceTimer?.cancel();
+    _updateDebounceTimer = Timer(_debounceDuration, () {
+      widget.onPostUpdated?.call();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      margin: EdgeInsets.only(bottom: 1),
-      padding: EdgeInsets.all(widget.isMobile
-          ? WireframeLayoutConstants.spacingMedium
-          : WireframeLayoutConstants.spacingStandard),
-      decoration: BoxDecoration(
-        color: WireframeColorManager.colors.surface,
-        border: Border(
-          bottom: BorderSide(
-              color: WireframeColorManager.colors.border.withOpacity(0.3)),
-        ),
-      ),
-      child: Column(
-        children: [
-          Row(
+    return ValueListenableBuilder<SocialPost>(
+      valueListenable: _postNotifier,
+      builder: (context, currentPost, child) {
+        return Container(
+          width: double.infinity,
+          margin: EdgeInsets.only(bottom: 1),
+          padding: EdgeInsets.all(widget.isMobile
+              ? WireframeLayoutConstants.spacingMedium
+              : WireframeLayoutConstants.spacingStandard),
+          decoration: BoxDecoration(
+            color: WireframeColorManager.colors.surface,
+            border: Border(
+              bottom: BorderSide(
+                color: WireframeColorManager.colors.border!,
+                width: 0.5,
+              ),
+            ),
+          ),
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildAvatar(),
-              SizedBox(width: WireframeLayoutConstants.spacingMedium),
-              Expanded(child: _buildPostContent()),
+              _buildPostHeader(currentPost),
+              SizedBox(height: WireframeLayoutConstants.spacingSmall),
+              _buildPostContent(currentPost),
+              SizedBox(height: WireframeLayoutConstants.spacingMedium),
+              _buildPostActions(currentPost),
             ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
-  Widget _buildAvatar() {
-    final size = widget.isMobile
-        ? WireframeLayoutConstants.smallAvatarSize
-        : WireframeLayoutConstants.mediumAvatarSize;
-
-    return AvatarSystem.buildAvatar(
-      avatarId: _currentPost.authorAvatar,
-      userName: _currentPost.authorName,
-      size: size,
-    );
-  }
-
-  Widget _buildPostContent() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildPostHeader(),
-        SizedBox(height: WireframeLayoutConstants.spacingSmall),
-        _buildPostBody(),
-        SizedBox(height: WireframeLayoutConstants.spacingMedium),
-        _buildPostActions(),
-      ],
-    );
-  }
-
-  Widget _buildPostHeader() {
+  Widget _buildPostHeader(SocialPost post) {
     return Row(
       children: [
+        // Avatar
+        Container(
+          width: widget.isMobile ? 32 : 40,
+          height: widget.isMobile ? 32 : 40,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: WireframeColorManager.colors.surfaceVariant,
+          ),
+          child: ClipOval(
+            child: AvatarSystem.buildAvatar(
+              avatarId: post.authorAvatar,
+              userName: post.authorName,
+              size: widget.isMobile ? 32.0 : 40.0,
+              showBorder: false,
+            ),
+          ),
+        ),
+        SizedBox(width: WireframeLayoutConstants.spacingSmall),
+
+        // Author info and timestamp
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                _currentPost.authorName,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: widget.isMobile
-                      ? WireframeLayoutConstants.mobileFontSizeBody
-                      : WireframeLayoutConstants.desktopFontSizeBody,
-                  color: WireframeColorManager.colors.focused,
-                ),
+              Row(
+                children: [
+                  Text(
+                    post.authorName,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: widget.isMobile
+                          ? WireframeLayoutConstants.mobileFontSizeBody
+                          : WireframeLayoutConstants.desktopFontSizeBody,
+                      color: WireframeColorManager.colors.text,
+                    ),
+                  ),
+                  if (post.isPinned) ...[
+                    SizedBox(width: 4),
+                    Icon(
+                      Icons.push_pin,
+                      size: 12,
+                      color: WireframeColorManager.colors.primary,
+                    ),
+                  ],
+                ],
               ),
               Text(
-                timeago.format(_currentPost.createdAt),
+                timeago.format(post.createdAt),
                 style: TextStyle(
-                  color: WireframeColorManager.colors.disabled,
                   fontSize: widget.isMobile
                       ? WireframeLayoutConstants.mobileFontSizeCaption
-                      : WireframeLayoutConstants.mobileFontSizeBody,
+                      : WireframeLayoutConstants.mobileFontSizeBody - 2,
+                  color: WireframeColorManager.colors.textSecondary,
                 ),
               ),
             ],
           ),
         ),
-        _buildMoreMenu(),
+
+        // More options menu
+        if (_canModifyPost(post) || _canPin())
+          PopupMenuButton<String>(
+            onSelected: (value) => _handleMenuAction(value, post),
+            icon: Icon(
+              Icons.more_vert,
+              size: 16,
+              color: WireframeColorManager.colors.textSecondary,
+            ),
+            itemBuilder: (context) => [
+              if (_canModifyPost(post)) ...[
+                PopupMenuItem(
+                  value: 'edit',
+                  child: Row(
+                    children: [
+                      Icon(Icons.edit, size: 16),
+                      SizedBox(width: 8),
+                      Text('Edit'),
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 'delete',
+                  child: Row(
+                    children: [
+                      Icon(Icons.delete, size: 16, color: Colors.red),
+                      SizedBox(width: 8),
+                      Text('Delete', style: TextStyle(color: Colors.red)),
+                    ],
+                  ),
+                ),
+              ],
+              if (_canPin()) ...[
+                PopupMenuItem(
+                  value: post.isPinned ? 'unpin' : 'pin',
+                  child: Row(
+                    children: [
+                      Icon(
+                        post.isPinned
+                            ? Icons.push_pin_outlined
+                            : Icons.push_pin,
+                        size: 16,
+                      ),
+                      SizedBox(width: 8),
+                      Text(post.isPinned ? 'Unpin' : 'Pin'),
+                    ],
+                  ),
+                ),
+              ],
+            ],
+          ),
       ],
     );
   }
 
-  Widget _buildMoreMenu() {
-    return PopupMenuButton<String>(
-      icon: Icon(
-        Icons.more_vert,
-        size: 18,
-        color: WireframeLayoutConstants.wireframeSecondary,
-      ),
-      itemBuilder: (context) {
-        List<PopupMenuEntry<String>> items = [];
-
-        // Show edit/delete only if current user is the author
-        if (_canModifyPost()) {
-          items.addAll([
-            PopupMenuItem(
-              value: 'edit',
-              child: Row(
-                children: [
-                  Icon(Icons.edit, size: 16, color: Colors.blue),
-                  SizedBox(width: 8),
-                  Text('Edit'),
-                ],
-              ),
-            ),
-            PopupMenuItem(
-              value: 'delete',
-              child: Row(
-                children: [
-                  Icon(Icons.delete, size: 16, color: Colors.red),
-                  SizedBox(width: 8),
-                  Text('Delete'),
-                ],
-              ),
-            ),
-            PopupMenuDivider(),
-          ]);
-        }
-
-        // Pin/Unpin option
-        if (_canPin()) {
-          items.add(
-            PopupMenuItem(
-              value: _currentPost.isPinned ? 'unpin' : 'pin',
-              child: Row(
-                children: [
-                  Icon(
-                    _currentPost.isPinned
-                        ? Icons.push_pin
-                        : Icons.push_pin_outlined,
-                    size: 16,
-                    color: _currentPost.isPinned ? Colors.red : Colors.blue,
-                  ),
-                  SizedBox(width: 8),
-                  Text(_currentPost.isPinned ? 'Unpin' : 'Pin'),
-                ],
-              ),
-            ),
-          );
-        }
-
-        // Always show report option
-        items.add(
-          PopupMenuItem(
-            value: 'report',
-            child: Row(
-              children: [
-                Icon(Icons.flag, size: 16, color: Colors.orange),
-                SizedBox(width: 8),
-                Text('Report'),
-              ],
-            ),
-          ),
-        );
-
-        return items;
-      },
-      onSelected: _handleMenuAction,
-    );
-  }
-
-  Widget _buildPostBody() {
+  Widget _buildPostContent(SocialPost post) {
     if (_isEditing) {
       return Column(
         children: [
@@ -266,6 +266,7 @@ class _EnhancedSocialPostState extends State<EnhancedSocialPost>
                   ? WireframeLayoutConstants.mobileFontSizeBody
                   : WireframeLayoutConstants.desktopFontSizeBody,
               color: WireframeColorManager.colors.text,
+              height: 1.4,
             ),
           ),
           SizedBox(height: 8),
@@ -280,12 +281,6 @@ class _EnhancedSocialPostState extends State<EnhancedSocialPost>
                 onPressed: _cancelEdit,
                 child: Text('Cancel'),
               ),
-              Spacer(),
-              IconButton(
-                onPressed: () =>
-                    setState(() => _showEmojiPicker = !_showEmojiPicker),
-                icon: Icon(Icons.emoji_emotions),
-              ),
             ],
           ),
         ],
@@ -293,7 +288,7 @@ class _EnhancedSocialPostState extends State<EnhancedSocialPost>
     }
 
     return Text(
-      _currentPost.content,
+      post.content,
       style: TextStyle(
         fontSize: widget.isMobile
             ? WireframeLayoutConstants.mobileFontSizeBody
@@ -304,12 +299,12 @@ class _EnhancedSocialPostState extends State<EnhancedSocialPost>
     );
   }
 
-  Widget _buildPostActions() {
+  Widget _buildPostActions(SocialPost post) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Show existing reactions if any
-        _buildExistingReactions(),
+        _buildExistingReactions(post),
 
         SizedBox(height: WireframeLayoutConstants.spacingSmall),
 
@@ -351,16 +346,16 @@ class _EnhancedSocialPostState extends State<EnhancedSocialPost>
     );
   }
 
-  Widget _buildExistingReactions() {
-    final reactions = _getPostReactions();
+  Widget _buildExistingReactions(SocialPost post) {
+    final reactions = _getPostReactions(post);
 
     if (reactions.isEmpty) return SizedBox.shrink();
 
     return Wrap(
       spacing: 4,
       children: reactions.entries.map((entry) {
-        final hasUserReacted = FirestoreService()
-            .hasUserReacted(_currentPost.reactions, entry.key);
+        final hasUserReacted =
+            FirestoreService().hasUserReacted(post.reactions, entry.key);
 
         return ClickableWidget(
           onTap: () => _toggleReaction(entry.key),
@@ -404,197 +399,127 @@ class _EnhancedSocialPostState extends State<EnhancedSocialPost>
   }
 
   void _toggleReaction(String emojiText) async {
-    try {
-      if (FirestoreService()
-          .hasUserReacted(_currentPost.reactions, emojiText)) {
-        await FirestoreService().addReactionToPost(
-            _currentPost.id, emojiText); // This will remove it since it toggles
-      } else {
-        await FirestoreService()
-            .addReactionToPost(_currentPost.id, emojiText); // This will add it
-      }
+    // IMMEDIATE UI UPDATE (Optimistic) - NO setState, use ValueNotifier
+    final currentReactions =
+        Map<String, dynamic>.from(_postNotifier.value.reactions);
+    final userReactionKey = '${FirestoreService().currentUser?.id}_$emojiText';
 
-      widget.onPostUpdated?.call();
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to update reaction: $e')),
-      );
+    if (currentReactions.containsKey(userReactionKey)) {
+      // Remove reaction optimistically
+      currentReactions.remove(userReactionKey);
+    } else {
+      // Add reaction optimistically
+      currentReactions[userReactionKey] = {
+        'userId': FirestoreService().currentUser?.id,
+        'userName': FirestoreService().currentUser?.name,
+        'emoji': emojiText,
+        'timestamp':
+            DateTime.now(), // Use local timestamp for immediate display
+      };
     }
-  }
 
-  Widget _buildEmojiReactionPicker() {
-    return Container(
-      margin: EdgeInsets.only(top: 8),
-      padding: EdgeInsets.all(8),
-      height: widget.isMobile ? 50 : 60, // Set fixed height
-      decoration: BoxDecoration(
-        color: WireframeColorManager.colors.surface,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: WireframeColorManager.colors.border),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 4,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: _getReactionEmojis().map((emoji) {
-            return ClickableWidget(
-              onTap: () => _addEmojiReaction(emoji),
-              child: Container(
-                margin: EdgeInsets.symmetric(horizontal: 2),
-                child: AnimatedEmoji(
-                  emoji['data'],
-                  size: widget.isMobile ? 20 : 24, // Smaller sizes
-                  repeat: false,
-                ),
-              ),
-            );
-          }).toList(),
-        ),
-      ),
-    );
-  }
+    // Update using ValueNotifier instead of setState - prevents flickering
+    _postNotifier.value =
+        _postNotifier.value.copyWith(reactions: currentReactions);
 
-
-  // LIST OF AVAILABLE ANIMATED EMOJIS  REACTION EMOJI LIST 
-  List<Map<String, dynamic>> _getReactionEmojis() {
-     return [
-      {'data': AnimatedEmojis.callMeHand, 'text': '🤙'},
-      {'data': AnimatedEmojis.redHeart, 'text': '❤️'},
-      {'data': AnimatedEmojis.thumbsUp, 'text': '👍'},
-      {'data': AnimatedEmojis.clap, 'text': '👏'},
-      {'data': AnimatedEmojis.fire, 'text': '🔥'},
-      {'data': AnimatedEmojis.partyingFace, 'text': '🥳'},
-      {'data': AnimatedEmojis.winkyTongue,'text': '😝'},
-      {'data': AnimatedEmojis.joy, 'text': '😂'},
-      {'data': AnimatedEmojis.thinkingFace, 'text': '🤔'},
-      {'data': AnimatedEmojis.astonished, 'text': '😲'},
-      {'data': AnimatedEmojis.wave, 'text': '👋'},
-      {'data': AnimatedEmojis.muscle, 'text': '💪'},
-      {'data': AnimatedEmojis.mindBlown, 'text': '🤯'},
-      {'data': AnimatedEmojis.oneHundred, 'text': '💯'}, 
-      {'data': AnimatedEmojis.checkMark, 'text': '✅'},
-      {'data': AnimatedEmojis.martialArtsUniform, 'text': '🥋'},
-    ];
-  }
-
-  void _addEmojiReaction(Map<String, dynamic> emoji) async {
-    final emojiText = emoji['text'];
-    print('🐛 DEBUG: Adding reaction $emojiText to post ${_currentPost.id}');
-
-    // 1. IMMEDIATE UI UPDATE (Optimistic)
-    setState(() {
-      _showEmojiPicker = false;
-
-      // Create optimistic reaction update
-      final currentReactions =
-          Map<String, dynamic>.from(_currentPost.reactions);
-      final userReactionKey =
-          '${FirestoreService().currentUser?.id}_$emojiText';
-
-      if (currentReactions.containsKey(userReactionKey)) {
-        // Remove reaction optimistically
-        currentReactions.remove(userReactionKey);
-      } else {
-        // Add reaction optimistically
-        currentReactions[userReactionKey] = {
-          'userId': FirestoreService().currentUser?.id,
-          'userName': FirestoreService().currentUser?.name,
-          'emoji': emojiText,
-          'timestamp':
-              DateTime.now(), // Use local timestamp for immediate display
-        };
-      }
-
-      // Update current post with optimistic data
-      _currentPost = _currentPost.copyWith(reactions: currentReactions);
-    });
-
-    // 2. BACKGROUND OPERATIONS (Fire and forget)
+    // Background operations (Fire and forget)
     _performBackgroundReactionUpdate(emojiText);
   }
 
-// Separate method for background operations
+  // Separate method for background operations
   void _performBackgroundReactionUpdate(String emojiText) async {
     try {
       // Run Firestore and Analytics in parallel (not sequential)
       final futures = [
-        FirestoreService().addReactionToPost(_currentPost.id, emojiText),
-        AnalyticsService().trackSocialReaction(_currentPost.id, emojiText),
+        FirestoreService().addReactionToPost(_postNotifier.value.id, emojiText),
+        AnalyticsService()
+            .trackSocialReaction(_postNotifier.value.id, emojiText),
       ];
 
       await Future.wait(futures);
 
       print('🐛 DEBUG: Background reaction update completed');
 
-      // Optional: Refresh from server to ensure consistency
-      widget.onPostUpdated?.call();
+      // Use debounced parent update to prevent excessive rebuilds
+      _debouncedParentUpdate();
     } catch (e) {
       print('🐛 DEBUG: Background reaction error: $e');
 
-      // Revert optimistic update on error
-      setState(() {
-        // Re-fetch current state from server or revert changes
-        widget.onPostUpdated?.call();
-      });
+      // Revert optimistic update on error - use debounced update
+      _debouncedParentUpdate();
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to add reaction: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to add reaction: $e')),
+        );
+      }
     }
   }
 
-  
-
-  Map<String, int> _getPostReactions() {
-    final reactions =
-        FirestoreService().getReactionCounts(_currentPost.reactions);
+  Map<String, int> _getPostReactions(SocialPost post) {
+    final reactions = FirestoreService().getReactionCounts(post.reactions);
     return reactions;
   }
 
-// method to get popular animated emojis
+  // method to get popular animated emojis
   List<Map<String, dynamic>> _getPopularEmojis() {
     return [
-      {'data': AnimatedEmojis.grinning, 'text': '😀'},
-      {'data': AnimatedEmojis.fire, 'text': '❤️'},
-      {'data': AnimatedEmojis.thumbsUp, 'text': '👍'},
-      {'data': AnimatedEmojis.clap, 'text': '👏'},
-      {'data': AnimatedEmojis.rocket, 'text': '🚀'},
-      {'data': AnimatedEmojis.fire, 'text': '🔥'},
-      {'data': AnimatedEmojis.raisedFist, 'text': '⭐'},
-      {'data': AnimatedEmojis.partyingFace, 'text': '🥳'},
-      {'data': AnimatedEmojis.winkyTongue, 'text': '😉'},
-      {'data': AnimatedEmojis.laughing, 'text': '😂'},
-      {'data': AnimatedEmojis.warmSmile, 'text': '😍'},
-      {'data': AnimatedEmojis.kissingHeart, 'text': '😘'},
-      {'data': AnimatedEmojis.thinkingFace, 'text': '🤔'},
-      {'data': AnimatedEmojis.happyCry, 'text': '😢'},
-      {'data': AnimatedEmojis.angry, 'text': '😠'},
-      {'data': AnimatedEmojis.surprised, 'text': '😲'},
-      {'data': AnimatedEmojis.victory, 'text': '✌️'},
-      {'data': AnimatedEmojis.wave, 'text': '👋'},
-      {'data': AnimatedEmojis.muscle, 'text': '💪'},
-      {'data': AnimatedEmojis.mindBlown, 'text': '🧠'},
-      {'data': AnimatedEmojis.lightBulb, 'text': '💡'},
-      {'data': AnimatedEmojis.trophy, 'text': '🏆'},
-      {'data': AnimatedEmojis.oneHundred, 'text': '🎯'},
-      {'data': AnimatedEmojis.checkMark, 'text': '✅'},
+      {'emoji': '👍', 'name': 'thumbs_up'},
+      {'emoji': '❤️', 'name': 'heart'},
+      {'emoji': '😂', 'name': 'joy'},
+      {'emoji': '😮', 'name': 'open_mouth'},
+      {'emoji': '😢', 'name': 'cry'},
+      {'emoji': '😡', 'name': 'rage'},
+      {'emoji': '🚀', 'name': 'rocket'},
+      {'emoji': '🎉', 'name': 'party_popper'},
+      {'emoji': '🔥', 'name': 'fire'},
+      {'emoji': '💯', 'name': 'hundred'},
     ];
   }
 
-  void _handleMenuAction(String action) {
+  Widget _buildEmojiReactionPicker() {
+    return Container(
+      margin: EdgeInsets.only(top: 8),
+      padding: EdgeInsets.all(8),
+      height: widget.isMobile ? 50 : 60,
+      decoration: BoxDecoration(
+        color: WireframeColorManager.colors.surfaceVariant,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: WireframeColorManager.colors.border!),
+      ),
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: _getPopularEmojis().length,
+        itemBuilder: (context, index) {
+          final emojiData = _getPopularEmojis()[index];
+          return ClickableWidget(
+            onTap: () => _selectEmoji(emojiData['emoji']),
+            child: Container(
+              margin: EdgeInsets.only(right: 8),
+              padding: EdgeInsets.all(4),
+              child: Text(
+                emojiData['emoji'],
+                style: TextStyle(fontSize: widget.isMobile ? 24 : 28),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  void _selectEmoji(String emoji) {
+    setState(() => _showEmojiPicker = false);
+    _toggleReaction(emoji);
+  }
+
+  void _handleMenuAction(String action, SocialPost post) {
     switch (action) {
       case 'edit':
         setState(() => _isEditing = true);
         break;
       case 'delete':
-        _confirmDelete();
+        _showDeleteConfirmation();
         break;
       case 'pin':
         _pinPost();
@@ -602,39 +527,91 @@ class _EnhancedSocialPostState extends State<EnhancedSocialPost>
       case 'unpin':
         _unpinPost();
         break;
-      case 'report':
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Post reported')),
-        );
-        break;
     }
   }
 
-  void _confirmDelete() {
-    final currentUser = FirestoreService().currentUser;
-    final isAuthor = _currentPost.authorId == currentUser?.id;
+  Future<void> _pinPost() async {
+    // Show password dialog first
+    showDialog(
+      context: context,
+      builder: (context) => PinAuthDialog(
+        onSuccess: () => _actuallyPinPost(),
+      ),
+    );
+  }
 
-    if (isAuthor) {
-      // Authors can delete immediately
-      _showActualDeleteDialog();
-    } else {
-      // Non-authors need admin password
-      showDialog(
-        context: context,
-        builder: (context) => PinAuthDialog(
-          onSuccess: () => _showActualDeleteDialog(),
-        ),
+  Future<void> _unpinPost() async {
+    // Show password dialog for unpinning too
+    showDialog(
+      context: context,
+      builder: (context) => PinAuthDialog(
+        onSuccess: () => _actuallyUnpinPost(),
+      ),
+    );
+  }
+
+  Future<void> _actuallyPinPost() async {
+    try {
+      await FirestoreService().pinPost(_postNotifier.value.id);
+
+      // Update using ValueNotifier with copyWith
+      _postNotifier.value = _postNotifier.value.copyWith(
+        isPinned: true,
+        pinOrder: 1,
       );
+
+      // Use debounced parent update
+      _debouncedParentUpdate();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Post pinned successfully!')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to pin post: $e')),
+        );
+      }
     }
   }
 
-  void _showActualDeleteDialog() {
+  Future<void> _actuallyUnpinPost() async {
+    try {
+      await FirestoreService().unpinPost(_postNotifier.value.id);
+
+      // Update using ValueNotifier with copyWith
+      _postNotifier.value = _postNotifier.value.copyWith(
+        isPinned: false,
+        pinOrder: null,
+      );
+
+      // Use debounced parent update
+      _debouncedParentUpdate();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Post unpinned successfully!')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to unpin post: $e')),
+        );
+      }
+    }
+  }
+
+  void _showDeleteConfirmation() {
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
           title: Text('Delete Post'),
-          content: Text('Are you sure you want to delete this post?'),
+          content: Text(
+              'Are you sure you want to delete this post? This action cannot be undone.'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
@@ -655,21 +632,28 @@ class _EnhancedSocialPostState extends State<EnhancedSocialPost>
     Navigator.of(context).pop();
 
     try {
-      final success = await FirestoreService().deletePost(_currentPost.id);
+      final success =
+          await FirestoreService().deletePost(_postNotifier.value.id);
       if (success) {
         widget.onPostDeleted?.call();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Post deleted')),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Post deleted')),
+          );
+        }
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Cannot delete this post')),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Cannot delete this post')),
+          );
+        }
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to delete post: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to delete post: $e')),
+        );
+      }
     }
   }
 
@@ -679,36 +663,44 @@ class _EnhancedSocialPostState extends State<EnhancedSocialPost>
 
     try {
       // Update post in Firestore
-      await FirestoreService().updatePost(_currentPost.id, newContent);
-      setState(() {
-        _isEditing = false;
-        _currentPost = _currentPost.copyWith(content: newContent);
-      });
-      widget.onPostUpdated?.call();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Post updated')),
-      );
+      await FirestoreService().updatePost(_postNotifier.value.id, newContent);
+
+      // Update local state using ValueNotifier
+      _postNotifier.value = _postNotifier.value.copyWith(content: newContent);
+
+      setState(() => _isEditing = false);
+
+      // Use debounced parent update
+      _debouncedParentUpdate();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Post updated')),
+        );
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to update post: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to update post: $e')),
+        );
+      }
     }
   }
 
   void _cancelEdit() {
     setState(() {
       _isEditing = false;
-      _editController.text = _currentPost.content;
+      _editController.text = _postNotifier.value.content;
     });
   }
 
-  bool _canModifyPost() {
+  bool _canModifyPost(SocialPost post) {
     final currentUser = FirestoreService().currentUser;
     if (currentUser == null) return false;
 
     // Allow post authors to modify their own posts
-    bool isAuthor = _currentPost.authorId == currentUser.id ||
-        _currentPost.authorName == currentUser.name;
+    bool isAuthor =
+        post.authorId == currentUser.id || post.authorName == currentUser.name;
 
     // Allow admin (you) to modify any post
     bool isAdmin =
@@ -723,58 +715,10 @@ class _EnhancedSocialPostState extends State<EnhancedSocialPost>
     return currentUser != null;
   }
 
-  Future<void> _pinPost() async {
-    // Show password dialog first
-    showDialog(
-      context: context,
-      builder: (context) => PinAuthDialog(
-        onSuccess: () => _actuallyPinPost(),
-      ),
-    );
-  }
+ 
 
-  // The actual pin logic (moved from _pinPost)
-  Future<void> _actuallyPinPost() async {
-    try {
-      await FirestoreService().pinPost(_currentPost.id);
-      setState(() {
-        _currentPost = _currentPost.copyWith(isPinned: true);
-      });
-      widget.onPostUpdated?.call();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Post pinned successfully!')),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to pin post: $e')),
-      );
-    }
-  }
 
-  Future<void> _unpinPost() async {
-    // Show password dialog for unpinning too
-    showDialog(
-      context: context,
-      builder: (context) => PinAuthDialog(
-        onSuccess: () => _actuallyUnpinPost(),
-      ),
-    );
-  }
+ 
 
-  Future<void> _actuallyUnpinPost() async {
-    try {
-      await FirestoreService().unpinPost(_currentPost.id);
-      setState(() {
-        _currentPost = _currentPost.copyWith(isPinned: false, pinOrder: null);
-      });
-      widget.onPostUpdated?.call();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Post unpinned successfully!')),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to unpin post: $e')),
-      );
-    }
-  }
+
 }

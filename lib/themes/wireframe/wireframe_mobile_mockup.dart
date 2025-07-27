@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:portfolio_website/components/projects_registry.dart';
 import 'package:portfolio_website/firestore/firestore_models.dart';
 import 'package:portfolio_website/firestore/firestore_service.dart';
+import 'package:portfolio_website/revised_case_studies/moments.dart';
+import 'package:portfolio_website/revised_case_studies/tap_in.dart';
 import 'package:portfolio_website/services/analytics_service.dart';
 import 'package:portfolio_website/themes/wireframe/cards/wireframe_project_cards.dart';
 import 'package:portfolio_website/themes/wireframe/components/header_icons.dart';
@@ -18,6 +21,7 @@ import 'package:portfolio_website/themes/wireframe/widgets/svg_icon.dart';
 import 'package:portfolio_website/themes/wireframe/widgets/theme_responsive_icon.dart';
 import 'package:portfolio_website/themes/wireframe/widgets/wireframe_about_section.dart';
 import 'package:portfolio_website/themes/wireframe/widgets/wireframe_custom_logo.dart';
+import 'package:portfolio_website/widgets/scroll_gesture_interceptor.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:math' as math;
 import 'components/wireframe_comment_modal.dart';
@@ -29,7 +33,6 @@ import 'wireframe_layout_constants.dart';
 class WireframeMobileMockup extends StatelessWidget {
   // State management props
   final String mobileCurrentView;
-  final String selectedCaseStudy;
   final int mobileNavIndex;
 
   // Targeting system
@@ -69,7 +72,6 @@ class WireframeMobileMockup extends StatelessWidget {
 
   // Callbacks
   final Function(int) onMobileNavigation;
-  final Function(String) onCaseStudySelected;
   final Function(BuildContext) onShowMobileDrawer;
   final VoidCallback onHideMobileDrawer;
   final Function(BuildContext) onShowMobileCommentModal;
@@ -89,7 +91,6 @@ class WireframeMobileMockup extends StatelessWidget {
   const WireframeMobileMockup({
     Key? key,
     required this.mobileCurrentView,
-    required this.selectedCaseStudy,
     required this.mobileNavIndex,
     required this.showMobileDrawerOverlay,
     required this.showMobileCommentOverlay,
@@ -110,7 +111,6 @@ class WireframeMobileMockup extends StatelessWidget {
     required this.selectedAvatar,
     required this.posts,
     required this.onMobileNavigation,
-    required this.onCaseStudySelected,
     required this.onShowMobileDrawer,
     required this.onHideMobileDrawer,
     required this.onShowMobileCommentModal,
@@ -141,7 +141,7 @@ class WireframeMobileMockup extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           // Mobile Header
-          _buildSectionHeader('Mobile', ''),
+          _buildSectionHeader('', ''),
 
           SizedBox(height: 20),
 
@@ -222,193 +222,236 @@ class WireframeMobileMockup extends StatelessWidget {
                                       ),
                                     ),
 
-                                    // SCROLLABLE CONTENT AREA
+                                    // SCROLLABLE CONTENT AREA - UPDATED WITH SCROLL ISOLATION
+
                                     if (mobileCurrentView == 'case_study')
-                                      // Case study view - keep original behavior
+                                      // Case study view - with scroll isolation
                                       Expanded(
-                                        child: WireframeMobileContentArea(
-                                          currentView: mobileCurrentView,
-                                          selectedCaseStudy: selectedCaseStudy,
-                                          posts: posts,
-                                          scrollController:
-                                              mobileScrollController,
-                                          onCaseStudySelected:
-                                              onCaseStudySelected,
-                                          onShowMobileContactModal:
-                                              onShowMobileContactModal,
+                                        child: ScrollGestureInterceptor(
+                                          scrollController: mobileScrollController,
+                                          enableScrollIsolation: true,
+                                          onScrollStart: () {
+                                            print('Mobile case study scroll started');
+                                          },
+                                          onScrollEnd: () {
+                                            print('Mobile case study scroll ended');
+                                          },
+                                          child: DeviceContentDragBehavior.wrap(
+                                            controller: mobileScrollController,
+                                            isVertical: true,
+                                            child: WireframeMobileContentArea(
+                                              currentView: mobileCurrentView,
+                                              posts: posts,
+                                              scrollController: mobileScrollController,
+
+
+                                            onCaseStudySelected: (caseStudy) =>
+                                                _navigateToCaseStudy(
+                                                    context, caseStudy),
+                                            onShowMobileContactModal:
+                                                onShowMobileContactModal,
+                                          ),
+                                         ),
                                         ),
                                       )
                                     else if (mobileCurrentView == 'settings')
-                                      // Settings view - direct rendering without navigation/profile
+                                      // Settings view - with scroll isolation
                                       Expanded(
-                                        child: Container(
-                                          width: double.infinity,
-                                          height: double.infinity,
-                                          color: WireframeColorManager
-                                              .colors.background,
-                                          child: WireframeSettingsSection(
-                                            isMobile: true,
-                                            onAnalyticsTap:
-                                                onShowAnalyticsModal != null
-                                                    ? () =>
-                                                        onShowAnalyticsModal!(
-                                                            context)
-                                                    : null,
-                                            onBackPressed: onGoBackFromSettings,
-                                            onThemeChanged: () {
-                                              // Force rebuild when theme changes
-                                            },
+                                        child: ScrollGestureInterceptor(
+                                          enableScrollIsolation: true,
+                                          onScrollStart: () {
+                                            print(
+                                                'Mobile settings scroll started');
+                                          },
+                                          onScrollEnd: () {
+                                            print(
+                                                'Mobile settings scroll ended');
+                                          },
+                                          child: Container(
+                                            width: double.infinity,
+                                            height: double.infinity,
+                                            color: WireframeColorManager
+                                                .colors.background,
+                                            child: WireframeSettingsSection(
+                                              isMobile: true,
+                                              onAnalyticsTap:
+                                                  onShowAnalyticsModal != null
+                                                      ? () =>
+                                                          onShowAnalyticsModal!(
+                                                              context)
+                                                      : null,
+                                              onBackPressed:
+                                                  onGoBackFromSettings,
+                                              onThemeChanged: () {
+                                                // Force rebuild when theme changes
+                                              },
+                                            ),
                                           ),
                                         ),
                                       )
                                     else
-                                      // Normal views with sticky navigation
+                                      // Normal views with scroll isolation
                                       Expanded(
-                                        child: CustomScrollView(
-                                          controller: mobileScrollController,
-                                          slivers: [
-                                            if (mobileCurrentView != 'settings')
-                                              SliverToBoxAdapter(
-                                                child: Stack(
-                                                  children: [
-                                                    // Profile header
-                                                    WireframeProfileHeader(
-                                                      isMobile: true,
-                                                      currentView:
-                                                          mobileCurrentView,
-                                                      onContactTap: () =>
-                                                          onShowMobileContactModal
-                                                              ?.call(),
-                                                      onLinkedInTap: () =>
-                                                          _launchLinkedIn(),
-                                                      onResumeTap: () =>
-                                                          _launchResume(),
-                                                      onAvatarTap:
-                                                          onShowAvatarFullScreen,
-                                                      onMenuTap: () =>
-                                                          onShowMobileDrawer(
-                                                              context),
-                                                    ),
-
-                                                    // Floating avatar that scrolls with content
-                                                    Positioned(
-                                                      top: MediaQuery.of(
-                                                                  context)
-                                                              .size
-                                                              .height *
-                                                          0.03, // % from top
-                                                      left: MediaQuery.of(
-                                                                  context)
-                                                              .size
-                                                              .width *
-                                                          0.006, // % from left
-                                                      child:
-                                                          WireframeFloatingAvatar(
-                                                        size: MediaQuery.of(
-                                                                    context)
-                                                                .size
-                                                                .width *
-                                                            0.03, // e.g. 0.15 is 15% of screen width
-                                                        onTap:
-                                                            onShowAvatarFullScreen,
-                                                      ),
-                                                    ),
-
-                                                    // Floating header icons that scroll with content
-                                                    Positioned(
-                                                      top: MediaQuery.of(
-                                                                  context)
-                                                              .size
-                                                              .height *
-                                                          0.070, // % from top
-                                                      right: MediaQuery.of(
-                                                                  context)
-                                                              .size
-                                                              .width *
-                                                          0.005, // % from right
-                                                      child:
-                                                          WireframeHeaderIcons(
+                                        child: ScrollGestureInterceptor(
+                                          scrollController:
+                                              mobileScrollController,
+                                          enableScrollIsolation: true,
+                                          onScrollStart: () {
+                                            print(
+                                                'Mobile normal views scroll started: $mobileCurrentView');
+                                          },
+                                          onScrollEnd: () {
+                                            print(
+                                                'Mobile normal views scroll ended: $mobileCurrentView');
+                                          },
+                                          child: CustomScrollView(
+                                            controller: mobileScrollController,
+                                            slivers: [
+                                              if (mobileCurrentView !=
+                                                  'settings')
+                                                SliverToBoxAdapter(
+                                                  child: Stack(
+                                                    children: [
+                                                      // Profile header
+                                                      WireframeProfileHeader(
                                                         isMobile: true,
-                                                        iconSize: MediaQuery.of(
-                                                                    context)
-                                                                .size
-                                                                .width *
-                                                            0.02, // 8% of screen width
-                                                        spacing: MediaQuery.of(
-                                                                    context)
-                                                                .size
-                                                                .width *
-                                                            0.002, // 2% of screen width
+                                                        currentView:
+                                                            mobileCurrentView,
                                                         onContactTap: () =>
                                                             onShowMobileContactModal
-                                                                ?.call(), // Fixed to use modal
+                                                                ?.call(),
                                                         onLinkedInTap: () =>
-                                                            WireframeHeaderIconsUtils
-                                                                .launchLinkedIn(),
+                                                            _launchLinkedIn(),
                                                         onResumeTap: () =>
-                                                            WireframeHeaderIconsUtils
-                                                                .launchResume(),
+                                                            _launchResume(),
+                                                        onAvatarTap:
+                                                            onShowAvatarFullScreen,
+                                                        onMenuTap: () =>
+                                                            onShowMobileDrawer(
+                                                                context),
                                                       ),
-                                                    ),
-                                                  ],
+
+                                                      // Floating avatar that scrolls with content
+                                                      Positioned(
+                                                        top: MediaQuery.of(
+                                                                    context)
+                                                                .size
+                                                                .height *
+                                                            0.03, // % from top
+                                                        left: MediaQuery.of(
+                                                                    context)
+                                                                .size
+                                                                .width *
+                                                            0.006, // % from left
+                                                        child:
+                                                            WireframeFloatingAvatar(
+                                                          size: MediaQuery.of(
+                                                                      context)
+                                                                  .size
+                                                                  .width *
+                                                              0.03, // e.g. 0.15 is 15% of screen width
+                                                          onTap:
+                                                              onShowAvatarFullScreen,
+                                                        ),
+                                                      ),
+
+                                                      // Floating header icons that scroll with content
+                                                      Positioned(
+                                                        top: MediaQuery.of(
+                                                                    context)
+                                                                .size
+                                                                .height *
+                                                            0.070, // % from top
+                                                        right: MediaQuery.of(
+                                                                    context)
+                                                                .size
+                                                                .width *
+                                                            0.005, // % from right
+                                                        child:
+                                                            WireframeHeaderIcons(
+                                                          isMobile: true,
+                                                          iconSize: MediaQuery.of(
+                                                                      context)
+                                                                  .size
+                                                                  .width *
+                                                              0.02, // 8% of screen width
+                                                          spacing: MediaQuery.of(
+                                                                      context)
+                                                                  .size
+                                                                  .width *
+                                                              0.002, // 2% of screen width
+                                                          onContactTap: () =>
+                                                              onShowMobileContactModal
+                                                                  ?.call(), // Fixed to use modal
+                                                          onLinkedInTap: () =>
+                                                              WireframeHeaderIconsUtils
+                                                                  .launchLinkedIn(),
+                                                          onResumeTap: () =>
+                                                              WireframeHeaderIconsUtils
+                                                                  .launchResume(),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+
+                                              // Sticky Navigation (stays below hamburger after scrolling)
+                                              SliverAppBar(
+                                                pinned: true,
+                                                floating: false,
+                                                backgroundColor:
+                                                    WireframeLayoutConstants
+                                                        .wireframeWhite,
+                                                elevation: 0,
+                                                toolbarHeight: 42,
+                                                automaticallyImplyLeading:
+                                                    false,
+                                                flexibleSpace: Container(
+                                                  padding: EdgeInsets.symmetric(
+                                                    horizontal:
+                                                        WireframeLayoutConstants
+                                                            .spacingTiny,
+                                                    vertical: 4,
+                                                  ),
+                                                  child: Column(
+                                                    children: [
+                                                      Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceEvenly,
+                                                        children: [
+                                                          _buildMobileNavItem(
+                                                              'Home', 'home'),
+                                                          _buildMobileNavItem(
+                                                              'Projects',
+                                                              'projects'),
+                                                          _buildMobileNavItem(
+                                                              'About', 'about'),
+                                                        ],
+                                                      ),
+                                                    ],
+                                                  ),
                                                 ),
                                               ),
 
-                                            // Sticky Navigation (stays below hamburger after scrolling)
-                                            SliverAppBar(
-                                              pinned: true,
-                                              floating: false,
-                                              backgroundColor:
-                                                  WireframeLayoutConstants
-                                                      .wireframeWhite,
-                                              elevation: 0,
-                                              toolbarHeight: 42,
-                                              automaticallyImplyLeading: false,
-                                              flexibleSpace: Container(
-                                                padding: EdgeInsets.symmetric(
-                                                  horizontal:
-                                                      WireframeLayoutConstants
-                                                          .spacingTiny,
-                                                  vertical: 4,
-                                                ),
-                                                child: Column(
-                                                  children: [
-                                                    Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .spaceEvenly,
-                                                      children: [
-                                                        _buildMobileNavItem(
-                                                            'Home', 'home'),
-                                                        _buildMobileNavItem(
-                                                            'Projects',
-                                                            'projects'),
-                                                        _buildMobileNavItem(
-                                                            'About', 'about'),
-                                                      ],
-                                                    ),
-                                                  ],
+                                              // Separator line (matching desktop)
+                                              SliverToBoxAdapter(
+                                                child: Container(
+                                                  height: 1,
+                                                  color: WireframeColorManager
+                                                      .colors.border,
+                                                  margin: EdgeInsets.symmetric(
+                                                    horizontal:
+                                                        WireframeLayoutConstants
+                                                            .spacingMedium,
+                                                  ),
                                                 ),
                                               ),
-                                            ),
 
-                                            // Separator line (matching desktop)
-                                            SliverToBoxAdapter(
-                                              child: Container(
-                                                height: 1,
-                                                color: WireframeColorManager
-                                                    .colors.border,
-                                                margin: EdgeInsets.symmetric(
-                                                  horizontal:
-                                                      WireframeLayoutConstants
-                                                          .spacingMedium,
-                                                ),
-                                              ),
-                                            ),
-
-                                            // Mobile Content Area as sliver list
-                                            _buildContentSliver(context),
-                                          ],
+                                              // Mobile Content Area as sliver list
+                                              _buildContentSliver(context),
+                                            ],
+                                          ),
                                         ),
                                       ),
                                   ],
@@ -726,6 +769,28 @@ class WireframeMobileMockup extends StatelessWidget {
     }
   }
 
+  void _navigateToCaseStudy(BuildContext context, String projectId) {
+    switch (projectId) {
+      case 'tap-in':
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => TapInCaseStudy(),
+          ),
+        );
+        break;
+      case 'moments':
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => MomentsCaseStudy(),
+          ),
+        );
+        break;
+      default:
+        print('Case study not implemented yet: $projectId');
+        break;
+    }
+  }
+
   Widget _buildMobileDrawerOverlay() {
     return ClickableWidget(
       onTap: onHideMobileDrawer, // Add outside click to close
@@ -1022,42 +1087,6 @@ class WireframeMobileMockup extends StatelessWidget {
     );
   }
 
-  // Helper method to get project card data
-  Map<String, String> _getProjectCardData(String projectId) {
-    final projectData = {
-      'tap-in': {
-        'title': 'Tap In',
-        'role':
-            'Senior Software Engineer, Senior UX/UI Designer & Researcher for B2C application',
-        'description':
-            'An inclusive mobile app that caters to the increasing demand for a unified integration of diverse Jiu-Jitsu training and cultural aspects.',
-        'heroImage': 'assets/tapin_card.png',
-      },
-      'moments': {
-        'title': 'Moments',
-        'role': 'UX/UI Designer & Researcher (5-member team)',
-        'description':
-            'A burgeoning B2C social media application aiming to redefine the landscape',
-        'heroImage': 'assets/moments_card.png',
-      },
-      'core-ai': {
-        'title': 'CoreAi',
-        'role': 'UX/UI Designer (5-member team)',
-        'description':
-            'An innovative B2B SaaS AI platform that analyzes associate metrics and offers actionable insights for continuous improvement',
-        'heroImage': 'assets/coreai_card.png',
-      },
-      'plannie': {
-        'title': 'Plannie',
-        'role': 'UX/UI Designer for B2C enhancement project',
-        'description':
-            'Event planning platform that seamlessly connects planners and clients through an intuitive interface',
-        'heroImage': 'assets/plannie_card.png',
-      },
-    };
-    return projectData[projectId] ?? projectData['tap-in']!;
-  }
-
   // Helper method to build mobile post item
   Widget _buildMobilePostItem(SocialPost post) {
     return EnhancedSocialPost(
@@ -1226,46 +1255,20 @@ class WireframeMobileMockup extends StatelessWidget {
     switch (mobileCurrentView) {
       case 'projects':
         return SliverList(
-          delegate: SliverChildListDelegate([
-            MobileWireframeProjectCard(
-              projectId: 'tap-in',
-              title: ProjectCardData.getProject('tap-in')['title']!,
-              role: ProjectCardData.getProject('tap-in')['role']!,
-              description: ProjectCardData.getProject('tap-in')['description']!,
-              heroImagePath: ProjectCardData.getProject('tap-in')['heroImage']!,
-              onTap: () => onCaseStudySelected('tap-in'),
-            ),
-            MobileWireframeProjectCard(
-              projectId: 'moments',
-              title: ProjectCardData.getProject('moments')['title']!,
-              role: ProjectCardData.getProject('moments')['role']!,
-              description:
-                  ProjectCardData.getProject('moments')['description']!,
-              heroImagePath:
-                  ProjectCardData.getProject('moments')['heroImage']!,
-              onTap: () => onCaseStudySelected('moments'),
-            ),
-            MobileWireframeProjectCard(
-              projectId: 'core-ai',
-              title: ProjectCardData.getProject('core-ai')['title']!,
-              role: ProjectCardData.getProject('core-ai')['role']!,
-              description:
-                  ProjectCardData.getProject('core-ai')['description']!,
-              heroImagePath:
-                  ProjectCardData.getProject('core-ai')['heroImage']!,
-              onTap: () => onCaseStudySelected('core-ai'),
-            ),
-            MobileWireframeProjectCard(
-              projectId: 'plannie',
-              title: ProjectCardData.getProject('plannie')['title']!,
-              role: ProjectCardData.getProject('plannie')['role']!,
-              description:
-                  ProjectCardData.getProject('plannie')['description']!,
-              heroImagePath:
-                  ProjectCardData.getProject('plannie')['heroImage']!,
-              onTap: () => onCaseStudySelected('plannie'),
-            ),
-          ]),
+          delegate: SliverChildListDelegate(
+            ProjectsRegistry().getAllProjects().map((project) {
+              return MobileWireframeProjectCard(
+                projectId: project.id,
+                title: project.title,
+                role: 'UX/UI Designer & Developer',
+                description: project.subtitle,
+                heroImagePath: project.logoImage.isNotEmpty
+                    ? project.logoImage
+                    : 'assets/backgroundheader.png',
+                onTap: () => _navigateToCaseStudy(context, project.id),
+              );
+            }).toList(),
+          ),
         );
 
       case 'about':

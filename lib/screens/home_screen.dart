@@ -5,6 +5,7 @@ import 'package:portfolio_website/components/project_viewer.dart';
 import 'package:portfolio_website/components/projects_registry.dart';
 import 'package:portfolio_website/themes/wireframe/wireframe_desktop_theme.dart';
 import 'package:portfolio_website/themes/wireframe/wireframe_main_theme.dart';
+import 'package:portfolio_website/widgets/border_beam.dart';
 import 'package:portfolio_website/widgets/circle_text_widget.dart';
 import 'package:portfolio_website/widgets/circle_theme_toggle.dart';
 import 'package:portfolio_website/widgets/pixel_widgets.dart';
@@ -771,28 +772,37 @@ class _HomeScreenState extends State<HomeScreen>
                           ),
                         ),
 
-                      // Hamburger menu button with circular text (only when menu is hidden in standard theme)
+                      // Hamburger menu button with border beam effect (only when menu is hidden in standard theme)
                       if (!_isMenuVisible && !isNesTheme)
                         Positioned(
                           top: 10,
                           right: 20,
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              // Circular rotating text
-                              CircularText(
-                                text: "unem rof ereh paT ... ",
-                                radius:
-                                    35.0, // Adjust radius to fit around your icon
-                                textColor: const Color(0xFF1DF0E6),
-                                fontSize: 12.0,
-                              ),
 
-                              // The existing menu button
-                              IconButton(
+                          child: BorderBeam(
+                            duration: 3.0, // Change from Duration(seconds: 3) to just 3.0
+                            borderWidth: 1.5,
+                            colorFrom: Colors.black,
+                            colorTo: Colors.black,
+                            staticBorderColor: Colors.black.withOpacity(0.3),
+                            borderRadius: BorderRadius.circular(25),
+                            padding: EdgeInsets.zero,
+                            child: Container(
+                              
+                              width: 50,
+                              height: 50,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: Colors.transparent, // BorderBeam handles the border
+                                  width: 0,
+                                ),
+                                color: Colors.transparent,
+                              ),
+                              child: IconButton(
                                 icon: const Icon(
                                   Icons.menu_rounded,
-                                  color: const Color(0xFFF9D200),
+                                  color: Colors
+                                      .black, // Changed from yellow to black
                                   size: 40,
                                 ),
                                 onPressed: () {
@@ -802,7 +812,7 @@ class _HomeScreenState extends State<HomeScreen>
                                   });
                                 },
                               ),
-                            ],
+                            ),
                           ),
                         ),
 

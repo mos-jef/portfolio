@@ -6,7 +6,7 @@ enum AppThemeMode { main, nes, wireframe }
 class ThemeProvider extends ChangeNotifier {
   bool _isDarkMode = false; // Default to light mode
   bool _isNesTheme = false; // Default to modern theme
-  AppThemeMode _currentThemeMode = AppThemeMode.main; // Default to main theme
+  AppThemeMode _currentThemeMode = AppThemeMode.wireframe; // Default to wireframe theme
 
   bool get isDarkMode => _isDarkMode;
   bool get isNesTheme => _isNesTheme;
@@ -24,7 +24,7 @@ class ThemeProvider extends ChangeNotifier {
     _isNesTheme = prefs.getBool('isNesTheme') ?? false;
 
     // Load theme mode
-    String themeMode = prefs.getString('themeMode') ?? 'main';
+    String themeMode = prefs.getString('themeMode') ?? 'wireframe';
     switch (themeMode) {
       case 'nes':
         _currentThemeMode = AppThemeMode.nes;
@@ -35,7 +35,7 @@ class ThemeProvider extends ChangeNotifier {
         _isNesTheme = false;
         break;
       default:
-        _currentThemeMode = AppThemeMode.main;
+        _currentThemeMode = AppThemeMode.wireframe;
         _isNesTheme = false;
     }
 

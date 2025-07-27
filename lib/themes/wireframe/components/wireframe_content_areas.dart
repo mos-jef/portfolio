@@ -1,165 +1,358 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:portfolio_website/components/project_viewer.dart';
+import 'package:portfolio_website/components/projects_registry.dart';
 import 'package:portfolio_website/firestore/firestore_models.dart';
 import 'package:portfolio_website/firestore/firestore_service.dart';
+import 'package:portfolio_website/revised_case_studies/moments.dart';
+import 'package:portfolio_website/revised_case_studies/tap_in.dart';
 import 'package:portfolio_website/themes/wireframe/utils/wireframe_color_manager.dart';
 import 'package:portfolio_website/themes/wireframe/widgets/clickable_widget.dart';
 import 'package:portfolio_website/themes/wireframe/widgets/enhanced_social_post.dart';
 import 'package:portfolio_website/themes/wireframe/widgets/wireframe_about_section.dart';
 import 'package:portfolio_website/themes/wireframe/widgets/wireframe_settings_section.dart';
-
+import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../cards/wireframe_project_cards.dart';
 import '../wireframe_layout_constants.dart';
+
+/// Enhanced drag behavior for content areas with momentum scrolling
+class ContentAreaDragBehavior extends StatefulWidget {
+  final Widget child;
+  final ScrollController? controller;
+  final bool isVertical;
+  final bool enableMomentum;
+
+  const ContentAreaDragBehavior({
+    Key? key,
+    required this.child,
+    this.controller,
+    this.isVertical = true,
+    this.enableMomentum = true,
+  }) : super(key: key);
+
+  @override
+  State<ContentAreaDragBehavior> createState() =>
+      _ContentAreaDragBehaviorState();
+}
+
+class _ContentAreaDragBehaviorState extends State<ContentAreaDragBehavior>
+    with TickerProviderStateMixin {
+  Offset? _startPosition;
+  double _initialScrollOffset = 0;
+  late AnimationController _momentumController;
+  Animation<double>? _momentumAnimation;
+  double _velocity = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _momentumController = AnimationController(
+      duration: Duration(milliseconds: 1500),
+      vsync: this,
+    );
+  }
+
+  @override
+  void dispose() {
+    _momentumController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onPanStart: _onPanStart,
+      onPanUpdate: _onPanUpdate,
+      onPanEnd: _onPanEnd,
+      child: widget.child,
+    );
+  }
+
+  void _onPanStart(DragStartDetails details) {
+    _startPosition = details.localPosition;
+    _initialScrollOffset = widget.controller?.offset ?? 0;
+    _momentumController.stop();
+    _velocity = 0;
+  }
+
+  void _onPanUpdate(DragUpdateDetails details) {
+    if (_startPosition != null && widget.controller != null) {
+      final delta = widget.isVertical
+          ? _startPosition!.dy - details.localPosition.dy
+          : _startPosition!.dx - details.localPosition.dx;
+
+      final newOffset = (_initialScrollOffset + delta * 1.2).clamp(
+        0.0,
+        widget.controller!.position.maxScrollExtent,
+      );
+
+      widget.controller!.jumpTo(newOffset);
+
+      // Calculate velocity for momentum
+      _velocity = delta * 0.1;
+    }
+  }
+
+  void _onPanEnd(DragEndDetails details) {
+    if (widget.enableMomentum &&
+        widget.controller != null &&
+        _velocity.abs() > 1) {
+      final targetOffset = (widget.controller!.offset + _velocity * 10).clamp(
+        0.0,
+        widget.controller!.position.maxScrollExtent,
+      );
+
+      _momentumAnimation = Tween<double>(
+        begin: widget.controller!.offset,
+        end: targetOffset,
+      ).animate(CurvedAnimation(
+        parent: _momentumController,
+        curve: Curves.decelerate,
+      ));
+
+      _momentumAnimation!.addListener(() {
+        widget.controller!.jumpTo(_momentumAnimation!.value);
+      });
+
+      _momentumController.forward(from: 0);
+    }
+
+    _startPosition = null;
+    _velocity = 0;
+  }
+}
+
+/// Custom drag scroll behavior for device content isolation
+class DeviceContentDragBehavior {
+  static Widget wrap({
+    required Widget child,
+    required ScrollController controller,
+    required bool isVertical,
+  }) {
+    return _DragScrollWidget(
+      controller: controller,
+      isVertical: isVertical,
+      child: child,
+    );
+  }
+}
+
+class _DragScrollWidget extends StatefulWidget {
+  final Widget child;
+  final ScrollController controller;
+  final bool isVertical;
+
+  const _DragScrollWidget({
+    required this.child,
+    required this.controller,
+    required this.isVertical,
+  });
+
+  @override
+  State<_DragScrollWidget> createState() => _DragScrollWidgetState();
+}
+
+class _DragScrollWidgetState extends State<_DragScrollWidget>
+    with TickerProviderStateMixin {
+  Offset? _startPosition;
+  double _initialScrollOffset = 0;
+  late AnimationController _momentumController;
+  Animation<double>? _momentumAnimation;
+  double _velocity = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _momentumController = AnimationController(
+      duration: Duration(milliseconds: 1500),
+      vsync: this,
+    );
+  }
+
+  @override
+  void dispose() {
+    _momentumController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onPanStart: _onPanStart,
+      onPanUpdate: _onPanUpdate,
+      onPanEnd: _onPanEnd,
+      child: widget.child,
+    );
+  }
+
+  void _onPanStart(DragStartDetails details) {
+    _startPosition = details.localPosition;
+    _initialScrollOffset = widget.controller.offset;
+    _momentumController.stop();
+    _velocity = 0;
+  }
+
+  void _onPanUpdate(DragUpdateDetails details) {
+    if (_startPosition != null) {
+      final delta = widget.isVertical
+          ? _startPosition!.dy - details.localPosition.dy
+          : _startPosition!.dx - details.localPosition.dx;
+      
+      final newOffset = (_initialScrollOffset + delta * 1.2).clamp(
+        0.0,
+        widget.controller.position.maxScrollExtent,
+      );
+      
+      widget.controller.jumpTo(newOffset);
+      
+      // Calculate velocity for momentum
+      _velocity = delta * 0.1;
+    }
+  }
+
+  void _onPanEnd(DragEndDetails details) {
+    if (_velocity.abs() > 1) {
+      final targetOffset = (widget.controller.offset + _velocity * 10).clamp(
+        0.0,
+        widget.controller.position.maxScrollExtent,
+      );
+      
+      _momentumAnimation = Tween<double>(
+        begin: widget.controller.offset,
+        end: targetOffset,
+      ).animate(CurvedAnimation(
+        parent: _momentumController,
+        curve: Curves.decelerate,
+      ));
+      
+      _momentumAnimation!.addListener(() {
+        widget.controller.jumpTo(_momentumAnimation!.value);
+      });
+      
+      _momentumController.forward(from: 0);
+    }
+    
+    _startPosition = null;
+    _velocity = 0;
+  }
+}
+
 
 /// Mobile content area component
 class WireframeMobileContentArea extends StatelessWidget {
   final String currentView;
-  final String selectedCaseStudy;
   final List<SocialPost> posts;
   final ScrollController scrollController;
   final Function(String) onCaseStudySelected;
   final VoidCallback? onShowMobileContactModal;
 
+  final VoidCallback? onAnalyticsTap;
+
   const WireframeMobileContentArea({
     Key? key,
     required this.currentView,
-    required this.selectedCaseStudy,
     required this.posts,
     required this.scrollController,
     required this.onCaseStudySelected,
     this.onShowMobileContactModal,
+    this.onAnalyticsTap,
   }) : super(key: key);
 
-  @override
+ @override
   Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => _notifyMouseEnterDevice(),
+      onExit: (_) => _notifyMouseExitDevice(),
+      child: Container(
+        // COMPLETE isolation
+        width: double.infinity,
+        height: double.infinity,
+        child: NotificationListener<ScrollNotification>(
+          onNotification: (notification) {
+            // CONSUME ALL SCROLL NOTIFICATIONS - PREVENT BUBBLING
+            return true;
+          },
+          child: SingleChildScrollView(
+            // NO CONTROLLER - prevents conflicts
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Container(
+              constraints: BoxConstraints(
+                minHeight: MediaQuery.of(context).size.height,
+              ),
+              child: _buildContent(context),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _notifyMouseEnterDevice() {
+    print('Mouse entered mobile device content area');
+    // Optional: Add callback to parent if needed
+  }
+
+  void _notifyMouseExitDevice() {
+    print('Mouse exited mobile device content area');
+    // Optional: Add callback to parent if needed
+  }
+
+  Widget _buildContent(BuildContext context) {
     switch (currentView) {
       case 'projects':
-        return _buildProjectsList();
-      case 'case_study':
-        return _buildCaseStudyView();
+        return _buildProjectsList(context);
       case 'about':
         return WireframeAboutSection(isMobile: true);
+
       case 'settings':
         return WireframeSettingsSection(
           isMobile: true,
-          onAnalyticsTap: () {
-            // Analytics functionality here
-          },
+          onAnalyticsTap: onAnalyticsTap,
           onThemeChanged: () {
             // This callback will trigger when themes change
             if (context.mounted) {
               (context as Element).markNeedsBuild();
             }
           },
-          onShowMobileContactModal: onShowMobileContactModal, // ADD THIS LINE
+          onShowMobileContactModal: onShowMobileContactModal,
         );
+
+
       default: // home
         return _buildHomeContent();
     }
   }
 
-  Widget _buildProjectsList() {
+  Widget _buildProjectsList(BuildContext context) {
     return ListView(
+      // No controller - prevents conflicts
       padding: EdgeInsets.zero,
-      physics: NeverScrollableScrollPhysics(), // Disable inner scrolling
-      shrinkWrap: true, // Allow it to size itself
-      children: [
-        MobileWireframeProjectCard(
-          projectId: 'tap-in',
-          title: ProjectCardData.getProject('tap-in')['title']!,
-          role: ProjectCardData.getProject('tap-in')['role']!,
-          description: ProjectCardData.getProject('tap-in')['description']!,
-          heroImagePath: ProjectCardData.getProject('tap-in')['heroImage']!,
-          onTap: () => onCaseStudySelected('tap-in'),
-        ),
-        MobileWireframeProjectCard(
-          projectId: 'moments',
-          title: ProjectCardData.getProject('moments')['title']!,
-          role: ProjectCardData.getProject('moments')['role']!,
-          description: ProjectCardData.getProject('moments')['description']!,
-          heroImagePath: ProjectCardData.getProject('moments')['heroImage']!,
-          onTap: () => onCaseStudySelected('moments'),
-        ),
-        MobileWireframeProjectCard(
-          projectId: 'core-ai',
-          title: ProjectCardData.getProject('core-ai')['title']!,
-          role: ProjectCardData.getProject('core-ai')['role']!,
-          description: ProjectCardData.getProject('core-ai')['description']!,
-          heroImagePath: ProjectCardData.getProject('core-ai')['heroImage']!,
-          onTap: () => onCaseStudySelected('core-ai'),
-        ),
-        MobileWireframeProjectCard(
-          projectId: 'plannie',
-          title: ProjectCardData.getProject('plannie')['title']!,
-          role: ProjectCardData.getProject('plannie')['role']!,
-          description: ProjectCardData.getProject('plannie')['description']!,
-          heroImagePath: ProjectCardData.getProject('plannie')['heroImage']!,
-          onTap: () => onCaseStudySelected('plannie'),
-        ),
-      ],
+      physics: AlwaysScrollableScrollPhysics(),
+      shrinkWrap: true,
+      children: ProjectsRegistry().getAllProjects().map((project) {
+        return MobileWireframeProjectCard(
+          projectId: project.id,
+          title: project.title,
+          role: 'UX/UI Designer & Developer',
+          description: project.subtitle,
+          heroImagePath: project.logoImage.isNotEmpty
+              ? project.logoImage
+              : 'assets/images/default_project.png',
+          onTap: () => onCaseStudySelected(project.id),
+        );
+      }).toList(),
     );
   }
 
-  Widget _buildCaseStudyView() {
-    return Column(
-      children: [
-        // Back button header
-        Container(
-          width: double.infinity,
-          padding: EdgeInsets.only(
-            left: 8.0,
-            right: WireframeLayoutConstants.spacingStandard,
-            top: WireframeLayoutConstants.spacingSmall,
-            bottom: WireframeLayoutConstants.spacingSmall,
-          ),
-          child: Row(
-            children: [
-              ClickableWidget(
-                onTap: () =>
-                    onCaseStudySelected(''), // This will close the case study
-                child: Container(
-                  padding: EdgeInsets.all(WireframeLayoutConstants.spacingTiny),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.arrow_back_ios,
-                        size: 16,
-                        color: WireframeLayoutConstants.wireframeAccent,
-                      ),
-                      SizedBox(width: 4),
-                      Text(
-                        'Back',
-                        style: TextStyle(
-                          fontSize: WireframeLayoutConstants.mobileFontSizeBody,
-                          color: WireframeLayoutConstants.wireframeAccent,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
+  
 
-        // Case study content
-        Expanded(
-          child: Container(
-            width: double.infinity,
-            child: PortfolioViewer(projectId: selectedCaseStudy),
-          ),
-        ),
-      ],
-    );
-  }
 
   Widget _buildHomeContent() {
     return ListView.builder(
-      controller: scrollController,
+      // No controller - prevents conflicts
       padding: EdgeInsets.zero,
-      physics: NeverScrollableScrollPhysics(),
+      physics: AlwaysScrollableScrollPhysics(),
       shrinkWrap: true,
       itemCount: posts.length + 1, // ✅ Add 1 for the "End of posts" item
       itemBuilder: (context, index) {
@@ -267,94 +460,68 @@ class WireframeMobileContentArea extends StatelessWidget {
   }
 }
 
-/// Desktop content area component
+/// Desktop content area component with mouse region detection
 class WireframeDesktopContentArea extends StatelessWidget {
   final String selectedSection;
-  final String desktopSelectedCaseStudy;
   final List<SocialPost> posts;
   final ScrollController scrollController;
   final Function(String) onCaseStudySelected;
   final VoidCallback? onBackPressed;
   final VoidCallback? onBackFromSettings;
 
+  final VoidCallback? onAnalyticsTap;
+
   const WireframeDesktopContentArea({
     Key? key,
     required this.selectedSection,
-    required this.desktopSelectedCaseStudy,
     required this.posts,
     required this.scrollController,
     required this.onCaseStudySelected,
     this.onBackPressed,
     this.onBackFromSettings,
+    this.onAnalyticsTap,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    if (selectedSection == 'Projects') {
-      if (desktopSelectedCaseStudy.isNotEmpty) {
-        return Column(
-          children: [
-            // Back button header
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.only(
-                left: 8.0,
-                right: WireframeLayoutConstants.spacingStandard,
-                top: WireframeLayoutConstants.spacingSmall,
-                bottom: WireframeLayoutConstants.spacingSmall,
-              ),
-              child: Row(
-                children: [
-                  ClickableWidget(
-                    onTap: () => onCaseStudySelected(
-                        ''), // This will close the case study
-                    child: Container(
-                      padding:
-                          EdgeInsets.all(WireframeLayoutConstants.spacingTiny),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.arrow_back_ios,
-                            size: 18,
-                            color: WireframeLayoutConstants.wireframeAccent,
-                          ),
-                          SizedBox(width: 4),
-                          Text(
-                            'Back to Projects',
-                            style: TextStyle(
-                              fontSize:
-                                  WireframeLayoutConstants.desktopFontSizeBody,
-                              color: WireframeLayoutConstants.wireframeAccent,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+    return MouseRegion(
+      onEnter: (_) => _notifyMouseEnterDevice(),
+      onExit: (_) => _notifyMouseExitDevice(),
+      child: Container(
+        child: NotificationListener<ScrollNotification>(
+          onNotification: (notification) {
+            // CONSUME ALL SCROLL NOTIFICATIONS - PREVENT BUBBLING
+            return true;
+          },
+          child: DeviceContentDragBehavior.wrap(
+            controller: scrollController,
+            isVertical: true,
+            child: _buildContent(context),
+          ),
+        ),
+      ),
+    );
+  }
 
-            // Case study content
-            Expanded(
-              child: PortfolioViewer(projectId: desktopSelectedCaseStudy),
-            ),
-          ],
-        );
-      } else {
-        return _buildDesktopProjectsList();
-      }
+  void _notifyMouseEnterDevice() {
+    print('🔵 Mouse entered mobile device content area');
+  }
+
+  void _notifyMouseExitDevice() {
+    print('🔴 Mouse exited mobile device content area');
+  }
+
+  Widget _buildContent(BuildContext context) {
+    if (selectedSection == 'Projects') {
+      return _buildDesktopProjectsList(context);
     } else if (selectedSection == 'About') {
       return WireframeAboutSection(isMobile: false);
+
     } else if (selectedSection == 'Settings') {
       return WireframeSettingsSection(
         isMobile: false,
-        onAnalyticsTap: () {
-          // Analytics functionality here
-        },
-        onBackPressed: onBackFromSettings, // Use the callback
+        onAnalyticsTap: onAnalyticsTap,
+        onBackPressed: onBackFromSettings,
         onThemeChanged: () {
           // This will help with theme updates
         },
@@ -364,54 +531,26 @@ class WireframeDesktopContentArea extends StatelessWidget {
     }
   }
 
-  Widget _buildDesktopProjectsList() {
+  
+
+  Widget _buildDesktopProjectsList(BuildContext context) {
     return Column(
       children: [
         Expanded(
           child: ListView(
             padding: EdgeInsets.zero,
-            children: [
-              DesktopWireframeProjectCard(
-                projectId: 'tap-in',
-                title: ProjectCardData.getProject('tap-in')['title']!,
-                role: ProjectCardData.getProject('tap-in')['role']!,
-                description:
-                    ProjectCardData.getProject('tap-in')['description']!,
-                heroImagePath:
-                    ProjectCardData.getProject('tap-in')['heroImage']!,
-                onTap: () => onCaseStudySelected('tap-in'),
-              ),
-              DesktopWireframeProjectCard(
-                projectId: 'moments',
-                title: ProjectCardData.getProject('moments')['title']!,
-                role: ProjectCardData.getProject('moments')['role']!,
-                description:
-                    ProjectCardData.getProject('moments')['description']!,
-                heroImagePath:
-                    ProjectCardData.getProject('moments')['heroImage']!,
-                onTap: () => onCaseStudySelected('moments'),
-              ),
-              DesktopWireframeProjectCard(
-                projectId: 'core-ai',
-                title: ProjectCardData.getProject('core-ai')['title']!,
-                role: ProjectCardData.getProject('core-ai')['role']!,
-                description:
-                    ProjectCardData.getProject('core-ai')['description']!,
-                heroImagePath:
-                    ProjectCardData.getProject('core-ai')['heroImage']!,
-                onTap: () => onCaseStudySelected('core-ai'),
-              ),
-              DesktopWireframeProjectCard(
-                projectId: 'plannie',
-                title: ProjectCardData.getProject('plannie')['title']!,
-                role: ProjectCardData.getProject('plannie')['role']!,
-                description:
-                    ProjectCardData.getProject('plannie')['description']!,
-                heroImagePath:
-                    ProjectCardData.getProject('plannie')['heroImage']!,
-                onTap: () => onCaseStudySelected('plannie'),
-              ),
-            ],
+            children: ProjectsRegistry().getAllProjects().map((project) {
+              return DesktopWireframeProjectCard(
+                projectId: project.id,
+                title: project.title,
+                role: 'UX/UI Designer & Developer', // Use consistent role
+                description: project.subtitle, // Use subtitle as description
+                heroImagePath: project.logoImage.isNotEmpty
+                    ? project.logoImage
+                    : 'assets/backgroundheader.png',
+                onTap: () => _navigateToCaseStudy(context, project.id),
+              );
+            }).toList(),
           ),
         ),
       ],
@@ -449,11 +588,11 @@ class WireframeDesktopContentArea extends StatelessWidget {
               }
 
               return ListView.builder(
-                controller: scrollController,
+                // No controller - prevents conflicts
                 padding: EdgeInsets.zero,
-                itemCount: posts.length, // Remove the +1
+                itemCount: posts.length,
                 itemBuilder: (context, index) {
-                  final post = posts[index]; // Remove the index - 1
+                  final post = posts[index];
                   return _buildDesktopPostItem(post);
                 },
               );
@@ -463,6 +602,8 @@ class WireframeDesktopContentArea extends StatelessWidget {
       ],
     );
   }
+
+  
 
   Widget _buildDesktopPostItem(SocialPost post) {
     return EnhancedSocialPost(
@@ -542,6 +683,28 @@ class WireframeDesktopContentArea extends StatelessWidget {
       'emoji_people': Icons.emoji_people,
     };
     return avatarIcons[avatarId] ?? Icons.person;
+  }
+}
+
+void _navigateToCaseStudy(BuildContext context, String projectId) {
+  switch (projectId) {
+    case 'tap-in':
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => TapInCaseStudy(),
+        ),
+      );
+      break;
+    case 'moments':
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => MomentsCaseStudy(),
+        ),
+      );
+      break;
+    default:
+      print('Case study not implemented yet: $projectId');
+      break;
   }
 }
 
@@ -638,4 +801,25 @@ class WireframeContentUtils {
     };
     return displayNames[type] ?? type;
   }
+}
+
+class _ContentAreaScrollBehavior extends ScrollBehavior {
+  @override
+  Widget buildScrollbar(
+      BuildContext context, Widget child, ScrollableDetails details) {
+    return child;
+  }
+
+  @override
+  ScrollPhysics getScrollPhysics(BuildContext context) {
+    return const BouncingScrollPhysics(); // ← Changed to prevent bubbling
+  }
+
+  @override
+  Set<PointerDeviceKind> get dragDevices => {
+        PointerDeviceKind.touch,
+        PointerDeviceKind.mouse,
+        PointerDeviceKind.stylus,
+        PointerDeviceKind.trackpad,
+      };
 }

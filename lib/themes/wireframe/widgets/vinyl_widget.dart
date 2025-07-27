@@ -60,7 +60,7 @@ class _VinylWidgetState extends State<VinylWidget>
             id: 'work_2',
             color: Colors.green,
             asset: "assets/images/vinyl/cover_2.png",
-            title: 'Project 2',
+            title: 'Moments',
           ),
           VinylItem(
             id: 'work_3',

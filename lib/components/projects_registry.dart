@@ -1,8 +1,6 @@
 import 'package:portfolio_website/components/project_data.dart';
-import 'package:portfolio_website/case_studies/tap_in.dart';
-import 'package:portfolio_website/case_studies/moments.dart';
-import 'package:portfolio_website/case_studies/core_ai.dart';
-import 'package:portfolio_website/case_studies/plannie.dart';
+import 'package:portfolio_website/revised_case_studies/tap_in.dart';
+import 'package:portfolio_website/revised_case_studies/moments.dart';
 
 // A registry of all available portfolio projects
 class ProjectsRegistry {
@@ -15,65 +13,36 @@ class ProjectsRegistry {
 
   ProjectsRegistry._internal();
 
-  // Get a specific project by ID
+  // Get a specific project by ID - USING REVISED CASE STUDIES ONLY
+  // Get a specific project by ID - USING REVISED CASE STUDIES ONLY
   ProjectData getProject(String projectId) {
     switch (projectId.toLowerCase()) {
       case 'tap-in':
-        return tapInProject;
+        return tapInStudy; // This now comes from revised_case_studies/tap_in.dart
       case 'moments':
-        return momentsProject;
-      case 'core-ai':
-        return coreAiProject;
-      case 'plannie':
-        return plannieProject;
-      case 'this-website':
-        // Simple project for the website itself
-        return ProjectData(
-          id: 'this-website',
-          title: 'Portfolio Website',
-          subtitle: 'The website you\'re viewing right now',
-          originalLink: 'https://jeffpdx.net',
-          pages: [
-            ProjectPage(
-              title: 'Project Overview',
-              sections: [
-                ContentSection(
-                  text: 'I made this portfolio website!',
-                ),
-                ContentSection(
-                  subtitle: 'Technologies',
-                  text: 'Flutter, Dart, Provider, NES UI, and more.',
-                ),
-              ],
-            ),
-          ],
-        );
+        return momentsStudy; // This now comes from revised_case_studies/moments.dart
       default:
         // Default to Tap In if project ID not found
-        return tapInProject;
+        return tapInStudy; // Using revised version
     }
   }
 
-  // Get all available projects
+// Get all available projects - RESTRICTED to only Tap-In and Moments
   List<ProjectData> getAllProjects() {
     return [
-      tapInProject,
-      momentsProject,
-      coreAiProject,
-      plannieProject,
-      // Add more projects here as they're created
+      tapInStudy,
+      momentsStudy,
+      // Removed coreAiProject and plannieProject - only showing revised case studies
     ];
   }
 
-  // Get project IDs for menu display
+  // Get project IDs for menu display - RESTRICTED to revised case studies only
   List<Map<String, String>> getProjectsForMenu() {
     return [
       {'id': 'this-website', 'title': 'This Website'},
       {'id': 'tap-in', 'title': 'Tap In'},
       {'id': 'moments', 'title': 'Moments'},
-      {'id': 'core-ai', 'title': 'CoreAi'},
-      {'id': 'plannie', 'title': 'Plannie'},
-      // Add more projects here as they're created
+      // Removed core-ai and plannie - only showing revised case studies
     ];
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:portfolio_website/themes/wireframe/utils/wireframe_color_manager.dart';
 import 'package:portfolio_website/themes/wireframe/widgets/clickable_widget.dart';
 import 'package:portfolio_website/themes/wireframe/widgets/svg_icon.dart';
+import 'package:portfolio_website/widgets/border_beam.dart';
 
 import '../wireframe_layout_constants.dart';
 
@@ -53,15 +54,15 @@ class WireframeProfileHeader extends StatelessWidget {
         // Profile section with avatar overlapping header
         Stack(
           children: [
-            // Background container - EXPANDED to full width
+
+            // Background container - CALCULATED HEIGHT based on avatar space
             Positioned(
               top: 0,
-              left:
-                  0, // Changed from WireframeLayoutConstants.spacingStandard to 0
-              right:
-                  0, // Changed from WireframeLayoutConstants.spacingStandard to 0
+              left: 0,
+              right: 0,
               child: Container(
-                height: 180,
+                height: 140 +
+                    80, // 140 base + your desired avatar space (change 80 to whatever you want)
                 decoration: BoxDecoration(
                   color: WireframeColorManager.colors.surface,
                   borderRadius: BorderRadius.circular(0),
@@ -69,70 +70,110 @@ class WireframeProfileHeader extends StatelessWidget {
               ),
             ),
 
-            // Content area without avatar
+       
+           // Content area without avatar - RESPONSIVE
             Transform.translate(
-              offset: Offset(0, -30),
+              offset: Offset(0, -40),
               child: Container(
                 width: double.infinity,
-                padding: EdgeInsets.only(
-                  left: WireframeLayoutConstants.spacingStandard,
-                  right: WireframeLayoutConstants.spacingStandard,
-                  top: WireframeLayoutConstants.spacingStandard +
-                      60, // Add space for avatar
-                  bottom: WireframeLayoutConstants.spacingTiny,
+                padding: EdgeInsets.symmetric(
+                  horizontal: WireframeLayoutConstants.spacingStandard,
+                  vertical: WireframeLayoutConstants.spacingStandard,
                 ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Left side - Just text content (NO AVATAR HERE)
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Name
-                          Text(
-                            'Jeff Anderson',
-                            style: TextStyle(
-                              fontSize: WireframeLayoutConstants
-                                  .mobileFontSizeLargeTitle,
-                              fontWeight: FontWeight.bold,
-                              color: WireframeColorManager.colors.focused,
-                            ),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final screenWidth = MediaQuery.of(context).size.width;
+                    final responsiveScale =
+                        WireframeLayoutConstants.getResponsiveScale(
+                            screenWidth);
+
+                    return Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+
+                        // Left side - Profile info with responsive layout
+
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(
+                                  height: 80), // Space for overlapping avatar
+
+                              // Name - RESPONSIVE
+                              Text(
+                                'Jeff Anderson',
+                                style: TextStyle(
+                                  fontSize: (WireframeLayoutConstants
+                                              .mobileFontSizeTitle *
+                                          responsiveScale)
+                                      .clamp(16.0, 24.0),
+                                  fontWeight: FontWeight.bold,
+                                  color: WireframeColorManager.colors.text,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+
+                              SizedBox(
+                                height: (WireframeLayoutConstants.spacingTiny *
+                                        responsiveScale)
+                                    .clamp(4.0, 8.0),
+                              ),
+
+                              // Role - RESPONSIVE
+                              Text(
+                                'UX/UI Designer',
+                                style: TextStyle(
+                                  fontSize: (WireframeLayoutConstants
+                                              .mobileFontSizeBody *
+                                          responsiveScale)
+                                      .clamp(12.0, 18.0),
+                                  color: WireframeColorManager.colors.primary,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+
+                              SizedBox(
+                                height: (WireframeLayoutConstants.spacingTiny *
+                                        responsiveScale)
+                                    .clamp(4.0, 8.0),
+                              ),
+
+                              // Quote - RESPONSIVE with wrap
+                              Container(
+                                width: constraints.maxWidth *
+                                    0.8, // Limit width to prevent overflow
+                                child: Text(
+                                  '"OPEN TO NEW OPPORTUNITIES!"',
+                                  style: TextStyle(
+                                    fontSize: (WireframeLayoutConstants
+                                                .mobileFontSizeCaption *
+                                            responsiveScale)
+                                        .clamp(10.0, 10.0),
+                                    fontStyle: FontStyle.italic,
+                                    color: WireframeColorManager
+                                        .colors.onSecondary,
+                                  ),
+                                  overflow: TextOverflow.fade,
+                                  softWrap: true,
+                                  maxLines: 2,
+                                ),
+                              ),
+                            ],
                           ),
+                        ),
 
-                          // Title
-                          Text(
-                            'UX/UI Designer',
-                            style: TextStyle(
-                              fontSize:
-                                  WireframeLayoutConstants.mobileFontSizeBody,
-                              color: WireframeColorManager.colors.primary,
-                            ),
-                          ),
-
-                          SizedBox(
-                              height: WireframeLayoutConstants.spacingTiny / 2),
-
-                          // Quote
-                          Text(
-                            '"Open to new opportunities"',
-                            style: TextStyle(
-                              fontSize: WireframeLayoutConstants
-                                  .mobileFontSizeCaption,
-                              fontStyle: FontStyle.italic,
-                              color: WireframeColorManager.colors.onSecondary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    // Right side - Icons removed (now using floating icons)
-                    SizedBox(width: 100), // Placeholder spacing
-                  ],
+                        // Right side - Responsive spacing
+                        SizedBox(
+                          width: (50.0 * responsiveScale).clamp(20.0, 100.0),
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ),
             ),
+
           ],
         ),
       ],
@@ -179,21 +220,31 @@ class WireframeProfileHeader extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+
                       // Avatar positioned to overlap header image with tap functionality
+                      
                       ClickableWidget(
                         onTap: isMobile ? onAvatarTap : onAvatarTap,
-                        child: Container(
-                          width: WireframeLayoutConstants.desktopAvatarSize,
-                          height: WireframeLayoutConstants.desktopAvatarSize,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            image: DecorationImage(
-                              image: AssetImage('assets/me_avatar.png'),
-                              fit: BoxFit.cover,
-                            ),
-                            border: Border.all(
-                              color: WireframeColorManager.colors.surface,
-                              width: 4,
+                        child: BorderBeam(
+                          duration: 10, // Slower animation for desktop
+                          borderWidth: 4,
+                          colorFrom: WireframeColorManager.colors.primary,
+                          colorTo: WireframeColorManager.colors.secondary ??
+                              WireframeColorManager.colors.primary,
+                          staticBorderColor:
+                              WireframeColorManager.colors.surface,
+                          borderRadius: BorderRadius.circular(
+                              WireframeLayoutConstants.desktopAvatarSize /
+                                  2), // Make it circular
+                          child: Container(
+                            width: WireframeLayoutConstants.desktopAvatarSize,
+                            height: WireframeLayoutConstants.desktopAvatarSize,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              image: DecorationImage(
+                                image: AssetImage('assets/me_avatar.png'),
+                                fit: BoxFit.cover,
+                              ),
                             ),
                           ),
                         ),
@@ -226,7 +277,7 @@ class WireframeProfileHeader extends StatelessWidget {
 
                       // Quote
                       Text(
-                        '"Open to new opportunities"',
+                        '"OPEN TO NEW OPPORTUNITIES!"',
                         style: TextStyle(
                           fontSize:
                               WireframeLayoutConstants.desktopFontSizeBody,

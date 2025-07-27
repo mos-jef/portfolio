@@ -301,28 +301,49 @@ class WireframeCardFactory {
 
   /// Gets default social posts data
   static List<Map<String, dynamic>> _getDefaultSocialPosts() {
-    return [
-      {
-        'author': 'Aminah',
-        'time': '19 hours ago',
-        'content':
-            'Jeff is a UX/UI Designer from Portland, Oregon. Check out his projects!',
-        'avatar': 'person',
-        'likeCount': 24,
-        'commentCount': 8,
-        'isLiked': false,
-      },
-      {
+    return _getRevisedCaseStudyPosts();
+  }
+
+  /// Creates social posts directly from revised case studies
+  static List<Map<String, dynamic>> _getRevisedCaseStudyPosts() {
+    final projects = ProjectsRegistry().getAllProjects();
+    final posts = <Map<String, dynamic>>[];
+
+    for (int i = 0; i < projects.length; i++) {
+      final project = projects[i];
+
+      // Create engaging social media content for each project
+      String content = '';
+      String imagePath = '';
+      int likeCount = 25 + (i * 10);
+      int commentCount = 8 + (i * 4);
+      String timeAgo =
+          i == 0 ? '2 hours ago' : '${i + 1} week${i > 0 ? 's' : ''} ago';
+
+      if (project.id == 'tap-in') {
+        content =
+            'Just finished my latest case study on Tap In - a comprehensive BJJ community platform! 🥋 Balancing innovation with zeitgeist was the key challenge. Check out how I transcended traditional design approaches for this custom social media solution.';
+        imagePath = 'assets/tapin/wireframe1.png';
+      } else if (project.id == 'moments') {
+        content =
+            'Excited to share my work on Moments - redefining online interaction through a friends-only picture-sharing network! 📸 The discovery phase revealed fascinating mechanisms of abatement. Dive into the full case study to see the process.';
+        imagePath = 'assets/moments/devices/hero.png';
+      }
+
+      posts.add({
         'author': 'Jeffjitsu',
-        'time': '19 hours ago',
-        'content':
-            'Make sure to poke around his profile! It\'s full of fun interactive elements, themes, and modes!',
-        'avatar': 'face',
-        'likeCount': 14,
-        'commentCount': 2,
-        'isLiked': true,
-      },
-    ];
+        'time': timeAgo,
+        'content': content,
+        'avatar': 'person',
+        'postImage': imagePath,
+        'likeCount': likeCount,
+        'commentCount': commentCount,
+        'isLiked': i % 2 == 1, // Alternate liked status
+        'projectId': project.id,
+      });
+    }
+
+    return posts;
   }
 
   /// Creates mixed content cards combining different types
@@ -762,7 +783,7 @@ class WireframeCardFactory {
             ),
             SizedBox(height: 8),
             Text(
-              '"Open to new opportunities"',
+              '"OPEN TO NEW OPPORTUNITIES!"',
               style: TextStyle(
                 color: WireframeColorManager.colors.onSecondary,
                 fontSize: isMobile ? 11 : 12,

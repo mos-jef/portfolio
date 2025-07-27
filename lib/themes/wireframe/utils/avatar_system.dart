@@ -1,6 +1,7 @@
 // File: lib/themes/wireframe/utils/avatar_system.dart
 import 'package:flutter/material.dart';
 import 'package:avatar_brick/avatar_brick.dart';
+import 'package:portfolio_website/widgets/border_beam.dart';
 import '../wireframe_layout_constants.dart';
 import 'wireframe_color_manager.dart';
 
@@ -93,53 +94,46 @@ class AvatarSystem {
     bool showBorder = false,
     Color? borderColor,
   }) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: showBorder
-            ? Border.all(
-                color: borderColor ?? WireframeColorManager.colors.primary,
-                width: 3, // Thicker border for owner
-              )
-            : Border.all(
-                color: WireframeColorManager.colors.primary,
-                width: 2, // Always show a border for owner
-              ),
-        // Add a special glow effect
-        boxShadow: [
-          BoxShadow(
-            color: WireframeColorManager.colors.primary.withOpacity(0.3),
-            blurRadius: 8,
-            spreadRadius: 2,
-          ),
-        ],
-      ),
-      child: ClipOval(
-        child: Image.asset(
-          'assets/me_avatar.png', // Your special avatar image
-          fit: BoxFit.cover,
-          alignment: Alignment(0, -0.3), // Same alignment as in about section
-          errorBuilder: (context, error, stackTrace) {
-            // Fallback to a special icon if image fails
-            return Container(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: LinearGradient(
-                  colors: [
-                    WireframeColorManager.colors.surface,
-                    WireframeColorManager.colors.surface.withOpacity(0.7),
-                  ],
+    return BorderBeam(
+      duration: 8, // Slower animation for subtle effect
+      borderWidth: showBorder ? 3 : 2,
+      colorFrom: WireframeColorManager.colors.primary,
+      colorTo: WireframeColorManager.colors.secondary ??
+          WireframeColorManager.colors.primary,
+      staticBorderColor: WireframeColorManager.colors.primary.withOpacity(0.3),
+      borderRadius: BorderRadius.circular(size / 2), // Make it circular
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.transparent, // Remove background to show BorderBeam
+        ),
+        child: ClipOval(
+          child: Image.asset(
+            'assets/me_avatar.png', // Your special avatar image
+            fit: BoxFit.cover,
+            alignment: Alignment(0, -0.3), // Same alignment as in about section
+            errorBuilder: (context, error, stackTrace) {
+              // Fallback to a special icon if image fails
+              return Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    colors: [
+                      WireframeColorManager.colors.surface,
+                      WireframeColorManager.colors.surface.withOpacity(0.7),
+                    ],
+                  ),
                 ),
-              ),
-              child: Icon(
-                Icons.star, // Special icon for owner
-                size: size * 0.5,
-                color: Colors.white,
-              ),
-            );
-          },
+                child: Icon(
+                  Icons.star, // Special icon for owner
+                  size: size * 0.5,
+                  color: Colors.white,
+                ),
+              );
+            },
+          ),
         ),
       ),
     );

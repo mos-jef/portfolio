@@ -5,6 +5,7 @@ import 'package:portfolio_website/firestore/firestore_service.dart';
 import 'package:portfolio_website/models/theme_provider.dart';
 import 'package:portfolio_website/services/analytics_service.dart';
 import 'package:portfolio_website/themes/wireframe/components/wireframe_contact_overlay.dart';
+import 'package:portfolio_website/themes/wireframe/components/wireframe_content_areas.dart';
 import 'package:portfolio_website/themes/wireframe/components/wireframe_desktop_analytics_modal.dart';
 import 'package:portfolio_website/themes/wireframe/utils/wireframe_color_manager.dart';
 import 'package:portfolio_website/themes/wireframe/widgets/grid_background.dart';
@@ -12,7 +13,9 @@ import 'package:portfolio_website/themes/wireframe/wireframe_desktop_mockup.dart
 import 'package:portfolio_website/themes/wireframe/wireframe_layout_constants.dart';
 import 'package:portfolio_website/themes/wireframe/wireframe_main_theme.dart';
 import 'package:portfolio_website/themes/wireframe/wireframe_mobile_mockup.dart';
+import 'package:portfolio_website/widgets/border_beam.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class WireframeDesktopTheme extends StatefulWidget {
   final bool isScrollableMode;
@@ -50,11 +53,14 @@ class _WireframeDesktopThemeState extends State<WireframeDesktopTheme>
   // Mobile navigation state
   String mobileCurrentView = 'home';
   String mobilePreviousView = 'home';
-  String selectedCaseStudy = '';
+
   int _mobileNavIndex = 0;
 
   // Desktop navigation state
   String desktopCurrentView = 'home';
+
+  // ADD THESE MISSING VARIABLES:
+  String selectedCaseStudy = '';
   String desktopSelectedCaseStudy = '';
 
   // Overlay states
@@ -67,8 +73,10 @@ class _WireframeDesktopThemeState extends State<WireframeDesktopTheme>
   bool _showBottomGrid = true; // Toggle for grid visibility
 
   // Target tracking keys for perfect alignment
-  final GlobalKey _mobileTargetKey = GlobalKey(debugLabel: 'desktop_theme_mobile_target');
-  final GlobalKey _desktopTargetKey = GlobalKey(debugLabel: 'desktop_theme_desktop_target');
+  final GlobalKey _mobileTargetKey =
+      GlobalKey(debugLabel: 'desktop_theme_mobile_target');
+  final GlobalKey _desktopTargetKey =
+      GlobalKey(debugLabel: 'desktop_theme_desktop_target');
 
   // Dynamic grid controls - matches top section exactly
   double _gridSize = WireframeLayoutConstants.masterGridSize;
@@ -193,6 +201,18 @@ class _WireframeDesktopThemeState extends State<WireframeDesktopTheme>
     }
   }
 
+  Widget _buildDraggableContentArea({
+    required Widget child,
+    required ScrollController controller,
+    bool isVertical = true,
+  }) {
+    return DeviceContentDragBehavior.wrap(
+      controller: controller,
+      isVertical: isVertical,
+      child: child,
+    );
+  }
+
   @override
   void dispose() {
     _mobileCommentController.dispose();
@@ -236,6 +256,26 @@ class _WireframeDesktopThemeState extends State<WireframeDesktopTheme>
     final isSmallScreen =
         screenSize.width < WireframeLayoutConstants.desktopBreakpoint;
 
+    // Enhanced constraint validation with minimum safe sizes
+    if (screenSize.width <= 0 ||
+        screenSize.height <= 0 ||
+        screenSize.width < 300 ||
+        screenSize.height < 200) {
+      return Container(
+        color: WireframeColorManager.colors.background,
+        child: Center(
+          child: CircularProgressIndicator(
+            color: WireframeColorManager.colors.primary,
+          ),
+        ),
+      );
+    }
+
+    // Additional check for very small screens
+    if (screenSize.width < 800) {
+      return _buildMobileFallback();
+    }
+
     // Force rebuild when theme changes by reading current theme
     final currentTheme = WireframeColorManager.currentTheme;
     final currentBackground = WireframeColorManager.colors.background;
@@ -246,8 +286,8 @@ class _WireframeDesktopThemeState extends State<WireframeDesktopTheme>
 
     return Stack(
       children: [
-        // Full screen grid background
-        if (_showBottomGrid)
+        // Disable the built-in grid when in scrollable mode to let RetroGridBackground show through
+        if (_showBottomGrid && !widget.isScrollableMode)
           Positioned.fill(
             child: GridBackground(
               gridColor: Color(0xFF202124),
@@ -264,14 +304,29 @@ class _WireframeDesktopThemeState extends State<WireframeDesktopTheme>
         Container(
           width: double.infinity,
           height: widget.fixedHeight ?? double.infinity,
+          color: widget.isScrollableMode
+              ? Colors.transparent
+              : null, // Make transparent in scrollable mode
           child: Center(
+
             child: Container(
-              width: 1600, // Change this value to make entire container wider/narrower
+              width: math.max(
+                  300,
+                  math.min(
+                      1600, screenSize.width * 0.95)), // Ensure minimum width
               height: widget.fixedHeight != null
-                  ? widget.fixedHeight! -
-                      (screenSize.height * 0.04) // 4% margins
-                  : math.min(screenSize.height * 0.8,
-                      900), // 80% of screen height, max 900
+                  ? math.max(
+                      200,
+                      math.min(widget.fixedHeight!,
+                          screenSize.height * 0.9)) // Ensure minimum height
+                  : math.max(
+                      200,
+                      math.min(screenSize.height * 0.8,
+                          900)), // Ensure minimum height
+              color: widget.isScrollableMode
+                  ? Colors.transparent
+                  : null, // Make transparent in scrollable mode
+
 
               margin: EdgeInsets.symmetric(
                 horizontal: math.max(
@@ -292,142 +347,221 @@ class _WireframeDesktopThemeState extends State<WireframeDesktopTheme>
                                         screenSize.width))) /
                             2),
               ),
-              child: Row(
-                children: [
-                  // Mobile Mockup Section
-                  Expanded(
-                    flex: 1,
-                    child: Container(
-                      child: WireframeMobileMockup(
-                        // State management props
-                        mobileCurrentView: mobileCurrentView,
-                        selectedCaseStudy: selectedCaseStudy,
-                        mobileNavIndex: _mobileNavIndex,
-                        showAvatarFullScreen: _showAvatarFullScreen,
-                        onShowAvatarFullScreen: _showAvatarFullScreenMethod,
-                        onHideAvatarFullScreen: _hideAvatarFullScreenMethod,
-                        onShowMobileAnalyticsModal: _showMobileAnalyticsModal,
-                        onHideMobileAnalyticsModal: _hideMobileAnalyticsModal,
-                        onShowMobileContactModal: _showMobileContactModal,
-                        onHideMobileContactModal: _hideMobileContactModal,
-                        showMobileAnalyticsOverlay: _showMobileAnalyticsOverlay,
-                        contactSlideAnimation: _contactSlideAnimation,
-                        analyticsSlideAnimation: _analyticsSlideAnimation,
-                        contactAnimationController: _contactAnimationController,
-                        analyticsAnimationController:
-                            _analyticsAnimationController,
 
-                        // Overlay states
-                        showMobileDrawerOverlay: _showMobileDrawerOverlay,
-                        showMobileCommentOverlay: _showMobileCommentOverlay,
-                        showMobileContactOverlay: _showMobileContactOverlay,
-
-                        // Animation controllers
-                        drawerSlideAnimation: _drawerSlideAnimation,
-                        drawerAnimationController: _drawerAnimationController,
-                        commentSlideAnimation: _commentSlideAnimation,
-                        commentAnimationController: _commentAnimationController,
-
-                        // Controllers
-                        mobileCommentController: _mobileCommentController,
-                        mobileNameController: _mobileNameController,
-                        mobileEmailController: _mobileEmailController,
-                        mobileScrollController:
-                            widget.externalScrollController ??
-                                _mobileScrollController,
-
-                        // Comment state
-                        commentStep: _commentStep,
-                        selectedAvatar: _selectedAvatar,
-
-                        // Data
-                        posts: _posts
-                            .map((postData) => _convertToSocialPost(postData))
-                            .toList(),
-
-                        // Callbacks
-                        onMobileNavigation: _handleMobileNavigation,
-                        onCaseStudySelected: _handleCaseStudySelection,
-                        onShowMobileDrawer: _showMobileDrawer,
-                        onHideMobileDrawer: _hideMobileDrawer,
-                        onShowMobileCommentModal: _showMobileCommentModal,
-                        onShowContactBottomSheet:
-                            _showContactBottomSheetInMobile,
-                        onHideContactOverlay: _hideMobileContactOverlay,
-                        onAddMobileComment: _addMobileComment,
-                        onResetCommentModal: _resetCommentModal,
-                        onUpdateCommentStep: _updateCommentStep,
-                        onUpdateSelectedAvatar: _updateSelectedAvatar,
-                        onGoBackFromSettings: _goBackFromSettings,
-                        targetKey: widget.mobileTargetKey,
+              child: LayoutBuilder(builder: (context, constraints) {
+                // Enhanced constraint validation with minimum safe sizes and ParentData error prevention
+                if (constraints.maxWidth <= 0 ||
+                    constraints.maxHeight <= 0 ||
+                    constraints.maxWidth < 300 ||
+                    constraints.maxHeight < 200) {
+                  return Container(
+                    width: math.max(300, constraints.maxWidth),
+                    height: math.max(200, constraints.maxHeight),
+                    color: WireframeColorManager.colors.background,
+                    child: Center(
+                      child: Text(
+                        'Loading...',
+                        style:
+                            TextStyle(color: WireframeColorManager.colors.text),
                       ),
                     ),
-                  ),
+                  );
+                }
 
-                  // Divider
-                  Container(
-                    width: 1,
-                    margin: EdgeInsets.symmetric(vertical: 40),
-                    color: WireframeColorManager.colors.border,
-                  ),
-
-                  // Desktop Mockup Section
-                  Expanded(
-                    flex: 3,
-                    child: Container(
-                      child: WireframeDesktopMockup(
-                        // State management props
-                        selectedSection: selectedSection,
-                        hoveredItem: hoveredItem,
-                        desktopCurrentView: desktopCurrentView,
-                        desktopSelectedCaseStudy: desktopSelectedCaseStudy,
-
-                        // Overlay states
-                        showDesktopInlineComment: _showDesktopInlineComment,
-                        showDesktopAvatarFullScreen:
-                            _showDesktopAvatarFullScreen,
-                        onShowDesktopAvatarFullScreen:
-                            _showDesktopAvatarFullScreenMethod,
-                        onHideDesktopAvatarFullScreen:
-                            _hideDesktopAvatarFullScreenMethod,
-                        onShowContactModal: _showDesktopContactModal,
-
-                        // Controllers
-                        desktopCommentController: _desktopCommentController,
-                        mobileNameController: _mobileNameController,
-                        mobileEmailController: _mobileEmailController,
-                        desktopScrollController:
-                            widget.externalScrollController ??
-                                _desktopScrollController,
-
-                        // Comment state
-                        commentStep: _commentStep,
-                        selectedAvatar: _selectedAvatar,
-
-                        // Data
-                        posts: _posts
-                            .map((postData) => _convertToSocialPost(postData))
-                            .toList(),
-
-                        // Callbacks
-                        onSectionChanged: _handleSectionChange,
-                        onHoveredItemChanged: _updateHoveredItem,
-                        onDesktopCaseStudySelected:
-                            _handleDesktopCaseStudySelection,
-                        onShowInlineDesktopCommentModal:
-                            _showInlineDesktopCommentModal,
-                        onHideInlineDesktopCommentModal:
-                            _hideInlineDesktopCommentModal,
-                        onAddDesktopComment: _addDesktopComment,
-                        onUpdateCommentStep: _updateCommentStep,
-                        onUpdateSelectedAvatar: _updateSelectedAvatar,
-                        onBackFromSettings: _goBackFromDesktopSettings,
-                        targetKey: widget.desktopTargetKey,
+                // Additional check for very small screens that could cause layout issues
+                if (constraints.maxWidth < 800) {
+                  return Container(
+                    width: constraints.maxWidth,
+                    height: constraints.maxHeight,
+                    color: WireframeColorManager.colors.background,
+                    child: Center(
+                      child: Text(
+                        'Screen too small for wireframe view',
+                        style:
+                            TextStyle(color: WireframeColorManager.colors.text),
+                        textAlign: TextAlign.center,
                       ),
                     ),
+                  );
+                }
+
+                return Container(
+                  width: constraints.maxWidth,
+                  height: constraints.maxHeight,
+                  child: Stack(
+                    children: [
+                      // Main content with safe constraints
+                      Container(
+                        width: constraints.maxWidth,
+                        height: constraints.maxHeight,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.max,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Mobile Mockup Section - Constrained
+                            Container(
+                              width: constraints.maxWidth * 0.25,
+                              height: constraints.maxHeight,
+                              child: WireframeMobileMockup(
+                                // State management props
+                                mobileCurrentView: mobileCurrentView,
+                                mobileNavIndex: _mobileNavIndex,
+                                showAvatarFullScreen: _showAvatarFullScreen,
+                                onShowAvatarFullScreen:
+                                    _showAvatarFullScreenMethod,
+                                onHideAvatarFullScreen:
+                                    _hideAvatarFullScreenMethod,
+                                onShowMobileAnalyticsModal:
+                                    _showMobileAnalyticsModal,
+                                onHideMobileAnalyticsModal:
+                                    _hideMobileAnalyticsModal,
+                                onShowMobileContactModal:
+                                    _showMobileContactModal,
+                                onHideMobileContactModal:
+                                    _hideMobileContactModal,
+                                showMobileAnalyticsOverlay:
+                                    _showMobileAnalyticsOverlay,
+                                contactSlideAnimation: _contactSlideAnimation,
+                                analyticsSlideAnimation:
+                                    _analyticsSlideAnimation,
+                                contactAnimationController:
+                                    _contactAnimationController,
+                                analyticsAnimationController:
+                                    _analyticsAnimationController,
+
+                                // Overlay states
+                                showMobileDrawerOverlay:
+                                    _showMobileDrawerOverlay,
+                                showMobileCommentOverlay:
+                                    _showMobileCommentOverlay,
+                                showMobileContactOverlay:
+                                    _showMobileContactOverlay,
+
+                                // Animation controllers
+                                drawerSlideAnimation: _drawerSlideAnimation,
+                                drawerAnimationController:
+                                    _drawerAnimationController,
+                                commentSlideAnimation: _commentSlideAnimation,
+                                commentAnimationController:
+                                    _commentAnimationController,
+
+                                // Controllers
+                                mobileCommentController:
+                                    _mobileCommentController,
+                                mobileNameController: _mobileNameController,
+                                mobileEmailController: _mobileEmailController,
+                                mobileScrollController:
+                                    widget.externalScrollController ??
+                                        _mobileScrollController,
+
+                                // Comment state
+                                commentStep: _commentStep,
+                                selectedAvatar: _selectedAvatar,
+
+                                // Data
+                                posts: _posts
+                                    .map((postData) =>
+                                        _convertToSocialPost(postData))
+                                    .toList(),
+
+                                // Callbacks
+                                onMobileNavigation: _handleMobileNavigation,
+                                onShowMobileDrawer: _showMobileDrawer,
+                                onHideMobileDrawer: _hideMobileDrawer,
+                                onShowMobileCommentModal:
+                                    _showMobileCommentModal,
+                                onShowContactBottomSheet:
+                                    _showContactBottomSheetInMobile,
+                                onHideContactOverlay: _hideMobileContactOverlay,
+                                onAddMobileComment: _addMobileComment,
+                                onResetCommentModal: _resetCommentModal,
+                                onUpdateCommentStep: _updateCommentStep,
+                                onUpdateSelectedAvatar: _updateSelectedAvatar,
+                                onGoBackFromSettings: _goBackFromSettings,
+                                targetKey: widget.mobileTargetKey,
+                              ),
+                            ),
+
+                            // Divider
+                            Container(
+                              width: 0,
+                              margin: EdgeInsets.symmetric(vertical: 40),
+                              color: WireframeColorManager.colors.border
+                                  .withAlpha(0),
+                            ),
+
+                            // Desktop Mockup Section - Constrained
+                            Container(
+                              width: constraints.maxWidth * 0.75,
+                              height: constraints.maxHeight,
+                              child: WireframeDesktopMockup(
+                                // State management props
+                                selectedSection: selectedSection,
+                                hoveredItem: hoveredItem,
+                                desktopCurrentView: desktopCurrentView,
+
+                                // Overlay states
+                                showDesktopInlineComment:
+                                    _showDesktopInlineComment,
+                                showDesktopAvatarFullScreen:
+                                    _showDesktopAvatarFullScreen,
+                                onShowDesktopAvatarFullScreen:
+                                    _showDesktopAvatarFullScreenMethod,
+                                onHideDesktopAvatarFullScreen:
+                                    _hideDesktopAvatarFullScreenMethod,
+                                onShowContactModal: _showDesktopContactModal,
+
+                                // Controllers
+                                desktopCommentController:
+                                    _desktopCommentController,
+                                mobileNameController: _mobileNameController,
+                                mobileEmailController: _mobileEmailController,
+                                desktopScrollController:
+                                    widget.externalScrollController ??
+                                        _desktopScrollController,
+
+                                // Comment state
+                                commentStep: _commentStep,
+                                selectedAvatar: _selectedAvatar,
+
+                                // Data
+                                posts: _posts
+                                    .map((postData) =>
+                                        _convertToSocialPost(postData))
+                                    .toList(),
+
+                                // Callbacks
+                                onSectionChanged: _handleSectionChange,
+                                onHoveredItemChanged: _updateHoveredItem,
+                                onShowInlineDesktopCommentModal:
+                                    _showInlineDesktopCommentModal,
+                                onHideInlineDesktopCommentModal:
+                                    _hideInlineDesktopCommentModal,
+                                onAddDesktopComment: _addDesktopComment,
+                                onUpdateCommentStep: _updateCommentStep,
+                                onUpdateSelectedAvatar: _updateSelectedAvatar,
+                                onBackFromSettings: _goBackFromDesktopSettings,
+                                targetKey: widget.desktopTargetKey,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      /*
+        // Back to Top Button - positioned in top right
+        Positioned(
+          top: 20,
+          right: 20,
+          child: _buildBackToTopButton(),
+        ),
+        */
+                    ],
                   ),
-                ],
-              ),
+                );
+              }),
+
+
             ),
           ),
         ),
@@ -435,64 +569,131 @@ class _WireframeDesktopThemeState extends State<WireframeDesktopTheme>
     );
   }
 
-  Widget _buildMobileFallback() {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Portfolio - Wireframe Theme'),
-        backgroundColor: WireframeColorManager.colors.surface,
-        foregroundColor: WireframeColorManager.colors.text,
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: Icon(Icons.desktop_windows),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                      'Wireframe theme optimized for desktop screens (1200px+)'),
-                ),
-              );
-            },
+  /*Widget _buildBackToTopButton() {
+    return GestureDetector(
+      onTap: _scrollToTop,
+      child: BorderBeam(
+        duration: 10, // Same duration as Contact button
+        borderWidth: 1.5,
+        colorFrom: Color(0xFFFFAA40),
+        colorTo: Color(0xFF9C40FF),
+        staticBorderColor: Color(0xFFCCCCCC),
+        borderRadius: BorderRadius.circular(8),
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Color(0xFF2A2A2A).withOpacity(0.9),
+            borderRadius: BorderRadius.circular(8),
           ),
-        ],
-      ),
-      body: Container(
-        color: WireframeLayoutConstants.wireframeBg,
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
-                Icons.desktop_windows,
-                size: 64,
-                color: WireframeLayoutConstants.wireframeSecondary,
+                Icons.arrow_upward,
+                size: 16,
+                color: Color(0xFFFF9A62),
               ),
-              SizedBox(height: 20),
+              SizedBox(width: 8),
               Text(
-                'Wireframe Theme',
+                'Back to Top',
                 style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: WireframeColorManager.colors.text,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Color(0xFFFF9A62),
+                  letterSpacing: 0.5,
                 ),
-              ),
-              SizedBox(height: 10),
-              Text(
-                'This theme is optimized for desktop screens',
-                style: TextStyle(
-                  color: WireframeLayoutConstants.wireframeSecondary,
-                ),
-              ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  final themeProvider =
-                      Provider.of<ThemeProvider>(context, listen: false);
-                  themeProvider.toggleNesTheme(false);
-                },
-                child: Text('Switch to Main Theme'),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+  */
+
+  void _scrollToTop() {
+    // Scroll back to the very top of the page
+    if (widget.externalScrollController != null &&
+        widget.externalScrollController!.hasClients) {
+      widget.externalScrollController!.animateTo(
+        0.0,
+        duration: Duration(milliseconds: 800),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
+  Widget _buildMobileFallback() {
+    return Scaffold(
+      backgroundColor: WireframeColorManager.colors.background,
+      body: SafeArea(
+        child: Container(
+          color: WireframeColorManager.colors.background,
+          child: Center(
+            child: Container(
+              width: double.infinity,
+              constraints:
+                  BoxConstraints(maxWidth: 400), // Limit width for mobile
+              padding: EdgeInsets.all(16),
+              child: WireframeMobileMockup(
+                // State management props
+                mobileCurrentView: mobileCurrentView,
+                mobileNavIndex: _mobileNavIndex,
+                showAvatarFullScreen: _showAvatarFullScreen,
+                onShowAvatarFullScreen: _showAvatarFullScreenMethod,
+                onHideAvatarFullScreen: _hideAvatarFullScreenMethod,
+                onShowMobileAnalyticsModal: _showMobileAnalyticsModal,
+                onHideMobileAnalyticsModal: _hideMobileAnalyticsModal,
+                onShowMobileContactModal: _showMobileContactModal,
+                onHideMobileContactModal: _hideMobileContactModal,
+                showMobileAnalyticsOverlay: _showMobileAnalyticsOverlay,
+                contactSlideAnimation: _contactSlideAnimation,
+                analyticsSlideAnimation: _analyticsSlideAnimation,
+                contactAnimationController: _contactAnimationController,
+                analyticsAnimationController: _analyticsAnimationController,
+
+                // Overlay states
+                showMobileDrawerOverlay: _showMobileDrawerOverlay,
+                showMobileCommentOverlay: _showMobileCommentOverlay,
+                showMobileContactOverlay: _showMobileContactOverlay,
+
+                // Animation controllers
+                drawerSlideAnimation: _drawerSlideAnimation,
+                drawerAnimationController: _drawerAnimationController,
+                commentSlideAnimation: _commentSlideAnimation,
+                commentAnimationController: _commentAnimationController,
+
+                // Controllers
+                mobileCommentController: _mobileCommentController,
+                mobileNameController: _mobileNameController,
+                mobileEmailController: _mobileEmailController,
+                mobileScrollController: _mobileScrollController,
+
+                // Comment state
+                commentStep: _commentStep,
+                selectedAvatar: _selectedAvatar,
+
+                // Data
+                posts: _posts
+                    .map((postData) => _convertToSocialPost(postData))
+                    .toList(),
+
+                // Callbacks
+                onMobileNavigation: _handleMobileNavigation,
+
+                onShowMobileDrawer: _showMobileDrawer,
+                onHideMobileDrawer: _hideMobileDrawer,
+                onShowMobileCommentModal: _showMobileCommentModal,
+                onShowContactBottomSheet: _showContactBottomSheetInMobile,
+                onHideContactOverlay: _hideMobileContactOverlay,
+                onAddMobileComment: _addMobileComment,
+                onResetCommentModal: _resetCommentModal,
+                onUpdateCommentStep: _updateCommentStep,
+                onUpdateSelectedAvatar: _updateSelectedAvatar,
+                onGoBackFromSettings: _goBackFromSettings,
+                targetKey: widget.mobileTargetKey,
+              ),
+            ),
           ),
         ),
       ),
@@ -601,10 +802,8 @@ class _WireframeDesktopThemeState extends State<WireframeDesktopTheme>
   }
 
   void _handleCaseStudySelection(String caseStudyId) {
-    setState(() {
-      selectedCaseStudy = caseStudyId;
-      mobileCurrentView = 'case_study';
-    });
+    // Launch case study in browser instead of showing inline viewer
+    _launchCaseStudyInBrowser(caseStudyId);
   }
 
   void _handleSectionChange(String section) {
@@ -625,9 +824,8 @@ class _WireframeDesktopThemeState extends State<WireframeDesktopTheme>
   }
 
   void _handleDesktopCaseStudySelection(String caseStudyId) {
-    setState(() {
-      desktopSelectedCaseStudy = caseStudyId;
-    });
+    // Launch case study in browser instead of showing inline viewer
+    _launchCaseStudyInBrowser(caseStudyId);
   }
 
   void _updateHoveredItem(String item) {
@@ -915,5 +1113,44 @@ class _WireframeDesktopThemeState extends State<WireframeDesktopTheme>
       likedByUsers: [],
       comments: [],
     );
+  }
+
+  void trackNavigation(String route) {
+    // Track navigation for analytics
+    print('Navigation tracked: $route');
+  }
+
+  // Launch case study in external browser
+  void _launchCaseStudyInBrowser(String projectId) async {
+    String url;
+    switch (projectId) {
+      case 'tap-in':
+        url =
+            'https://your-portfolio-site.com/case-studies/tap-in'; // Replace with your actual URLs
+        break;
+      case 'moments':
+        url =
+            'https://your-portfolio-site.com/case-studies/moments'; // Replace with your actual URLs
+        break;
+      default:
+        print('Unknown project ID: $projectId');
+        return;
+    }
+
+    try {
+      final uri = Uri.parse(url);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      }
+    } catch (e) {
+      print('Error launching case study: $e');
+    }
+  }
+
+  // Navigation helper method
+  void _pushNavigation(String route) {
+    // Track navigation for analytics
+    trackNavigation(route); // <-- Use the local method instead
+    print('Navigation pushed: $route');
   }
 }

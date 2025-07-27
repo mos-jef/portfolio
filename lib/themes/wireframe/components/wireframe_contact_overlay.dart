@@ -6,7 +6,6 @@ import 'package:portfolio_website/themes/wireframe/utils/wireframe_color_manager
 import 'package:portfolio_website/themes/wireframe/widgets/clickable_widget.dart';
 import 'package:portfolio_website/themes/wireframe/widgets/svg_icon.dart';
 import 'package:url_launcher/url_launcher.dart';
-
 import '../wireframe_layout_constants.dart';
 
 /// Mobile contact overlay component
@@ -21,9 +20,13 @@ class WireframeMobileContactOverlay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Positioned.fill(
-      child: ClickableWidget(
-        onTap: onClose, // Allow tap outside to close
+
+      child: GestureDetector(
+      onTap: onClose,
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
         child: Container(
+
           decoration: BoxDecoration(
             color: WireframeLayoutConstants.wireframeBlack.withOpacity(0.3),
             borderRadius: BorderRadius.circular(25),
@@ -143,20 +146,21 @@ class WireframeMobileContactOverlay extends StatelessWidget {
                                   'assets/linked_in_main.png',
                                   fit: BoxFit.contain,
                                   errorBuilder: (context, error, stackTrace) {
-                                    return Icon(
-                                      Icons.link,
-                                      size: 24,
-                                      color: WireframeLayoutConstants.linkedInBlue,
-                                    );
-                                  },
+                                      return Icon(
+                                        Icons.link,
+                                        size: 24,
+                                        color: WireframeLayoutConstants.linkedInBlue,
+                                      );
+                                    },
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -202,8 +206,9 @@ class WireframeMobileContactOverlay extends StatelessWidget {
   }
 }
 
-/// Desktop contact modal component
-class WireframeDesktopContactModal extends StatelessWidget {
+  /// Desktop contact modal component
+
+  class WireframeDesktopContactModal extends StatelessWidget {
   final VoidCallback onClose;
 
   const WireframeDesktopContactModal({
@@ -214,69 +219,100 @@ class WireframeDesktopContactModal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      backgroundColor: WireframeLayoutConstants.wireframeWhite,
-      shape: RoundedRectangleBorder(
-        borderRadius:
-            BorderRadius.circular(WireframeLayoutConstants.radiusLarge),
-      ),
+      backgroundColor: Colors.transparent,
       child: Container(
         width: 400,
-        padding: EdgeInsets.all(WireframeLayoutConstants.spacingXLarge),
+        height: 500,
+        decoration: BoxDecoration(
+          color: WireframeColorManager.colors.surface,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              blurRadius: 20,
+              offset: Offset(0, 10),
+            ),
+          ],
+        ),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
           children: [
-            // Header
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Contact Information',
-                  style: TextStyle(
-                    fontSize:
-                        WireframeLayoutConstants.desktopFontSizeLargeTitle,
-                    fontWeight: FontWeight.bold,
-                    color: WireframeColorManager.colors.text,
+            // Header with close button
+            Container(
+              padding: EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(
+                    color: WireframeColorManager.colors.border!,
                   ),
                 ),
-                IconButton(
-                  icon: Icon(
-                    Icons.close,
-                    color: WireframeLayoutConstants.wireframeSecondary,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Contact Information',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: WireframeColorManager.colors.text,
+                    ),
                   ),
-                  onPressed: onClose,
-                  style: IconButton.styleFrom(
-                    padding:
-                        EdgeInsets.all(WireframeLayoutConstants.spacingSmall),
-                    minimumSize: Size(32, 32),
+                  GestureDetector(
+                    // ← REPLACE ClickableWidget with GestureDetector
+                    onTap: onClose,
+                    child: MouseRegion(
+                      cursor: SystemMouseCursors.click,
+                      child: Icon(
+                        Icons.close,
+                        color: WireframeColorManager.colors.textSecondary,
+                      ),
+                    ),
                   ),
+                ],
+              ),
+            ),
+
+            // Contact content
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+
+                    _buildContactItem(
+                      context,
+                      'email', // ← SVG identifier
+                      'Email',
+                      'JeffreyAndersonPDX@gmail.com',
+                      () => _launchEmail(),
+                    ),
+                    SizedBox(height: 16),
+                    _buildContactItem(
+                      context,
+                      'phone', // ← SVG identifier
+                      'Phone',
+                      '(503) 282-4647',
+                      () => _launchPhone(),
+                    ),
+                    SizedBox(height: 16),
+                    _buildContactItem(
+                      context,
+                      'location', // ← SVG identifier
+                      'Location',
+                      'Portland, OR',
+                      null,
+                    ),
+                    SizedBox(height: 16),
+                    _buildContactItem(
+                      context,
+                      'linkedin', // ← SVG identifier
+                      'LinkedIn',
+                      'jeffrey-anderson-pdx',
+                      () => _launchLinkedIn(),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-
-            SizedBox(height: WireframeLayoutConstants.spacingLarge),
-
-            // Contact details
-            _buildDesktopContactItem(
-              Icons.email,
-              'JeffreyAndersonPDX@gmail.com',
-              onTap: () => _launchEmail('JeffreyAndersonPDX@gmail.com'),
-            ),
-            _buildDesktopContactItem(Icons.phone, '(503) 282-4647'),
-            _buildDesktopContactItem(
-              Icons.web,
-              'JeffPDX.net',
-              onTap: () => _launchURL('https://jeffpdx.net'),
-            ),
-            _buildDesktopContactItem(Icons.location_on, 'Portland, OR'),
-
-            SizedBox(height: WireframeLayoutConstants.spacingLarge),
-
-            // LinkedIn
-            ClickableWidget(
-            onTap: () => _launchLinkedIn(),
-              child: SvgIcon(
-                assetPath: SvgIconPaths.linkedbasicon,
-                color: WireframeColorManager.colors.primary,
               ),
             ),
           ],
@@ -285,11 +321,74 @@ class WireframeDesktopContactModal extends StatelessWidget {
     );
   }
 
+  Widget _buildContactItem(
+    BuildContext context,
+    String iconType, // ← String parameter for SVG type
+    String title,
+    String value,
+    VoidCallback? onTap,
+  ) {
+    Widget content = Container(
+      padding: EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: WireframeColorManager.colors.surface,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: WireframeColorManager.colors.border!,
+        ),
+      ),
+      child: Row(
+        children: [
+          _buildSvgIcon(iconType), // ← Use SVG icon method
+          SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: WireframeColorManager.colors.textSecondary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: WireframeColorManager.colors.text,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (onTap != null)
+            Icon(
+              Icons.arrow_forward_ios,
+              size: 16,
+              color: WireframeColorManager.colors.textSecondary,
+            ),
+        ],
+      ),
+    );
 
+    if (onTap != null) {
+      return GestureDetector(
+        onTap: onTap,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: content,
+        ),
+      );
+    }
 
+    return content;
+  }
 
-// Add these URL launcher methods:
-  void _launchEmail(String email) async {
+  void _launchEmail() async {
+    const email = 'JeffreyAndersonPDX@gmail.com';
     final url = 'mailto:$email';
     try {
       final uri = Uri.parse(url);
@@ -301,23 +400,22 @@ class WireframeDesktopContactModal extends StatelessWidget {
     }
   }
 
-  void _launchURL(String url) async {
+  void _launchPhone() async {
+    const phone = '5032824647';
+    final url = 'tel:$phone';
     try {
       final uri = Uri.parse(url);
       if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
+        await launchUrl(uri);
       }
     } catch (e) {
-      debugPrint('Error launching URL: $e');
+      debugPrint('Error launching phone: $e');
     }
   }
 
   void _launchLinkedIn() async {
     const url = 'https://www.linkedin.com/in/jeffrey-anderson-pdx/';
     try {
-      // Track contact attempt
-      await AnalyticsService().trackContactAttempt('linkedin');
-      
       final uri = Uri.parse(url);
       if (await canLaunchUrl(uri)) {
         await launchUrl(uri, mode: LaunchMode.externalApplication);
@@ -325,42 +423,6 @@ class WireframeDesktopContactModal extends StatelessWidget {
     } catch (e) {
       debugPrint('Error launching LinkedIn: $e');
     }
-  }
-
-  Widget _buildDesktopContactItem(IconData icon, String text, {VoidCallback? onTap}) {
-    return ClickableWidget(
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.symmetric(
-          vertical: WireframeLayoutConstants.spacingSmall,
-        ),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              size: 20,
-              color: WireframeLayoutConstants.wireframeAccent,
-            ),
-            SizedBox(width: WireframeLayoutConstants.spacingMedium),
-            Expanded(
-              child: Text(
-                text,
-                style: TextStyle(
-                  fontSize: WireframeLayoutConstants.desktopFontSizeBody,
-                  color: WireframeColorManager.colors.text,
-                ),
-              ),
-            ),
-            if (onTap != null)
-              Icon(
-                Icons.arrow_forward_ios,
-                size: 14,
-                color: WireframeColorManager.colors.textSecondary,
-              ),
-          ],
-        ),
-      ),
-    );
   }
 }
 
@@ -441,4 +503,31 @@ class WireframeContactUtils {
   static bool isContactItemClickable(String key) {
     return ['email', 'website', 'linkedIn'].contains(key);
   }
+}
+
+Widget _buildSvgIcon(String iconType) {
+  String svgPath;
+
+  switch (iconType) {
+    case 'email':
+      svgPath = SvgIconPaths.emailbasicon; // ← Correct path
+      break;
+    case 'phone':
+      svgPath = SvgIconPaths.phonebasicon; // ← Correct path
+      break;
+    case 'location':
+      svgPath = SvgIconPaths.housebasicon; // ← Using house icon for location
+      break;
+    case 'linkedin':
+      svgPath = SvgIconPaths.linkedbasicon; // ← Correct path
+      break;
+    default:
+      svgPath = SvgIconPaths.contactbasicon; // Fallback
+  }
+
+  return SvgIcon(
+    assetPath: svgPath,
+    size: 20,
+    color: WireframeColorManager.colors.primary,
+  );
 }

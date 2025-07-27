@@ -335,7 +335,7 @@ class _WireframeDesktopAnalyticsModalState
   Widget _buildMetricsGrid(List<_MetricData> metrics) {
     return GridView.builder(
       shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
+      physics: AlwaysScrollableScrollPhysics(), // ← Allows scrolling within bounds
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         crossAxisSpacing: 12,

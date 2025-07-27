@@ -493,7 +493,7 @@ class WireframeMobileCommentModal extends StatelessWidget {
       ),
       child: GridView.builder(
         shrinkWrap: true,
-        physics: NeverScrollableScrollPhysics(),
+        physics: AlwaysScrollableScrollPhysics(), // ← Allows scrolling within bounds
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 4, // Perfect for mobile modal width
           crossAxisSpacing: 6,
