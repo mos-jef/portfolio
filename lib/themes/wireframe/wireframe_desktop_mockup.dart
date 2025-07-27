@@ -346,7 +346,7 @@ class WireframeDesktopMockup extends StatelessWidget {
                                                   onTap:
                                                       onShowInlineDesktopCommentModal,
                                                   hasAnimation: true,
-                                                  hasEnhancedShadow: true,
+                                                  hasEnhancedShadow: false,
                                                   animationDuration: Duration(
                                                       milliseconds: 300),
                                                   size: 56.0,

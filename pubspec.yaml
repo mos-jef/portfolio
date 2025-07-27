@@ -58,7 +58,7 @@ flutter:
     - assets/
     - assets/icons/
     - assets/icons/animated_emojis/
-    - assets/packages/animated_emoji/lottie/
+    - assets/assets/packages/custom_emoji/lottie/
     
     #images:
       

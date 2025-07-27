@@ -708,7 +708,7 @@ class WireframeFloatingActionUtils {
       backgroundColor: config['backgroundColor'] as Color?,
       tooltip: config['tooltip'] as String?,
       size: size ?? 56.0,
-      hasShadow: hasShadow ?? true,
+      hasShadow: hasShadow ?? false,
     );
   }
 
@@ -931,18 +931,18 @@ class _SimpleFloatingCommentButtonState
                   boxShadow: widget.hasEnhancedShadow
                       ? [
                           BoxShadow(
-                            color: WireframeColorManager.colors.textOnSurface.withAlpha(35),
+                            color: Colors.black.withAlpha(0),
                             blurRadius: 5,
                             offset: Offset(-4, 8),
                           ),
-                          BoxShadow(color: WireframeColorManager.colors.textOnSurface.withAlpha(35),
+                          BoxShadow(color: Colors.black.withAlpha(0),
                             blurRadius: 4,
                             offset: Offset(-4, 2),
                           ),
                         ]
                       : [
                           BoxShadow(
-                            color: WireframeColorManager.colors.textOnSurface.withAlpha(35),
+                            color: Colors.black.withAlpha(0),
                             blurRadius: 8,
                             offset: Offset(-4, 4),
                           ),

@@ -1,6 +1,6 @@
 // File: lib/themes/wireframe/widgets/enhanced_social_post.dart
 import 'dart:async';
-import 'package:animated_emoji/animated_emoji.dart';
+
 import 'package:flutter/material.dart';
 import 'package:portfolio_website/services/analytics_service.dart';
 import 'package:portfolio_website/themes/wireframe/widgets/clickable_widget.dart';
@@ -10,6 +10,7 @@ import 'package:timeago/timeago.dart' as timeago;
 
 import '../../../firestore/firestore_models.dart';
 import '../../../firestore/firestore_service.dart';
+
 import '../utils/avatar_system.dart';
 import '../utils/wireframe_color_manager.dart';
 import '../wireframe_layout_constants.dart';
@@ -714,11 +715,4 @@ class _EnhancedSocialPostState extends State<EnhancedSocialPost>
     final currentUser = FirestoreService().currentUser;
     return currentUser != null;
   }
-
- 
-
-
- 
-
-
 }
