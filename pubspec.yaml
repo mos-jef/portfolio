@@ -32,7 +32,6 @@ dependencies:
   emoji_picker_flutter: ^4.3.0
   avatar_brick: ^1.0.0
   animated_to: ^0.3.2
-  animated_emoji: ^3.2.1
   flutter_svg: ^2.2.0
   web_smooth_scroll: ^2.0.0
   overlapped_carousel: ^1.0.2
@@ -57,8 +56,6 @@ flutter:
   assets:
     - assets/
     - assets/icons/
-    - assets/icons/animated_emojis/
-    - assets/assets/packages/custom_emoji/lottie/
     
     #images:
       

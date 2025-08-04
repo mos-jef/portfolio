@@ -1,7 +1,6 @@
 // File: lib/themes/wireframe/widgets/create_post_widget.dart
-import 'package:animated_emoji/emoji.dart';
-import 'package:animated_emoji/emojis.g.dart';
 import 'package:flutter/material.dart';
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:portfolio_website/themes/wireframe/widgets/animated_avatar_selector.dart';
 import 'package:portfolio_website/themes/wireframe/widgets/clickable_widget.dart';
 
@@ -76,6 +75,7 @@ class _CreatePostWidgetState extends State<CreatePostWidget> {
           _buildContentInput(),
           SizedBox(height: WireframeLayoutConstants.spacingMedium),
           _buildActions(),
+          if (_showEmojiPicker) _buildEmojiPicker(),
         ],
       ),
     );
@@ -176,7 +176,7 @@ class _CreatePostWidgetState extends State<CreatePostWidget> {
       controller: _contentController,
       maxLines: widget.isMobile ? 3 : 4,
       decoration: InputDecoration(
-        hintText: 'What\'s on your mind?',
+        hintText: "What's on your mind?",
         border: OutlineInputBorder(
           borderRadius:
               BorderRadius.circular(WireframeLayoutConstants.radiusSmall),
@@ -199,87 +199,51 @@ class _CreatePostWidgetState extends State<CreatePostWidget> {
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: WireframeColorManager.colors.border!),
       ),
-      child: GridView.builder(
-        padding: EdgeInsets.all(8),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: widget.isMobile ? 6 : 8,
-          crossAxisSpacing: 8,
-          mainAxisSpacing: 8,
-        ),
-        itemCount: _getPopularEmojis().length,
-        itemBuilder: (context, index) {
-          final emoji = _getPopularEmojis()[index];
-          return ClickableWidget(
-            onTap: () {
-              // Get current cursor position
-              final currentText = _contentController.text;
-              final selection = _contentController.selection;
-              final cursorPosition = selection.baseOffset == -1
-                  ? currentText.length
-                  : selection.baseOffset;
+      child: EmojiPicker(
+        onEmojiSelected: (category, emoji) {
+          // Get current cursor position
+          final currentText = _contentController.text;
+          final selection = _contentController.selection;
+          final cursorPosition = selection.baseOffset == -1
+              ? currentText.length
+              : selection.baseOffset;
 
-              // Insert emoji at cursor position
-              final newText = currentText.replaceRange(
-                cursorPosition,
-                cursorPosition,
-                emoji['text'],
-              );
-
-              // Update text and move cursor after emoji
-              _contentController.text = newText;
-              _contentController.selection = TextSelection.fromPosition(
-                TextPosition(
-                    offset: cursorPosition + emoji['text'].length as int),
-              );
-
-              setState(() => _showEmojiPicker = false);
-            },
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(4),
-                color: Colors.transparent,
-              ),
-              child: AnimatedEmoji(
-                emoji['data'],
-                size: widget.isMobile ? 24.0 : 32.0,
-                repeat: false,
-                source: AnimatedEmojiSource.asset,
-              ),
-            ),
+          // Insert emoji at cursor position
+          final newText = currentText.replaceRange(
+            cursorPosition,
+            cursorPosition,
+            emoji.emoji,
           );
+
+          // Update text and move cursor after emoji
+          _contentController.text = newText;
+          _contentController.selection = TextSelection.fromPosition(
+            TextPosition(offset: cursorPosition + emoji.emoji.length),
+          );
+
+          setState(() => _showEmojiPicker = false);
         },
+        config: Config(
+          height: widget.isMobile ? 200 : 250,
+          checkPlatformCompatibility: true,
+          emojiViewConfig: EmojiViewConfig(
+            emojiSizeMax: widget.isMobile ? 24.0 : 32.0,
+            backgroundColor: WireframeColorManager.colors.surface,
+          ),
+          bottomActionBarConfig: BottomActionBarConfig(
+            backgroundColor: WireframeColorManager.colors.surface,
+            buttonColor: WireframeColorManager.colors.primary,
+          ),
+          searchViewConfig: SearchViewConfig(
+            backgroundColor: WireframeColorManager.colors.surface,
+          ),
+          categoryViewConfig: CategoryViewConfig(
+            backgroundColor: WireframeColorManager.colors.surface,
+            iconColorSelected: WireframeColorManager.colors.primary,
+          ),
+        ),
       ),
     );
-  }
-
-// Add the same _getPopularEmojis() method to CreatePostWidget too
-  List<Map<String, dynamic>> _getPopularEmojis() {
-    return [
-      {'data': AnimatedEmojis.grinning, 'text': '😀'},
-      {'data': AnimatedEmojis.fire, 'text': '❤️'},
-      {'data': AnimatedEmojis.thumbsUp, 'text': '👍'},
-      {'data': AnimatedEmojis.clap, 'text': '👏'},
-      {'data': AnimatedEmojis.rocket, 'text': '🚀'},
-      {'data': AnimatedEmojis.fire, 'text': '🔥'},
-      {'data': AnimatedEmojis.raisedFist, 'text': '⭐'},
-      {'data': AnimatedEmojis.partyingFace, 'text': '🥳'},
-      {'data': AnimatedEmojis.winkyTongue, 'text': '😉'},
-      {'data': AnimatedEmojis.laughing, 'text': '😂'},
-      {'data': AnimatedEmojis.warmSmile, 'text': '😍'},
-      {'data': AnimatedEmojis.kissingHeart, 'text': '😘'},
-      {'data': AnimatedEmojis.thinkingFace, 'text': '🤔'},
-      {'data': AnimatedEmojis.happyCry, 'text': '😢'},
-      {'data': AnimatedEmojis.angry, 'text': '😠'},
-      {'data': AnimatedEmojis.surprised, 'text': '😲'},
-      {'data': AnimatedEmojis.victory, 'text': '✌️'},
-      {'data': AnimatedEmojis.wave, 'text': '👋'},
-      {'data': AnimatedEmojis.muscle, 'text': '💪'},
-      {'data': AnimatedEmojis.mindBlown, 'text': '🧠'},
-      {'data': AnimatedEmojis.lightBulb, 'text': '💡'},
-      {'data': AnimatedEmojis.trophy, 'text': '🏆'},
-      {'data': AnimatedEmojis.oneHundred, 'text': '🎯'},
-      {'data': AnimatedEmojis.checkMark, 'text': '✅'},
-    ];
   }
 
   Widget _buildActions() {
@@ -288,15 +252,12 @@ class _CreatePostWidgetState extends State<CreatePostWidget> {
         // Emoji button
         IconButton(
           onPressed: () => setState(() => _showEmojiPicker = !_showEmojiPicker),
-          icon: _showEmojiPicker
-              ? AnimatedEmoji(
-                  AnimatedEmojis.grinning,
-                  size: widget.isMobile ? 20.0 : 24.0,
-                )
-              : Icon(
-                  Icons.emoji_emotions,
-                  color: WireframeColorManager.colors.textSecondary,
-                ),
+          icon: Icon(
+            _showEmojiPicker ? Icons.keyboard_hide : Icons.emoji_emotions,
+            color: _showEmojiPicker
+                ? WireframeColorManager.colors.primary
+                : WireframeColorManager.colors.textSecondary,
+          ),
           tooltip: 'Add Emoji',
         ),
 

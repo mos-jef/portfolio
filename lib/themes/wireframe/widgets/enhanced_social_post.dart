@@ -462,7 +462,7 @@ class _EnhancedSocialPostState extends State<EnhancedSocialPost>
     return reactions;
   }
 
-  // method to get popular animated emojis
+  // method to get popular emojis (renamed - they're not animated)
   List<Map<String, dynamic>> _getPopularEmojis() {
     return [
       {'emoji': '👍', 'name': 'thumbs_up'},
