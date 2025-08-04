@@ -243,6 +243,8 @@ class _DragScrollWidgetState extends State<_DragScrollWidget>
 class WireframeMobileContentArea extends StatelessWidget {
   final String currentView;
   final List<SocialPost> posts;
+  final bool? postsLoading;
+  final String? postsError;
   final ScrollController scrollController;
   final Function(String) onCaseStudySelected;
   final VoidCallback? onShowMobileContactModal;
@@ -253,6 +255,8 @@ class WireframeMobileContentArea extends StatelessWidget {
     Key? key,
     required this.currentView,
     required this.posts,
+    this.postsLoading,
+    this.postsError,
     required this.scrollController,
     required this.onCaseStudySelected,
     this.onShowMobileContactModal,
@@ -351,11 +355,15 @@ class WireframeMobileContentArea extends StatelessWidget {
   Widget _buildHomeContent() {
     return ListView.builder(
       // No controller - prevents conflicts
+      key: ValueKey('posts_list_${posts.length}'), // ← Add stable key
       padding: EdgeInsets.zero,
       physics: AlwaysScrollableScrollPhysics(),
       shrinkWrap: true,
+      addAutomaticKeepAlives: true, // ← Add this
+      addRepaintBoundaries: true, // ← Add this
       itemCount: posts.length + 1, // ✅ Add 1 for the "End of posts" item
       itemBuilder: (context, index) {
+
         if (index == posts.length) {
           // ✅ This is the "End of posts" item
           return Container(
@@ -390,6 +398,7 @@ class WireframeMobileContentArea extends StatelessWidget {
 
   Widget _buildMobilePostItem(SocialPost post) {
     return EnhancedSocialPost(
+      key: ValueKey('mobile_post_${post.id}'), // ← Add unique key
       post: post,
       isMobile: true,
       onPostUpdated: () {

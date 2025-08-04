@@ -9,6 +9,7 @@ import 'package:portfolio_website/firestore/firestore_service.dart';
 import 'package:portfolio_website/revised_case_studies/moments.dart';
 import 'package:portfolio_website/revised_case_studies/tap_in.dart';
 import 'package:portfolio_website/services/analytics_service.dart';
+import 'package:portfolio_website/services/post_cache_service.dart';
 import 'package:portfolio_website/themes/wireframe/cards/wireframe_project_cards.dart';
 import 'package:portfolio_website/themes/wireframe/components/header_icons.dart';
 import 'package:portfolio_website/themes/wireframe/components/wireframe_content_areas.dart';
@@ -55,6 +56,8 @@ class WireframeDesktopMockup extends StatelessWidget {
 
   // Data
   final List<SocialPost> posts;
+  final bool? postsLoading;
+  final String? postsError;
 
   // Callbacks
   final Function(String) onSectionChanged;
@@ -81,6 +84,8 @@ class WireframeDesktopMockup extends StatelessWidget {
     required this.commentStep,
     required this.selectedAvatar,
     required this.posts,
+    this.postsLoading,
+    this.postsError,
     required this.onSectionChanged,
     required this.onHoveredItemChanged,
     required this.onShowInlineDesktopCommentModal,
@@ -882,7 +887,7 @@ class WireframeDesktopMockup extends StatelessWidget {
       // Home section with posts
       return [
         StreamBuilder<List<SocialPost>>(
-          stream: FirestoreService().getPostsStream(),
+          stream: PostCacheService().getPostsStream(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return SliverToBoxAdapter(
@@ -914,10 +919,14 @@ class WireframeDesktopMockup extends StatelessWidget {
               );
             }
 
-            // Build posts list as slivers
+            /// Build posts list as slivers
             final postWidgets = posts
                 .map((post) => SliverToBoxAdapter(
+                      key: ValueKey(
+                          'sliver_post_${post.id}'), // ← Add unique key
                       child: EnhancedSocialPost(
+                        key: ValueKey(
+                            'desktop_post_${post.id}'), // ← Add unique key
                         post: post,
                         isMobile: false,
                         onPostUpdated: () {

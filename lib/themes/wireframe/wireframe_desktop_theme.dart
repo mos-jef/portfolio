@@ -72,6 +72,11 @@ class _WireframeDesktopThemeState extends State<WireframeDesktopTheme>
   bool _showDesktopAnalyticsOverlay = false; //
   bool _showBottomGrid = true; // Toggle for grid visibility
 
+  // Shared posts data to prevent multiple StreamBuilders
+  List<SocialPost> _sharedPosts = [];
+  bool _postsLoading = true;
+  String? _postsError;
+
   // Target tracking keys for perfect alignment
   final GlobalKey _mobileTargetKey =
       GlobalKey(debugLabel: 'desktop_theme_mobile_target');
@@ -233,9 +238,28 @@ class _WireframeDesktopThemeState extends State<WireframeDesktopTheme>
     print(
         '🔍 DEBUG: WireframeDesktopTheme.build() called with isScrollableMode: ${widget.isScrollableMode}');
 
-    return widget.isScrollableMode
-        ? _buildScrollableContent(context)
-        : _buildStandardContent(context);
+    return StreamBuilder<List<SocialPost>>(
+      stream: FirestoreService().getPostsStream(),
+      builder: (context, snapshot) {
+        // Update shared state
+        if (snapshot.connectionState == ConnectionState.waiting &&
+            _sharedPosts.isEmpty) {
+          _postsLoading = true;
+          _postsError = null;
+        } else if (snapshot.hasError) {
+          _postsLoading = false;
+          _postsError = snapshot.error.toString();
+        } else if (snapshot.hasData) {
+          _postsLoading = false;
+          _postsError = null;
+          _sharedPosts = snapshot.data ?? [];
+        }
+
+        return widget.isScrollableMode
+            ? _buildScrollableContent(context)
+            : _buildStandardContent(context);
+      },
+    );
   }
 
   Widget _buildScrollableContent(BuildContext context) {
@@ -402,8 +426,11 @@ class _WireframeDesktopThemeState extends State<WireframeDesktopTheme>
                             Container(
                               width: constraints.maxWidth * 0.25,
                               height: constraints.maxHeight,
+
                               child: WireframeMobileMockup(
+
                                 // State management props
+
                                 mobileCurrentView: mobileCurrentView,
                                 mobileNavIndex: _mobileNavIndex,
                                 showAvatarFullScreen: _showAvatarFullScreen,
@@ -494,7 +521,9 @@ class _WireframeDesktopThemeState extends State<WireframeDesktopTheme>
                             Container(
                               width: constraints.maxWidth * 0.75,
                               height: constraints.maxHeight,
+
                               child: WireframeDesktopMockup(
+
                                 // State management props
                                 selectedSection: selectedSection,
                                 hoveredItem: hoveredItem,
@@ -525,10 +554,14 @@ class _WireframeDesktopThemeState extends State<WireframeDesktopTheme>
                                 selectedAvatar: _selectedAvatar,
 
                                 // Data
-                                posts: _posts
-                                    .map((postData) =>
-                                        _convertToSocialPost(postData))
-                                    .toList(),
+                                posts: _sharedPosts.isNotEmpty
+                                    ? _sharedPosts
+                                    : _posts
+                                        .map((postData) =>
+                                            _convertToSocialPost(postData))
+                                        .toList(),
+                                postsLoading: _postsLoading,
+                                postsError: _postsError,
 
                                 // Callbacks
                                 onSectionChanged: _handleSectionChange,
@@ -674,9 +707,13 @@ class _WireframeDesktopThemeState extends State<WireframeDesktopTheme>
                 selectedAvatar: _selectedAvatar,
 
                 // Data
-                posts: _posts
-                    .map((postData) => _convertToSocialPost(postData))
-                    .toList(),
+                posts: _sharedPosts.isNotEmpty
+                    ? _sharedPosts
+                    : _posts
+                        .map((postData) => _convertToSocialPost(postData))
+                        .toList(),
+                postsLoading: _postsLoading,
+                postsError: _postsError,
 
                 // Callbacks
                 onMobileNavigation: _handleMobileNavigation,

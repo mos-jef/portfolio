@@ -5,6 +5,7 @@ import 'package:portfolio_website/firestore/firestore_service.dart';
 import 'package:portfolio_website/revised_case_studies/moments.dart';
 import 'package:portfolio_website/revised_case_studies/tap_in.dart';
 import 'package:portfolio_website/services/analytics_service.dart';
+import 'package:portfolio_website/services/post_cache_service.dart';
 import 'package:portfolio_website/themes/wireframe/cards/wireframe_project_cards.dart';
 import 'package:portfolio_website/themes/wireframe/components/header_icons.dart';
 import 'package:portfolio_website/themes/wireframe/components/wireframe_analytics_modal.dart';
@@ -37,6 +38,10 @@ class WireframeMobileMockup extends StatelessWidget {
 
   // Targeting system
   final GlobalKey? targetKey;
+
+  // Data parameters for shared posts
+  final bool? postsLoading;
+  final String? postsError;
 
   // Overlay states
   final bool showMobileDrawerOverlay;
@@ -110,6 +115,8 @@ class WireframeMobileMockup extends StatelessWidget {
     required this.commentStep,
     required this.selectedAvatar,
     required this.posts,
+    this.postsLoading,
+    this.postsError,
     required this.onMobileNavigation,
     required this.onShowMobileDrawer,
     required this.onHideMobileDrawer,
@@ -239,18 +246,23 @@ class WireframeMobileMockup extends StatelessWidget {
                                           child: DeviceContentDragBehavior.wrap(
                                             controller: mobileScrollController,
                                             isVertical: true,
+
                                             child: WireframeMobileContentArea(
                                               currentView: mobileCurrentView,
                                               posts: posts,
-                                              scrollController: mobileScrollController,
+                                              postsLoading: postsLoading,
+                                              postsError: postsError,
+                                              scrollController:
+                                                  mobileScrollController,
+                                              onCaseStudySelected:
+                                                  (caseStudy) =>
+                                                      _navigateToCaseStudy(
+                                                          context, caseStudy),
+                                              onShowMobileContactModal:
+                                                  onShowMobileContactModal,
+                                            ),
 
 
-                                            onCaseStudySelected: (caseStudy) =>
-                                                _navigateToCaseStudy(
-                                                    context, caseStudy),
-                                            onShowMobileContactModal:
-                                                onShowMobileContactModal,
-                                          ),
                                          ),
                                         ),
                                       )
@@ -1327,7 +1339,7 @@ class WireframeMobileMockup extends StatelessWidget {
       case 'home':
       default:
         return StreamBuilder<List<SocialPost>>(
-          stream: FirestoreService().getPostsStream(),
+          stream: PostCacheService().getPostsStream(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return SliverToBoxAdapter(

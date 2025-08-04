@@ -151,85 +151,93 @@ class WireframeDesktopSidebar extends StatelessWidget {
     this.onLinkedInPressed,
   }) : super(key: key);
 
-  @override
+ @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // Add Home at the top
-        _buildNeumorphicSidebarItem(
-          null,
-          'Home',
-          svgIconPath: SvgIconPaths.home3Line,
-          onTap: () => onSectionChanged('Home'),
+    return SingleChildScrollView(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          minHeight: MediaQuery.of(context).size.height * 0.6,
         ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Add Home at the top
+            _buildNeumorphicSidebarItem(
+              null,
+              'Home',
+              svgIconPath: SvgIconPaths.home3Line,
+              onTap: () => onSectionChanged('Home'),
+            ),
 
-        _buildNeumorphicSidebarItem(
-          null,
-          'Contact',
-          svgIconPath: SvgIconPaths.contacts3Line,
-          onTap: () {
-            // Show desktop contact modal
-            if (context.mounted) {
-              showDialog(
-                context: context,
-                builder: (context) => Material(
-                  type: MaterialType.transparency,
-                  child: WireframeDesktopContactModal(
-                    onClose: () => Navigator.of(context).pop(),
-                  ),
-                ),
-              );
-            }
-          },
-        ),
+            _buildNeumorphicSidebarItem(
+              null,
+              'Contact',
+              svgIconPath: SvgIconPaths.contacts3Line,
+              onTap: () {
+                // Show desktop contact modal
+                if (context.mounted) {
+                  showDialog(
+                    context: context,
+                    builder: (context) => Material(
+                      type: MaterialType.transparency,
+                      child: WireframeDesktopContactModal(
+                        onClose: () => Navigator.of(context).pop(),
+                      ),
+                    ),
+                  );
+                }
+              },
+            ),
 
-        _buildNeumorphicSidebarItem(
-          null,
-          'Analytics',
-          svgIconPath: SvgIconPaths.chartBar2Line,
-          onTap: () {
-            // Show analytics modal
-            if (context.mounted) {
-              showDialog(
-                context: context,
-                builder: (context) => WireframeDesktopAnalyticsModal(
-                  onClose: () => Navigator.of(context).pop(),
-                ),
-              );
-            }
-          },
+            _buildNeumorphicSidebarItem(
+              null,
+              'Analytics',
+              svgIconPath: SvgIconPaths.chartBar2Line,
+              onTap: () {
+                // Show analytics modal
+                if (context.mounted) {
+                  showDialog(
+                    context: context,
+                    builder: (context) => WireframeDesktopAnalyticsModal(
+                      onClose: () => Navigator.of(context).pop(),
+                    ),
+                  );
+                }
+              },
+            ),
+            _buildNeumorphicSidebarItem(
+              null,
+              'Projects',
+              svgIconPath: SvgIconPaths.displayLine,
+              onTap: () => onSectionChanged('Projects'),
+            ),
+            _buildNeumorphicSidebarItem(
+              null,
+              'Resume',
+              svgIconPath: SvgIconPaths.documentLine,
+              onTap: () => _launchResume(),
+            ),
+            _buildNeumorphicSidebarItem(
+              null,
+              'Settings',
+              svgIconPath: SvgIconPaths.settings3Line,
+              onTap: () => onSectionChanged('Settings'),
+            ),
+            _buildNeumorphicSidebarItem(
+              null,
+              'About',
+              svgIconPath: SvgIconPaths.userLine,
+              onTap: () => onSectionChanged('About'),
+            ),
+            _buildNeumorphicSidebarItem(
+              null,
+              'LinkedIn',
+              svgIconPath: SvgIconPaths.linkedinFill,
+              onTap: () => _launchLinkedIn(),
+            ),
+          ],
         ),
-        _buildNeumorphicSidebarItem(
-          null,
-          'Projects',
-          svgIconPath: SvgIconPaths.displayLine,
-          onTap: () => onSectionChanged('Projects'),
-        ),
-        _buildNeumorphicSidebarItem(
-          null,
-          'Resume',
-          svgIconPath: SvgIconPaths.documentLine,
-          onTap: () => _launchResume(),
-        ),
-        _buildNeumorphicSidebarItem(
-          null,
-          'Settings',
-          svgIconPath: SvgIconPaths.settings3Line,
-          onTap: () => onSectionChanged('Settings'),
-        ),
-        _buildNeumorphicSidebarItem(
-          null,
-          'About',
-          svgIconPath: SvgIconPaths.userLine,
-          onTap: () => onSectionChanged('About'),
-        ),
-        _buildNeumorphicSidebarItem(
-          null,
-          'LinkedIn',
-          svgIconPath: SvgIconPaths.linkedinFill,
-          onTap: () => _launchLinkedIn(),
-        ),
-      ],
+      ),
     );
   }
 
@@ -281,8 +289,11 @@ class WireframeDesktopSidebar extends StatelessWidget {
         child: AnimatedContainer(
           duration: Duration(milliseconds: 400),
           margin:
-              EdgeInsets.only(bottom: WireframeLayoutConstants.spacingMedium),
-          padding: EdgeInsets.all(WireframeLayoutConstants.spacingMedium),
+    EdgeInsets.only(bottom: WireframeLayoutConstants.spacingMedium * 0.8),
+padding: EdgeInsets.symmetric(
+  horizontal: WireframeLayoutConstants.spacingMedium,
+  vertical: WireframeLayoutConstants.spacingMedium * 0.7,
+),
           decoration: BoxDecoration(
             borderRadius:
                 BorderRadius.circular(WireframeLayoutConstants.radiusSmall),

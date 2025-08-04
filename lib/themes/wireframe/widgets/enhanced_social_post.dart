@@ -18,14 +18,14 @@ import '../wireframe_layout_constants.dart';
 // MAKING MYSELF ADMIN - HARDCODING MY ID
 class AdminConfig {
   static const List<String> adminUserIds = [
-    'your-user-id-here', // Replace with your actual user ID
+    'YOUR_ACTUAL_FIREBASE_AUTH_UID', // Get this from Firebase Console > Authentication
     // Add more admin IDs as needed
   ];
 
   static const List<String> adminUserNames = [
     'Jeff',
     'Jeffjitsu',
-    // Add your variations
+    'Jeffrey Anderson', // Add your variations
   ];
 }
 
@@ -35,20 +35,20 @@ class EnhancedSocialPost extends StatefulWidget {
   final VoidCallback? onPostUpdated;
   final VoidCallback? onPostDeleted;
 
-  const EnhancedSocialPost({
+  EnhancedSocialPost({
     Key? key,
     required this.post,
     required this.isMobile,
     this.onPostUpdated,
     this.onPostDeleted,
-  }) : super(key: key);
+  }) : super(key: key ?? ValueKey(post.id)); // ← Add this ValueKey
 
   @override
   State<EnhancedSocialPost> createState() => _EnhancedSocialPostState();
 }
 
 class _EnhancedSocialPostState extends State<EnhancedSocialPost>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   // Use ValueNotifier to prevent flickering
   late ValueNotifier<SocialPost> _postNotifier;
   late AnimationController _likeAnimationController;
@@ -61,9 +61,17 @@ class _EnhancedSocialPostState extends State<EnhancedSocialPost>
   Timer? _updateDebounceTimer;
   static const Duration _debounceDuration = Duration(milliseconds: 300);
 
+  // Add these for stability
+  String? _cachedPostId;
+  bool _isDisposed = false;
+
+  @override
+  bool get wantKeepAlive => true;
+
   @override
   void initState() {
     super.initState();
+    _cachedPostId = widget.post.id;
     _postNotifier = ValueNotifier<SocialPost>(widget.post);
     _editController = TextEditingController(text: widget.post.content);
 
@@ -83,11 +91,28 @@ class _EnhancedSocialPostState extends State<EnhancedSocialPost>
   }
 
   @override
+  void didUpdateWidget(EnhancedSocialPost oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // Only update if this is the same post (prevent flickering from rebuilds)
+    if (oldWidget.post.id == widget.post.id && !_isDisposed) {
+      // Debounce updates to prevent excessive rebuilds
+      _updateDebounceTimer?.cancel();
+      _updateDebounceTimer = Timer(Duration(milliseconds: 50), () {
+        if (!_isDisposed && mounted) {
+          _postNotifier.value = widget.post;
+        }
+      });
+    }
+  }
+
+  @override
   void dispose() {
+    _isDisposed = true;
+    _updateDebounceTimer?.cancel();
     _likeAnimationController.dispose();
     _editController.dispose();
     _postNotifier.dispose();
-    _updateDebounceTimer?.cancel();
     super.dispose();
   }
 
@@ -101,10 +126,17 @@ class _EnhancedSocialPostState extends State<EnhancedSocialPost>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // ← Add this line for AutomaticKeepAliveClientMixin
     return ValueListenableBuilder<SocialPost>(
       valueListenable: _postNotifier,
       builder: (context, currentPost, child) {
-        return Container(
+      // Prevent rebuilding if disposed
+      if (_isDisposed) {
+        return SizedBox.shrink();
+      }
+      
+      return RepaintBoundary(
+        child: Container(
           width: double.infinity,
           margin: EdgeInsets.only(bottom: 1),
           padding: EdgeInsets.all(widget.isMobile
@@ -127,7 +159,8 @@ class _EnhancedSocialPostState extends State<EnhancedSocialPost>
               _buildPostContent(currentPost),
               SizedBox(height: WireframeLayoutConstants.spacingMedium),
               _buildPostActions(currentPost),
-            ],
+             ],
+            ),
           ),
         );
       },
