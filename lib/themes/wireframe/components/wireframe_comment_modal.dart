@@ -60,24 +60,33 @@ class WireframeMobileCommentModal extends StatelessWidget {
                 return Transform.translate(
                   offset: commentSlideAnimation.value *
                       WireframeLayoutConstants.mobileModalHeight,
+
                   child: Container(
                     width: double.infinity,
-                    height: math.min(WireframeLayoutConstants.mobileModalHeight,
-                        WireframeLayoutConstants.iPhoneFrameHeight * 0.85),
-                    margin: EdgeInsets.symmetric(horizontal: 0, vertical: 0),
-                    constraints: BoxConstraints(
-                      maxHeight:
-                          WireframeLayoutConstants.iPhoneFrameHeight * 0.8,
-                      maxWidth: WireframeLayoutConstants.iPhoneFrameWidth - 4,
+                    height: math.min(
+                      WireframeLayoutConstants
+                          .mobileModalHeight, // Same as contact modal
+                      WireframeLayoutConstants.iPhoneFrameHeight *
+                          0.95, // Same as contact modal
                     ),
+                    margin: EdgeInsets.symmetric(
+                        horizontal: 0, vertical: 0), // Same as contact modal
                     decoration: BoxDecoration(
-                      color: WireframeLayoutConstants.wireframeWhite,
+                      color: WireframeColorManager.colors.surface,
                       borderRadius: BorderRadius.only(
                         topLeft: Radius.circular(
                             WireframeLayoutConstants.radiusLarge),
                         topRight: Radius.circular(
                             WireframeLayoutConstants.radiusLarge),
                       ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: WireframeLayoutConstants.wireframeBlack
+                              .withOpacity(0.2),
+                          blurRadius: 10,
+                          offset: Offset(0, -2),
+                        ),
+                      ],
                     ),
                     child: Column(
                       children: [
@@ -96,6 +105,7 @@ class WireframeMobileCommentModal extends StatelessWidget {
                             right: WireframeLayoutConstants.spacingMedium,
                           ),
                         ),
+                        // ... rest of your content
 
                         // Header with step indicator and close button
                         _buildModalHeader(),

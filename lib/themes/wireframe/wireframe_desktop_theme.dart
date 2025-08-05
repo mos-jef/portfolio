@@ -187,6 +187,8 @@ class _WireframeDesktopThemeState extends State<WireframeDesktopTheme>
       vsync: this,
     );
 
+    
+
     _contactSlideAnimation = Tween<Offset>(
       begin: const Offset(0.0, 1.0),
       end: const Offset(0.0, 0.0),
